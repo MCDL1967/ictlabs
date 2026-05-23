@@ -1,168 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" id="html-root">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ICTLabs — Client Applications</title>
+<title>ICTLabs — Aplicaciones</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --black:#000;--black-2:#05080f;
-  --blue:#1a4fd6;--blue-glow:#3b82f6;--blue-dim:#0f2d7a;
-  --gold:#c9a84c;--white:#fff;--silver:#cbd5e1;
-  --steel:#94a3b8;--muted:rgba(148,163,184,0.7);
-  --border-b:rgba(37,99,235,0.3);
-}
+:root{--black:#000;--black-2:#05080f;--blue:#1a4fd6;--blue-glow:#3b82f6;--steel:#94a3b8;--muted:rgba(148,163,184,0.7);--border-b:rgba(37,99,235,0.3);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Barlow',sans-serif;
-  background:var(--black);color:var(--white);
-  min-height:100vh;
-  background-image:
-    linear-gradient(rgba(26,79,214,0.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(26,79,214,0.05) 1px,transparent 1px);
-  background-size:44px 44px;
-}
-
-/* HEADER */
-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:24px 48px;
-  background:rgba(0,0,0,0.97);
-  border-bottom:1px solid var(--border-b);
-}
-.logo-3d{
-  position:relative;display:inline-block;
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:26px;font-weight:900;letter-spacing:4px;text-transform:uppercase;
-}
-.logo-3d .ld2{position:absolute;top:3px;left:3px;color:#04112e;user-select:none;pointer-events:none;z-index:0;}
-.logo-3d .ld1{position:absolute;top:2px;left:2px;color:#0a2a7a;user-select:none;pointer-events:none;z-index:1;}
-.logo-3d .lf{position:relative;z-index:2;color:var(--white);}
-.logo-3d .lf em{font-style:normal;color:var(--blue-glow);text-shadow:0 0 16px rgba(59,130,246,0.9);}
-.back{
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;
-  letter-spacing:3px;text-transform:uppercase;
-  color:var(--steel);text-decoration:none;
-  display:flex;align-items:center;gap:8px;
-  transition:color 0.2s;
-}
+body{font-family:'Barlow',sans-serif;background:var(--black);color:#fff;min-height:100vh;
+  background-image:linear-gradient(rgba(26,79,214,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(26,79,214,0.05) 1px,transparent 1px);
+  background-size:44px 44px;}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 48px;background:rgba(0,0,0,0.97);border-bottom:1px solid var(--border-b);}
+.header-logo img{height:40px;width:auto;}
+.header-right{display:flex;align-items:center;gap:20px;}
+.back{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color 0.2s;}
 .back:hover{color:var(--blue-glow);}
-.back::before{content:'←';font-size:14px;}
-
-/* MAIN */
+.back::before{content:'← ';}
+.lang-toggle{display:flex;gap:6px;}
+.lang-btn{background:transparent;border:1px solid rgba(148,163,184,0.2);color:var(--muted);padding:4px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;}
+.lang-btn.active{border-color:var(--blue-glow);color:var(--blue-glow);box-shadow:0 0 8px rgba(37,99,235,0.3);}
 main{max-width:1100px;margin:0 auto;padding:64px 48px;}
-
-.page-label{
-  font-family:'Barlow Condensed',sans-serif;font-size:11px;
-  letter-spacing:5px;text-transform:uppercase;
-  color:var(--blue-glow);margin-bottom:12px;
-  display:flex;align-items:center;gap:12px;
-}
+.page-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:12px;display:flex;align-items:center;gap:12px;}
 .page-label::before{content:'';width:18px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue);}
-
-.page-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:clamp(36px,5vw,64px);font-weight:800;
-  letter-spacing:3px;text-transform:uppercase;
-  color:var(--white);margin-bottom:48px;line-height:1;
-}
-.page-title span{color:var(--blue-glow);text-shadow:0 0 16px rgba(59,130,246,0.5);}
-
-/* APPS GRID */
-.apps-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-  gap:1px;
-  background:var(--border-b);
-  border:1px solid var(--border-b);
-}
-.app-card{
-  background:var(--black);
-  padding:36px 32px;
-  text-decoration:none;color:var(--white);
-  position:relative;overflow:hidden;
-  transition:background 0.2s;
-  display:block;
-}
-.app-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--blue),transparent);
-  box-shadow:0 0 8px var(--blue);
-}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,5vw,64px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:48px;line-height:1;}
+.page-title span{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.5));}
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border-b);border:1px solid var(--border-b);}
+.app-card{background:var(--black);padding:36px 32px;text-decoration:none;color:#fff;position:relative;overflow:hidden;transition:background 0.2s;display:block;}
+.app-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);}
 .app-card:not(.soon):hover{background:rgba(26,79,214,0.07);}
 .app-card.soon{opacity:0.45;cursor:default;}
-
 .app-icon{font-size:32px;margin-bottom:20px;display:block;}
-.app-name{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:28px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-  color:var(--blue-glow);margin-bottom:6px;
-  text-shadow:0 0 14px rgba(59,130,246,0.3);
-}
-.app-card.soon .app-name{color:var(--steel);text-shadow:none;}
+.app-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:6px;filter:drop-shadow(0 0 6px rgba(59,130,246,0.3));}
+.app-card.soon .app-name{color:var(--steel);filter:none;}
 .app-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
-.app-tag{
-  display:inline-block;
-  font-family:'Barlow Condensed',sans-serif;font-size:10px;
-  letter-spacing:3px;text-transform:uppercase;
-  padding:5px 14px;border:1px solid var(--border-b);
-}
+.app-tag{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;border:1px solid var(--border-b);}
 .app-tag.live{color:var(--blue-glow);border-color:var(--blue);box-shadow:0 0 8px rgba(26,79,214,0.2);}
 .app-tag.soon-tag{color:var(--muted);border-color:rgba(148,163,184,0.2);}
-
-/* FOOTER NOTE */
-.footer-note{
-  margin-top:48px;padding-top:24px;
-  border-top:1px solid var(--border-b);
-  font-family:'Barlow Condensed',sans-serif;font-size:11px;
-  letter-spacing:2px;text-transform:uppercase;
-  color:rgba(148,163,184,0.3);text-align:center;
-}
+.footer-note{margin-top:48px;padding-top:24px;border-top:1px solid var(--border-b);font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(148,163,184,0.3);text-align:center;}
+[data-en]{display:none;}
+html[lang="en"] [data-es]{display:none;}
+html[lang="en"] [data-en]{display:revert;}
+@media(max-width:600px){header{padding:14px 20px;}main{padding:40px 20px;}.header-logo img{height:30px;}}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo-3d">
-    <div class="ld2">ICT<span>Labs</span></div>
-    <div class="ld1">ICT<span>Labs</span></div>
-    <div class="lf">ICT<em>Labs</em></div>
+  <div class="header-logo">
+    <img src="../assets/img/ictlabs-logo.png"
+         srcset="../assets/img/ictlabs-logo-sm.png 200w, ../assets/img/ictlabs-logo.png 480w"
+         sizes="(max-width:600px) 160px, 200px"
+         alt="ICTLabs" width="200" height="133"/>
   </div>
-  <a class="back" href="../index.html">Back to Site</a>
+  <div class="header-right">
+    <a class="back" href="../index.html" data-es>Volver al Sitio</a>
+    <a class="back" href="../index.html" data-en>Back to Site</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
-
 <main>
-  <div class="page-label">Private Client Area</div>
-  <h1 class="page-title">Client <span>Applications</span></h1>
-
+  <div class="page-label" data-es>Área Privada de Clientes</div>
+  <div class="page-label" data-en>Private Client Area</div>
+  <h1 class="page-title" data-es>Aplicaciones <span>de Clientes</span></h1>
+  <h1 class="page-title" data-en>Client <span>Applications</span></h1>
   <div class="apps-grid">
-
     <div class="app-card soon">
       <span class="app-icon">🕹️</span>
       <div class="app-name">Arcade</div>
-      <p class="app-desc">ICTLabs Retro Console — browser-based classic games including Galaga and more.</p>
-      <span class="app-tag soon-tag">Coming Soon</span>
+      <p class="app-desc" data-es>Consola Retro ICTLabs — juegos clásicos en el navegador.</p>
+      <p class="app-desc" data-en>ICTLabs Retro Console — browser-based classic games.</p>
+      <span class="app-tag soon-tag" data-es>Próximamente</span>
+      <span class="app-tag soon-tag" data-en>Coming Soon</span>
     </div>
-
     <div class="app-card soon">
       <span class="app-icon">✈️</span>
       <div class="app-name">HP Fleet</div>
-      <p class="app-desc">Flight operations & billing management for HP-1861 and HP-1862FX.</p>
-      <span class="app-tag soon-tag">Coming Soon</span>
+      <p class="app-desc" data-es>Gestión de operaciones de vuelo y facturación para HP-1861 y HP-1862FX.</p>
+      <p class="app-desc" data-en>Flight operations & billing management for HP-1861 and HP-1862FX.</p>
+      <span class="app-tag soon-tag" data-es>Próximamente</span>
+      <span class="app-tag soon-tag" data-en>Coming Soon</span>
     </div>
-
     <div class="app-card soon">
       <span class="app-icon">🤖</span>
       <div class="app-name">SOL</div>
-      <p class="app-desc">AI Guest Concierge platform — WhatsApp · Web · 24/7 bilingual operations.</p>
-      <span class="app-tag soon-tag">Coming Soon</span>
+      <p class="app-desc" data-es>Plataforma Concierge IA — WhatsApp · Web · 24/7 bilingüe.</p>
+      <p class="app-desc" data-en>AI Guest Concierge platform — WhatsApp · Web · 24/7 bilingual.</p>
+      <span class="app-tag soon-tag" data-es>Próximamente</span>
+      <span class="app-tag soon-tag" data-en>Coming Soon</span>
     </div>
-
   </div>
-
   <p class="footer-note">© 2026 ICTLabs / GRANSOLUX S.A. · ict-labs.com</p>
 </main>
-
+<script>
+function setLang(lang){
+  document.getElementById('html-root').lang=lang;
+  document.getElementById('btn-es').classList.toggle('active',lang==='es');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  localStorage.setItem('ictlabs-lang',lang);
+}
+const saved=localStorage.getItem('ictlabs-lang')||'es';
+setLang(saved);
+</script>
 </body>
 </html>

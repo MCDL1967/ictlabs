@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" id="html-root">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="ICTLabs — AI-powered casino operations. Better service. Higher productivity. Lower costs."/>
-<title>ICTLabs — AI-Powered Casino Operations</title>
+<meta name="description" content="ICTLabs — Operaciones de Casino Impulsadas por IA. Mejor servicio. Mayor productividad. Menores costos."/>
+<title>ICTLabs — Operaciones de Casino con IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -17,7 +17,7 @@
   --blue-dim:  #0f2d7a;
   --gold:      #c9a84c;
   --white:     #ffffff;
-  --silver:    #cbd5e1;
+  --silver:    #b0bec5;
   --steel:     #94a3b8;
   --muted:     rgba(148,163,184,0.7);
   --border-b:  rgba(37,99,235,0.3);
@@ -26,8 +26,7 @@
 html{scroll-behavior:smooth;}
 body{
   font-family:'Barlow',sans-serif;
-  background:var(--black);
-  color:var(--white);
+  background:var(--black);color:var(--white);
   overflow-x:hidden;
 }
 body::before{
@@ -42,30 +41,56 @@ body::before{
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:22px 56px;transition:all 0.3s;
+  padding:16px 48px;transition:all 0.3s;
 }
 nav.scrolled{
   background:rgba(0,0,0,0.97);
   border-bottom:1px solid var(--border-b);
   backdrop-filter:blur(12px);
-  padding:14px 56px;
+  padding:10px 48px;
 }
-.logo{text-decoration:none;}
-.logo-3d{
-  position:relative;display:inline-block;
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:28px;font-weight:900;letter-spacing:4px;text-transform:uppercase;
+.nav-logo img{
+  height:48px;width:auto;
+  display:block;
+  transition:height 0.3s;
 }
-.logo-3d .ld2{position:absolute;top:4px;left:4px;color:#04112e;user-select:none;pointer-events:none;z-index:0;}
-.logo-3d .ld1{position:absolute;top:2px;left:2px;color:#0a2a7a;user-select:none;pointer-events:none;z-index:1;}
-.logo-3d .lf{position:relative;z-index:2;color:var(--white);}
-.logo-3d .lf em{font-style:normal;color:var(--blue-glow);text-shadow:0 0 18px rgba(59,130,246,0.9);}
-.logo-sub{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:4px;color:var(--steel);display:block;margin-top:1px;text-transform:uppercase;}
-.nav-links{display:flex;align-items:center;gap:36px;}
-.nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color 0.2s;}
+nav.scrolled .nav-logo img{ height:36px; }
+
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--steel);text-decoration:none;transition:color 0.2s;
+}
 .nav-links a:hover{color:var(--blue-glow);}
-.nav-cta{border:1px solid var(--blue) !important;color:var(--blue-glow) !important;padding:7px 20px;box-shadow:0 0 10px rgba(26,79,214,0.25);transition:all 0.2s !important;}
-.nav-cta:hover{background:var(--blue) !important;color:var(--white) !important;box-shadow:0 0 24px rgba(37,99,235,0.5) !important;}
+.nav-cta{
+  border:1px solid var(--blue) !important;
+  color:var(--blue-glow) !important;
+  padding:7px 20px;
+  box-shadow:0 0 10px rgba(26,79,214,0.25);
+  transition:all 0.2s !important;
+}
+.nav-cta:hover{
+  background:var(--blue) !important;
+  color:var(--white) !important;
+  box-shadow:0 0 24px rgba(37,99,235,0.5) !important;
+}
+
+/* LANG TOGGLE */
+.lang-toggle{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;
+}
+.lang-btn{
+  background:transparent;border:1px solid rgba(148,163,184,0.2);
+  color:var(--muted);padding:4px 10px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;transition:all 0.2s;
+}
+.lang-btn.active{
+  border-color:var(--blue-glow);color:var(--blue-glow);
+  box-shadow:0 0 8px rgba(37,99,235,0.3);
+}
 
 /* HERO */
 .hero{
@@ -73,33 +98,56 @@ nav.scrolled{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:120px 24px 80px;overflow:hidden;
 }
-.hero-glow{position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(37,99,235,0.2) 0%,transparent 65%);pointer-events:none;z-index:0;animation:pulse 4s ease-in-out infinite;}
-.hero-glow-2{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(201,168,76,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
-@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.hero-glow{
+  position:absolute;top:-10%;left:50%;transform:translateX(-50%);
+  width:900px;height:600px;
+  background:radial-gradient(ellipse,rgba(37,99,235,0.18) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+  animation:pulse 4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
 
 .eyebrow{
   position:relative;z-index:1;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:6px;text-transform:uppercase;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  letter-spacing:6px;text-transform:uppercase;
   color:var(--blue-glow);margin-bottom:28px;
   opacity:0;animation:fadeUp 0.7s 0.2s forwards;
 }
-.eyebrow::before,.eyebrow::after{content:'';display:inline-block;width:28px;height:1px;background:var(--blue);vertical-align:middle;margin:0 10px;box-shadow:0 0 6px var(--blue);}
+.eyebrow::before,.eyebrow::after{
+  content:'';display:inline-block;width:28px;height:1px;
+  background:var(--blue);vertical-align:middle;margin:0 10px;
+  box-shadow:0 0 6px var(--blue);
+}
 
-/* 3D HERO HEADLINE */
-.hero-3d{
-  position:relative;z-index:1;display:inline-block;
+/* HERO HEADLINE — stainless / blue glow / stainless */
+.hero-headline{
+  position:relative;z-index:1;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(60px,10vw,100px);
+  font-weight:900;letter-spacing:6px;
+  line-height:0.94;text-transform:uppercase;text-align:center;
   margin-bottom:20px;
   opacity:0;animation:fadeUp 0.8s 0.35s forwards;
 }
-.hero-3d .hd2{position:absolute;top:8px;left:8px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;color:#04112e;user-select:none;pointer-events:none;z-index:0;white-space:nowrap;}
-.hero-3d .hd1{position:absolute;top:4px;left:4px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;color:#0a2a7a;user-select:none;pointer-events:none;z-index:1;white-space:nowrap;}
-.hero-3d .hf{position:relative;z-index:2;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;white-space:nowrap;}
-.hf .silver{color:var(--silver);}
-.hf .blue{color:var(--blue-glow);text-shadow:0 0 40px rgba(59,130,246,0.7),0 0 80px rgba(37,99,235,0.3);}
+.hl-steel{
+  display:block;
+  color:var(--silver);
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.12)) drop-shadow(0 -1px 0 rgba(0,0,0,0.5));
+}
+.hl-blue{
+  display:block;
+  color:var(--blue-glow);
+  filter:
+    drop-shadow(0 0 10px rgba(59,130,246,1))
+    drop-shadow(0 0 24px rgba(37,99,235,0.7))
+    drop-shadow(0 0 48px rgba(26,79,214,0.35));
+}
 
 .hero-sub{
   position:relative;z-index:1;
-  font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,2vw,20px);letter-spacing:3px;text-transform:uppercase;
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,2vw,20px);
+  letter-spacing:3px;text-transform:uppercase;
   color:var(--steel);margin-bottom:32px;
   opacity:0;animation:fadeUp 0.8s 0.5s forwards;
 }
@@ -129,7 +177,11 @@ nav.scrolled{
   text-decoration:none;padding:13px 44px;border:1px solid rgba(148,163,184,0.3);cursor:pointer;transition:all 0.2s;
 }
 .btn-secondary:hover{border-color:var(--blue-glow);color:var(--blue-glow);}
-.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fadeUp 1s 1.3s forwards;}
+.hero-scroll{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp 1s 1.3s forwards;
+}
 .hero-scroll span{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;}
 .scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--blue-glow),transparent);box-shadow:0 0 8px var(--blue);animation:scrollPulse 2s ease-in-out infinite;}
 @keyframes scrollPulse{0%,100%{opacity:0.2}50%{opacity:1}}
@@ -139,7 +191,11 @@ nav.scrolled{
 .stat-item{padding:32px 20px;text-align:center;border-right:1px solid var(--border-b);position:relative;overflow:hidden;}
 .stat-item::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(37,99,235,0.07),transparent 70%);}
 .stat-item:last-child{border-right:none;}
-.stat-number{font-family:'Barlow Condensed',sans-serif;font-size:clamp(32px,3.5vw,52px);font-weight:700;letter-spacing:2px;color:var(--blue-glow);line-height:1;margin-bottom:7px;text-shadow:0 0 18px rgba(59,130,246,0.5);}
+.stat-number{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(32px,3.5vw,52px);
+  font-weight:700;letter-spacing:2px;color:var(--blue-glow);line-height:1;margin-bottom:7px;
+  filter:drop-shadow(0 0 10px rgba(59,130,246,0.6));
+}
 .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;line-height:1.5;}
 
 /* SECTIONS */
@@ -148,7 +204,7 @@ section{position:relative;z-index:1;}
 .sec-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
 .sec-label::before{content:'';width:20px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue);}
 .sec-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,4.5vw,64px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--white);margin-bottom:20px;line-height:1;}
-.sec-title .bl{color:var(--blue-glow);text-shadow:0 0 16px rgba(59,130,246,0.5);}
+.sec-title .bl{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.5));}
 .sec-body{font-size:15px;color:var(--muted);max-width:580px;line-height:1.8;}
 
 /* PROBLEM */
@@ -159,8 +215,8 @@ section{position:relative;z-index:1;}
 .prob-card:hover{box-shadow:0 0 18px rgba(37,99,235,0.15);}
 .prob-card strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--white);margin-bottom:3px;}
 .prob-card span{font-size:13px;color:var(--muted);}
-.prob-quote{font-family:'Barlow Condensed',sans-serif;font-size:clamp(24px,3vw,40px);font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white);line-height:1.15;border-left:2px solid var(--blue);padding-left:24px;}
-.prob-quote span{color:var(--blue-glow);text-shadow:0 0 14px rgba(59,130,246,0.6);}
+.prob-quote{font-family:'Barlow Condensed',sans-serif;font-size:clamp(22px,3vw,38px);font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white);line-height:1.15;border-left:2px solid var(--blue);padding-left:24px;}
+.prob-quote span{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.6));}
 
 /* PRODUCTS */
 .products{background:var(--black-2);}
@@ -169,7 +225,7 @@ section{position:relative;z-index:1;}
 .prod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);}
 .prod-card:hover{background:rgba(26,79,214,0.05);}
 .prod-num{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--blue-dim);margin-bottom:16px;}
-.prod-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:4px;text-shadow:0 0 16px rgba(59,130,246,0.4);}
+.prod-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:4px;filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));}
 .prod-layer{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:16px;}
 .prod-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
 .prod-feat{list-style:none;}
@@ -190,7 +246,7 @@ section{position:relative;z-index:1;}
 .creds-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:24px;}
 .cred-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(26,79,214,0.15);}
 .cred-row:last-child{border-bottom:none;}
-.cred-num{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;letter-spacing:2px;color:var(--blue-glow);text-shadow:0 0 14px rgba(59,130,246,0.4);}
+.cred-num{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;letter-spacing:2px;color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));}
 .cred-lbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right;max-width:170px;line-height:1.4;}
 
 /* APPROACH */
@@ -209,15 +265,14 @@ section{position:relative;z-index:1;}
 .gateway{background:var(--black);border-top:1px solid var(--border-b);position:relative;overflow:hidden;}
 .gw-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(26,79,214,0.1),transparent 70%);pointer-events:none;}
 .gw-inner{max-width:700px;margin:0 auto;padding:120px 48px;text-align:center;position:relative;z-index:1;}
-
-/* 3D GATEWAY TITLE */
-.gw-3d{position:relative;display:inline-block;margin-bottom:14px;}
-.gw-3d .gd2{position:absolute;top:6px;left:6px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;color:#04112e;pointer-events:none;user-select:none;}
-.gw-3d .gd1{position:absolute;top:3px;left:3px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;color:#0a2a7a;pointer-events:none;user-select:none;}
-.gw-3d .gf{position:relative;z-index:1;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;}
-.gf .silver{color:var(--silver);}
-.gf .blue{color:var(--blue-glow);text-shadow:0 0 30px rgba(59,130,246,0.7);}
-
+.gw-headline{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(40px,6vw,80px);font-weight:900;
+  letter-spacing:4px;line-height:1;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.gw-headline .hl-steel{font-size:inherit;}
+.gw-headline .hl-blue{font-size:inherit;}
 .gw-sub{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:48px;line-height:1.7;}
 .gw-box{background:var(--black-2);border:1px solid rgba(37,99,235,0.4);padding:44px;box-shadow:0 0 60px rgba(26,79,214,0.1),inset 0 1px 0 var(--border-b);position:relative;}
 .gw-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue-glow),transparent);box-shadow:0 0 14px var(--blue);}
@@ -235,8 +290,8 @@ section{position:relative;z-index:1;}
 .gw-alt a{color:var(--blue-glow);text-decoration:none;}
 
 /* FOOTER */
-footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:44px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;position:relative;z-index:1;}
-.ft-legal-sub{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(148,163,184,0.35);margin-top:4px;}
+footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:36px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;position:relative;z-index:1;}
+.footer-logo img{height:40px;width:auto;}
 .ft-contact{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;line-height:2.2;}
 .ft-contact a{color:var(--blue-glow);text-decoration:none;}
 .ft-legal{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(148,163,184,0.25);text-align:right;line-height:2;}
@@ -246,134 +301,203 @@ footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:44
 .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease;}
 .reveal.visible{opacity:1;transform:translateY(0);}
 .reveal-d1{transition-delay:0.15s;}
-.reveal-d2{transition-delay:0.3s;}
 
 /* RESPONSIVE */
 @media(max-width:900px){
-  nav{padding:16px 24px;}nav.scrolled{padding:12px 24px;}
-  .nav-links{display:none;}
+  nav{padding:12px 20px;}
+  nav.scrolled{padding:8px 20px;}
+  .nav-links .hide-mobile{display:none;}
+  .nav-logo img{height:36px;}
+  nav.scrolled .nav-logo img{height:28px;}
   .stats-bar{grid-template-columns:1fr 1fr;}
   .stat-item:nth-child(2){border-right:none;}
   .stat-item:nth-child(3){border-top:1px solid var(--border-b);}
-  .section-inner{padding:64px 24px;}
+  .section-inner{padding:64px 20px;}
   .prob-grid,.why-grid{grid-template-columns:1fr;gap:32px;}
   .prod-grid,.steps{grid-template-columns:1fr;}
-  footer{flex-direction:column;text-align:center;padding:32px 24px;}
+  .gw-inner{padding:80px 24px;}
+  footer{flex-direction:column;text-align:center;padding:28px 20px;}
   .ft-legal,.ft-contact{text-align:center;}
 }
+
+/* BILINGUAL — hidden by default, shown via JS */
+[data-en]{display:none;}
+html[lang="en"] [data-es]{display:none;}
+html[lang="en"] [data-en]{display:revert;}
 </style>
 </head>
 <body>
 
 <nav id="nav">
-  <a class="logo" href="#">
-    <div class="logo-3d">
-      <div class="ld2">ICT<span>Labs</span></div>
-      <div class="ld1">ICT<span>Labs</span></div>
-      <div class="lf">ICT<em>Labs</em></div>
-    </div>
-    <span class="logo-sub">AI · Casino Operations</span>
+  <a class="nav-logo" href="#">
+    <img src="assets/img/ictlabs-logo.png"
+         srcset="assets/img/ictlabs-logo-sm.png 200w, assets/img/ictlabs-logo.png 480w"
+         sizes="(max-width:600px) 200px, 480px"
+         alt="ICTLabs — AI Casino Operations"
+         width="240" height="160"/>
   </a>
   <div class="nav-links">
-    <a href="#solutions">Solutions</a>
-    <a href="#why">Why ICTLabs</a>
-    <a href="#approach">Approach</a>
-    <a href="#gateway" class="nav-cta">Client Access</a>
+    <a href="#solutions" class="hide-mobile" data-es>Soluciones</a>
+    <a href="#solutions" class="hide-mobile" data-en>Solutions</a>
+    <a href="#why" class="hide-mobile" data-es>Por Qué ICTLabs</a>
+    <a href="#why" class="hide-mobile" data-en>Why ICTLabs</a>
+    <a href="#approach" class="hide-mobile" data-es>Enfoque</a>
+    <a href="#approach" class="hide-mobile" data-en>Approach</a>
+    <a href="#gateway" class="nav-cta" data-es>Área de Clientes</a>
+    <a href="#gateway" class="nav-cta" data-en>Client Access</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
   </div>
 </nav>
 
 <section class="hero">
   <div class="hero-glow"></div>
-  <div class="hero-glow-2"></div>
-  <div class="eyebrow">Integrated Computer Technology</div>
-  <div class="hero-3d">
-    <div class="hd2">AI POWERED<br>CASINO<br>OPERATIONS</div>
-    <div class="hd1">AI POWERED<br>CASINO<br>OPERATIONS</div>
-    <div class="hf">
-      <span class="silver">AI POWERED</span><br>
-      <span class="blue">CASINO</span><br>
-      <span class="silver">OPERATIONS</span>
-    </div>
+  <div class="eyebrow" data-es>IA Aplicada a Operaciones de Casino</div>
+  <div class="eyebrow" data-en>AI Applied to Casino Operations</div>
+  <div class="hero-headline">
+    <span class="hl-steel" data-es>IA POTENCIADA</span>
+    <span class="hl-steel" data-en>AI POWERED</span>
+    <span class="hl-blue">CASINO</span>
+    <span class="hl-steel" data-es>OPERACIONES</span>
+    <span class="hl-steel" data-en>OPERATIONS</span>
   </div>
-  <p class="hero-sub">Better service &nbsp;·&nbsp; Higher productivity &nbsp;·&nbsp; Lower costs</p>
+  <p class="hero-sub" data-es>Mejor servicio &nbsp;·&nbsp; Mayor productividad &nbsp;·&nbsp; Menores costos</p>
+  <p class="hero-sub" data-en>Better service &nbsp;·&nbsp; Higher productivity &nbsp;·&nbsp; Lower costs</p>
   <div class="hero-divider">
     <div class="div-line"></div>
-    <div class="div-text"><span>40 yrs</span> Technology &nbsp;·&nbsp; <span>25 yrs</span> Casino Operations &nbsp;·&nbsp; Live in <span>Weeks</span></div>
+    <div class="div-text" data-es><span>40 años</span> Tecnología &nbsp;·&nbsp; <span>25 años</span> Operaciones Casino &nbsp;·&nbsp; En vivo en <span>Semanas</span></div>
+    <div class="div-text" data-en><span>40 yrs</span> Technology &nbsp;·&nbsp; <span>25 yrs</span> Casino Operations &nbsp;·&nbsp; Live in <span>Weeks</span></div>
     <div class="div-line"></div>
   </div>
   <div class="hero-actions">
-    <a href="#gateway" class="btn-primary">Enter Client Area</a>
-    <a href="#solutions" class="btn-secondary">Our Solutions</a>
+    <a href="#gateway" class="btn-primary" data-es>Entrar al Área de Clientes</a>
+    <a href="#gateway" class="btn-primary" data-en>Enter Client Area</a>
+    <a href="#solutions" class="btn-secondary" data-es>Nuestras Soluciones</a>
+    <a href="#solutions" class="btn-secondary" data-en>Our Solutions</a>
   </div>
-  <div class="hero-scroll"><div class="scroll-line"></div><span>Scroll</span></div>
+  <div class="hero-scroll"><div class="scroll-line"></div><span data-es>Bajar</span><span data-en>Scroll</span></div>
 </section>
 
 <div class="stats-bar reveal">
-  <div class="stat-item"><div class="stat-number">30–70%</div><div class="stat-label">Productivity Increase<br>Knowledge & Reporting</div></div>
-  <div class="stat-item"><div class="stat-number">40–60%</div><div class="stat-label">Less Manual Work<br>Data Entry Eliminated</div></div>
-  <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">AI Guest Attention<br>No Breaks. No Overtime.</div></div>
-  <div class="stat-item"><div class="stat-number">ZERO</div><div class="stat-label">New Hires Needed<br>Scale With Your Team</div></div>
+  <div class="stat-item">
+    <div class="stat-number">30–70%</div>
+    <div class="stat-label" data-es>Aumento de Productividad<br>Conocimiento e Informes</div>
+    <div class="stat-label" data-en>Productivity Increase<br>Knowledge & Reporting</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">40–60%</div>
+    <div class="stat-label" data-es>Menos Trabajo Manual<br>Entrada de Datos Eliminada</div>
+    <div class="stat-label" data-en>Less Manual Work<br>Data Entry Eliminated</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">24/7</div>
+    <div class="stat-label" data-es>Atención IA al Huésped<br>Sin Descansos. Sin Horas Extra.</div>
+    <div class="stat-label" data-en>AI Guest Attention<br>No Breaks. No Overtime.</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number">CERO</div>
+    <div class="stat-label" data-es>Nuevas Contrataciones<br>Escala Con Tu Equipo</div>
+    <div class="stat-label" data-en>New Hires Needed<br>Scale With Your Team</div>
+  </div>
 </div>
 
 <section class="problem" id="problem">
   <div class="section-inner">
-    <div class="sec-label">The Problem</div>
-    <h2 class="sec-title">THE TOOL IS <span class="bl">MISSING.</span></h2>
+    <div class="sec-label" data-es>El Problema</div>
+    <div class="sec-label" data-en>The Problem</div>
+    <h2 class="sec-title" data-es>LA HERRAMIENTA <span class="bl">FALTA.</span></h2>
+    <h2 class="sec-title" data-en>THE TOOL IS <span class="bl">MISSING.</span></h2>
     <div class="prob-grid reveal">
       <div class="prob-cards">
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📋</span><div><strong>Manual Reports → Slow Decisions</strong><span>Data that arrives too late to act on. Hours lost every reporting cycle.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📊</span><div><strong>Data Available — Not Exploited</strong><span>Your operation generates intelligence you're not using.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📁</span><div><strong>Compliance Reports — Hours Lost</strong><span>AI produces these automatically, accurately, every time.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">⚡</span><div><strong>Competition Already Moving</strong><span>First mover advantage compounds. The window is now.</span></div></div>
+        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📋</span><div>
+          <strong data-es>Reportes Manuales → Decisiones Lentas</strong>
+          <strong data-en>Manual Reports → Slow Decisions</strong>
+          <span data-es>Datos que llegan demasiado tarde. Horas perdidas cada ciclo.</span>
+          <span data-en>Data that arrives too late to act on. Hours lost every cycle.</span>
+        </div></div>
+        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📊</span><div>
+          <strong data-es>Datos Disponibles — No Explotados</strong>
+          <strong data-en>Data Available — Not Exploited</strong>
+          <span data-es>Tu operación genera inteligencia que no estás usando.</span>
+          <span data-en>Your operation generates intelligence you're not using.</span>
+        </div></div>
+        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📁</span><div>
+          <strong data-es>Cumplimiento Normativo — Horas Perdidas</strong>
+          <strong data-en>Compliance Reports — Hours Lost</strong>
+          <span data-es>La IA los produce automáticamente, con precisión, siempre.</span>
+          <span data-en>AI produces these automatically, accurately, every time.</span>
+        </div></div>
+        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">⚡</span><div>
+          <strong data-es>La Competencia Ya Se Está Moviendo</strong>
+          <strong data-en>Competition Already Moving</strong>
+          <span data-es>La ventaja del primero se acumula. La ventana es ahora.</span>
+          <span data-en>First mover advantage compounds. The window is now.</span>
+        </div></div>
       </div>
-      <div class="prob-quote">THE BIGGEST RISK ISN'T MAKING A MISTAKE.<br>IT'S <span>NOT MOVING</span> AT ALL.</div>
+      <div class="prob-quote">
+        <span data-es>EL MAYOR RIESGO NO ES EQUIVOCARSE.<br>ES <span>NO MOVERSE</span> EN ABSOLUTO.</span>
+        <span data-en>THE BIGGEST RISK ISN'T MAKING A MISTAKE.<br>IT'S <span>NOT MOVING</span> AT ALL.</span>
+      </div>
     </div>
   </div>
 </section>
 
 <section class="products" id="solutions">
   <div class="section-inner">
-    <div class="sec-label">Our Solutions</div>
-    <h2 class="sec-title">WHERE WE GENERATE <span class="bl">IMMEDIATE VALUE.</span></h2>
-    <p class="sec-body">We don't build AI models. We implement proven models in real casino operations — fast, focused, tied to measurable KPIs.</p>
+    <div class="sec-label" data-es>Nuestras Soluciones</div>
+    <div class="sec-label" data-en>Our Solutions</div>
+    <h2 class="sec-title" data-es>DONDE GENERAMOS <span class="bl">VALOR INMEDIATO.</span></h2>
+    <h2 class="sec-title" data-en>WHERE WE GENERATE <span class="bl">IMMEDIATE VALUE.</span></h2>
+    <p class="sec-body" data-es>No construimos modelos de IA. Implementamos modelos probados en operaciones reales de casino — rápido, enfocado, vinculado a KPIs medibles.</p>
+    <p class="sec-body" data-en>We don't build AI models. We implement proven models in real casino operations — fast, focused, tied to measurable KPIs.</p>
     <div class="prod-grid reveal">
       <div class="prod-card">
-        <div class="prod-num">01 · Front of House</div>
+        <div class="prod-num" data-es>01 · Frente de Casa</div>
+        <div class="prod-num" data-en>01 · Front of House</div>
         <div class="prod-name">SOL</div>
-        <div class="prod-layer">AI Guest Concierge · WhatsApp · 24/7</div>
-        <p class="prod-desc">Your first AI collaborator that never sleeps and handles unlimited simultaneous guest requests — in English and Spanish.</p>
+        <div class="prod-layer" data-es>Concierge IA · WhatsApp · 24/7</div>
+        <div class="prod-layer" data-en>AI Guest Concierge · WhatsApp · 24/7</div>
+        <p class="prod-desc" data-es>Tu primera colaboradora IA que nunca duerme y atiende solicitudes simultáneas de huéspedes — en inglés y español.</p>
+        <p class="prod-desc" data-en>Your first AI collaborator that never sleeps and handles unlimited simultaneous guest requests — in English and Spanish.</p>
         <ul class="prod-feat">
-          <li>Instant guest response, zero wait</li>
-          <li>WhatsApp from any location</li>
-          <li>Incident logging & calendaring</li>
-          <li>Replaces repetitive tasks, not your team</li>
-          <li>Bilingual EN / ES</li>
+          <li data-es>Respuesta instantánea, cero espera</li><li data-en>Instant guest response, zero wait</li>
+          <li data-es>WhatsApp desde cualquier ubicación</li><li data-en>WhatsApp from any location</li>
+          <li data-es>Registro de incidentes y calendario</li><li data-en>Incident logging & calendaring</li>
+          <li data-es>Bilingüe ES / EN</li><li data-en>Bilingual EN / ES</li>
         </ul>
       </div>
       <div class="prod-card">
-        <div class="prod-num">02 · Back of House</div>
-        <div class="prod-name">OPS IA</div>
-        <div class="prod-layer">Reporting · KPIs · Compliance</div>
-        <p class="prod-desc">Automated regulatory compliance, real-time KPI dashboards, cross-system data consolidation, and shift-level productivity metrics.</p>
+        <div class="prod-num" data-es>02 · Back of House</div>
+        <div class="prod-num" data-en>02 · Back of House</div>
+        <div class="prod-name" data-es>OPS IA</div>
+        <div class="prod-name" data-en>OPS IA</div>
+        <div class="prod-layer" data-es>Reportes · KPIs · Cumplimiento</div>
+        <div class="prod-layer" data-en>Reporting · KPIs · Compliance</div>
+        <p class="prod-desc" data-es>Cumplimiento normativo automatizado, dashboards KPI en tiempo real, consolidación de datos multi-sistema.</p>
+        <p class="prod-desc" data-en>Automated regulatory compliance, real-time KPI dashboards, cross-system data consolidation.</p>
         <ul class="prod-feat">
-          <li>Automated compliance reports</li>
-          <li>Real-time KPI dashboards</li>
-          <li>Multi-system data consolidation</li>
-          <li>Structured incident registry</li>
-          <li>Shift productivity metrics</li>
+          <li data-es>Reportes de cumplimiento automatizados</li><li data-en>Automated compliance reports</li>
+          <li data-es>Dashboards KPI en tiempo real</li><li data-en>Real-time KPI dashboards</li>
+          <li data-es>Consolidación multi-sistema</li><li data-en>Multi-system data consolidation</li>
+          <li data-es>Métricas de productividad por turno</li><li data-en>Shift productivity metrics</li>
         </ul>
       </div>
       <div class="prod-card">
-        <div class="prod-num">03 · Intelligence Layer</div>
-        <div class="prod-name">KNOWLEDGE IA</div>
-        <div class="prod-layer">Agents · Search · Decision Support</div>
-        <p class="prod-desc">Internal AI knowledge systems that automate documentation, enable intelligent search, and support real-time operational decisions.</p>
+        <div class="prod-num" data-es>03 · Capa de Inteligencia</div>
+        <div class="prod-num" data-en>03 · Intelligence Layer</div>
+        <div class="prod-name" data-es>CONOCIMIENTO IA</div>
+        <div class="prod-name" data-en>KNOWLEDGE IA</div>
+        <div class="prod-layer" data-es>Agentes · Búsqueda · Decisiones</div>
+        <div class="prod-layer" data-en>Agents · Search · Decision Support</div>
+        <p class="prod-desc" data-es>Sistemas de conocimiento IA internos que automatizan documentación y apoyan decisiones operativas en tiempo real.</p>
+        <p class="prod-desc" data-en>Internal AI knowledge systems that automate documentation and support real-time operational decisions.</p>
         <ul class="prod-feat">
-          <li>Internal AI knowledge base</li>
-          <li>Document automation</li>
-          <li>AI-assisted decision support</li>
-          <li>HR & team performance tracking</li>
-          <li>Scalable agent architecture</li>
+          <li data-es>Base de conocimiento IA interna</li><li data-en>Internal AI knowledge base</li>
+          <li data-es>Automatización de documentos</li><li data-en>Document automation</li>
+          <li data-es>Soporte de decisiones con IA</li><li data-en>AI-assisted decision support</li>
+          <li data-es>Arquitectura de agentes escalable</li><li data-en>Scalable agent architecture</li>
         </ul>
       </div>
     </div>
@@ -382,22 +506,45 @@ footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:44
 
 <section class="why" id="why">
   <div class="section-inner">
-    <div class="sec-label">Why ICTLabs</div>
-    <h2 class="sec-title">AI AS A REAL <span class="bl">OPERATIONAL ADVANTAGE.</span></h2>
+    <div class="sec-label" data-es>Por Qué ICTLabs</div>
+    <div class="sec-label" data-en>Why ICTLabs</div>
+    <h2 class="sec-title" data-es>IA COMO UNA REAL <span class="bl">VENTAJA OPERATIVA.</span></h2>
+    <h2 class="sec-title" data-en>AI AS A REAL <span class="bl">OPERATIONAL ADVANTAGE.</span></h2>
     <div class="why-grid reveal">
       <div class="why-pts">
-        <div class="why-pt"><div class="why-n">01</div><div class="why-b"><strong>Deep Casino Domain Knowledge</strong><span>Compliance, internal controls, incident management, reservations, loyalty programs — we know this business from the inside out.</span></div></div>
-        <div class="why-pt"><div class="why-n">02</div><div class="why-b"><strong>Your Data — Not Generic AI</strong><span>AI fed by your operation's data. Contextual, accurate, tuned specifically to your environment.</span></div></div>
-        <div class="why-pt"><div class="why-n">03</div><div class="why-b"><strong>Intelligent Workflows</strong><span>Automate the repetitive. Free your team to focus on what drives real value and guest experience.</span></div></div>
-        <div class="why-pt"><div class="why-n">04</div><div class="why-b"><strong>KPI-Driven — Functional in Days</strong><span>Functional prototypes in days. Live systems in weeks. Every project tied to measurable outcomes.</span></div></div>
+        <div class="why-pt"><div class="why-n">01</div><div class="why-b">
+          <strong data-es>Conocimiento Profundo del Casino</strong>
+          <strong data-en>Deep Casino Domain Knowledge</strong>
+          <span data-es>Cumplimiento, controles internos, incidentes, reservas, fidelización — conocemos este negocio por dentro.</span>
+          <span data-en>Compliance, internal controls, incidents, reservations, loyalty — we know this business from the inside out.</span>
+        </div></div>
+        <div class="why-pt"><div class="why-n">02</div><div class="why-b">
+          <strong data-es>Tus Datos — No IA Genérica</strong>
+          <strong data-en>Your Data — Not Generic AI</strong>
+          <span data-es>IA alimentada con los datos de tu operación. Contextual, precisa, adaptada a tu entorno.</span>
+          <span data-en>AI fed by your operation's data. Contextual, accurate, tuned to your environment.</span>
+        </div></div>
+        <div class="why-pt"><div class="why-n">03</div><div class="why-b">
+          <strong data-es>Flujos de Trabajo Inteligentes</strong>
+          <strong data-en>Intelligent Workflows</strong>
+          <span data-es>Automatiza lo repetitivo. Libera a tu equipo para lo que impulsa valor real.</span>
+          <span data-en>Automate the repetitive. Free your team to focus on what drives real value.</span>
+        </div></div>
+        <div class="why-pt"><div class="why-n">04</div><div class="why-b">
+          <strong data-es>KPI-Driven — Funcional en Días</strong>
+          <strong data-en>KPI-Driven — Functional in Days</strong>
+          <span data-es>Prototipos funcionales en días. Sistemas en vivo en semanas. Todo vinculado a resultados medibles.</span>
+          <span data-en>Functional prototypes in days. Live systems in weeks. Every project tied to measurable outcomes.</span>
+        </div></div>
       </div>
       <div class="why-creds reveal reveal-d1">
         <div class="creds-inner">
-          <div class="creds-title">Track Record</div>
-          <div class="cred-row"><div class="cred-num">40</div><div class="cred-lbl">Years IT & Systems Integration</div></div>
-          <div class="cred-row"><div class="cred-num">25</div><div class="cred-lbl">Years Casino Operations Expertise</div></div>
-          <div class="cred-row"><div class="cred-num">WEEKS</div><div class="cred-lbl">From kickoff to live — not months</div></div>
-          <div class="cred-row"><div class="cred-num">ZERO</div><div class="cred-lbl">Generic AI — built for your operation</div></div>
+          <div class="creds-title" data-es>Nuestro Historial</div>
+          <div class="creds-title" data-en>Track Record</div>
+          <div class="cred-row"><div class="cred-num">40</div><div class="cred-lbl" data-es>Años Integración TI y Sistemas</div><div class="cred-lbl" data-en>Years IT & Systems Integration</div></div>
+          <div class="cred-row"><div class="cred-num">25</div><div class="cred-lbl" data-es>Años Experiencia en Casinos</div><div class="cred-lbl" data-en>Years Casino Operations Expertise</div></div>
+          <div class="cred-row"><div class="cred-num" data-es>SEMANAS</div><div class="cred-num" data-en>WEEKS</div><div class="cred-lbl" data-es>Del arranque a producción</div><div class="cred-lbl" data-en>From kickoff to live</div></div>
+          <div class="cred-row"><div class="cred-num">CERO</div><div class="cred-lbl" data-es>IA Genérica — construida para tu operación</div><div class="cred-lbl" data-en>Generic AI — built for your operation</div></div>
         </div>
       </div>
     </div>
@@ -406,71 +553,120 @@ footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:44
 
 <section class="approach" id="approach">
   <div class="section-inner">
-    <div class="sec-label">Our Approach</div>
-    <h2 class="sec-title">START SMALL. <span class="bl">SCALE FAST.</span></h2>
-    <p class="sec-body">No complex integrations on day one. No disruption to your operation. A proven three-phase path built on real results.</p>
+    <div class="sec-label" data-es>Nuestro Enfoque</div>
+    <div class="sec-label" data-en>Our Approach</div>
+    <h2 class="sec-title" data-es>ARRANCA PEQUEÑO. <span class="bl">ESCALA RÁPIDO.</span></h2>
+    <h2 class="sec-title" data-en>START SMALL. <span class="bl">SCALE FAST.</span></h2>
     <div class="steps reveal">
-      <div class="step"><div class="step-bg">1</div><div class="step-num">Phase 01</div><div class="step-title">Launch SOL</div><p class="step-body">Go live in your casino. Real guests. Real data. Immediate, measurable results your team can see from day one.</p></div>
-      <div class="step"><div class="step-bg">2</div><div class="step-num">Phase 02</div><div class="step-title">Analyze Performance</div><p class="step-body">Measure real results. Identify where AI adds the most value in your specific operation before expanding scope.</p></div>
-      <div class="step"><div class="step-bg">3</div><div class="step-num">Phase 03</div><div class="step-title">Expand Back-of-House</div><p class="step-body">Compliance, reporting, knowledge systems — layer by layer, on your timeline, without disruption.</p></div>
+      <div class="step"><div class="step-bg">1</div><div class="step-num" data-es>Fase 01</div><div class="step-num" data-en>Phase 01</div>
+        <div class="step-title" data-es>LANZAR SOL</div><div class="step-title" data-en>LAUNCH SOL</div>
+        <p class="step-body" data-es>En vivo en tu casino. Huéspedes reales. Datos reales. Resultados medibles desde el primer día.</p>
+        <p class="step-body" data-en>Go live in your casino. Real guests. Real data. Immediate, measurable results from day one.</p>
+      </div>
+      <div class="step"><div class="step-bg">2</div><div class="step-num" data-es>Fase 02</div><div class="step-num" data-en>Phase 02</div>
+        <div class="step-title" data-es>ANALIZAR RENDIMIENTO</div><div class="step-title" data-en>ANALYZE PERFORMANCE</div>
+        <p class="step-body" data-es>Medir resultados reales. Identificar dónde la IA agrega más valor antes de expandir.</p>
+        <p class="step-body" data-en>Measure real results. Identify where AI adds the most value before expanding scope.</p>
+      </div>
+      <div class="step"><div class="step-bg">3</div><div class="step-num" data-es>Fase 03</div><div class="step-num" data-en>Phase 03</div>
+        <div class="step-title" data-es>EXPANDIR BACK-OF-HOUSE</div><div class="step-title" data-en>EXPAND BACK-OF-HOUSE</div>
+        <p class="step-body" data-es>Cumplimiento, reportes, sistemas de conocimiento — capa a capa, a tu ritmo, sin disrupciones.</p>
+        <p class="step-body" data-en>Compliance, reporting, knowledge systems — layer by layer, on your timeline, without disruption.</p>
+      </div>
     </div>
-    <p class="approach-note reveal">No complex integrations &nbsp;·&nbsp; Live in weeks, not months</p>
+    <p class="approach-note reveal">
+      <span data-es>Sin integraciones complejas &nbsp;·&nbsp; En vivo en semanas, no meses</span>
+      <span data-en>No complex integrations &nbsp;·&nbsp; Live in weeks, not months</span>
+    </p>
   </div>
 </section>
 
 <section class="gateway" id="gateway">
   <div class="gw-glow"></div>
   <div class="gw-inner">
-    <div class="gw-3d reveal">
-      <div class="gd2">AI IS NO LONGER<br>OPTIONAL.</div>
-      <div class="gd1">AI IS NO LONGER<br>OPTIONAL.</div>
-      <div class="gf">
-        <span class="silver">AI IS NO LONGER</span><br>
-        <span class="blue">OPTIONAL.</span>
-      </div>
+    <div class="gw-headline reveal">
+      <span class="hl-steel" data-es>LA IA YA NO ES</span>
+      <span class="hl-steel" data-en>AI IS NO LONGER</span>
+      <span class="hl-blue" data-es>OPCIONAL.</span>
+      <span class="hl-blue" data-en>OPTIONAL.</span>
     </div>
-    <p class="gw-sub">The speed of execution defines the advantage.<br>The advantage belongs to whoever moves first.</p>
+    <p class="gw-sub" data-es>La velocidad de ejecución define la ventaja.<br>La ventaja es de quien implementa primero.</p>
+    <p class="gw-sub" data-en>The speed of execution defines the advantage.<br>The advantage belongs to whoever moves first.</p>
     <div class="gw-box reveal">
-      <div class="gw-lbl">Private Client Area</div>
-      <div class="gw-title">Access ICTLabs Applications</div>
-      <p class="gw-sub2">Enter your details to access our client tools and project dashboards.</p>
+      <div class="gw-lbl" data-es>Área Privada de Clientes</div>
+      <div class="gw-lbl" data-en>Private Client Area</div>
+      <div class="gw-title" data-es>ACCEDER A APLICACIONES ICTLABS</div>
+      <div class="gw-title" data-en>ACCESS ICTLABS APPLICATIONS</div>
+      <p class="gw-sub2" data-es>Ingresa tus datos para acceder a herramientas y dashboards de clientes.</p>
+      <p class="gw-sub2" data-en>Enter your details to access our client tools and project dashboards.</p>
       <form class="gw-form" onsubmit="handleAccess(event)">
-        <input class="gw-input" type="text"  id="g-name"  placeholder="Full Name" required/>
-        <input class="gw-input" type="email" id="g-email" placeholder="Email Address" required/>
-        <input class="gw-input" type="tel"   id="g-phone" placeholder="Phone Number"/>
-        <button class="gw-btn" type="submit">Enter Client Area →</button>
+        <input class="gw-input" type="text"  id="g-name"  data-placeholder-es="Nombre Completo"    data-placeholder-en="Full Name"      required/>
+        <input class="gw-input" type="email" id="g-email" data-placeholder-es="Correo Electrónico" data-placeholder-en="Email Address"   required/>
+        <input class="gw-input" type="tel"   id="g-phone" data-placeholder-es="Teléfono"           data-placeholder-en="Phone Number"/>
+        <button class="gw-btn" type="submit">
+          <span data-es>ENTRAR AL ÁREA DE CLIENTES →</span>
+          <span data-en>ENTER CLIENT AREA →</span>
+        </button>
       </form>
-      <p class="gw-disc">Your information is kept private and used solely for access management.</p>
+      <p class="gw-disc" data-es>Tu información es privada y se usa únicamente para gestión de acceso.</p>
+      <p class="gw-disc" data-en>Your information is kept private and used solely for access management.</p>
     </div>
-    <p class="gw-alt">Or &nbsp;<a href="mailto:marcelo@gransolux.com">Contact us directly</a></p>
+    <p class="gw-alt">
+      <span data-es>O &nbsp;<a href="mailto:marcelo@gransolux.com">CONTÁCTANOS DIRECTAMENTE</a></span>
+      <span data-en>Or &nbsp;<a href="mailto:marcelo@gransolux.com">CONTACT US DIRECTLY</a></span>
+    </p>
   </div>
 </section>
 
 <footer>
-  <div>
-    <div class="logo-3d" style="font-size:22px;">
-      <div class="ld2">ICT<span>Labs</span></div>
-      <div class="ld1">ICT<span>Labs</span></div>
-      <div class="lf">ICT<em>Labs</em></div>
-    </div>
-    <div class="ft-legal-sub">Integrated Computer Technology · AI Consulting Division</div>
+  <div class="footer-logo">
+    <img src="assets/img/ictlabs-logo.png"
+         srcset="assets/img/ictlabs-logo-sm.png 200w, assets/img/ictlabs-logo.png 480w"
+         sizes="(max-width:600px) 160px, 200px"
+         alt="ICTLabs" width="200" height="133"/>
   </div>
   <div class="ft-contact">
     <a href="mailto:marcelo@gransolux.com">marcelo@gransolux.com</a><br>
     <a href="tel:+50762574995">+507.6257.4995</a><br>
-    Panama · GRANSOLUX S.A.
+    <span data-es>Panamá · GRANSOLUX S.A.</span>
+    <span data-en>Panama · GRANSOLUX S.A.</span>
   </div>
-  <div class="ft-legal">© 2026 ICTLabs / GRANSOLUX S.A.<br>All rights reserved.<br>ict-labs.com</div>
+  <div class="ft-legal">
+    © 2026 ICTLabs / GRANSOLUX S.A.<br>
+    <span data-es>Todos los derechos reservados.</span>
+    <span data-en>All rights reserved.</span><br>
+    ict-labs.com
+  </div>
 </footer>
 
 <script>
+// Nav scroll
 const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+// Scroll reveal
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } });
 }, { threshold: 0.1 });
 reveals.forEach(el => observer.observe(el));
+
+// Language toggle
+function setLang(lang) {
+  document.getElementById('html-root').lang = lang;
+  document.getElementById('btn-es').classList.toggle('active', lang==='es');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  // Update form placeholders
+  document.querySelectorAll('[data-placeholder-es]').forEach(el => {
+    el.placeholder = lang==='es' ? el.dataset.placeholderEs : el.dataset.placeholderEn;
+  });
+  localStorage.setItem('ictlabs-lang', lang);
+}
+// Init — default Spanish, restore preference if set
+const savedLang = localStorage.getItem('ictlabs-lang') || 'es';
+setLang(savedLang);
+
+// Gateway form
 function handleAccess(e) {
   e.preventDefault();
   const name  = document.getElementById('g-name').value.trim();
