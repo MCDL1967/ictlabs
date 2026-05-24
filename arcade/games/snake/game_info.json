@@ -1,7 +1,7 @@
 {
   "name": "SNAKE",
-  "image_desc": "Eat, grow, survive. Don't hit the walls or yourself. Bonus food for extra points.",
-  "video_src": "https://www.youtube.com/embed/TJdKMFy7MEA?autoplay=1&mute=1&controls=0&loop=1&playlist=TJdKMFy7MEA",
+  "image_desc": "Eat, grow, survive. Grab the ⭐ bonus for 5× points before it vanishes. Don't hit the walls or yourself.",
+  "video_src": "https://www.youtube.com/embed/7hEZYA0FVso?autoplay=1&mute=1&controls=0&loop=1&playlist=7hEZYA0FVso",
   "genre": "Classic",
   "release_year": 1976,
   "play_url": "games/snake/snake.html",

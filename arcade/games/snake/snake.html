@@ -67,11 +67,8 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="overlay">
   <h1>SNAKE</h1>
   <button class="start-btn" id="startBtn">START GAME</button>
-  <p class="sub">
-    Arrow keys or <span>WASD</span> to move<br>
-    Eat <span>●</span> to grow · Don't hit walls or yourself<br>
-    <span>★</span> Bonus food appears occasionally
-  </p>
+  <p class="sub" data-es>Arrow keys or <span>WASD</span> to move<br>Eat <span>🍎</span> to grow · Avoid walls and yourself<br>Grab <span>⭐ 5×</span> bonus before it disappears!</p>
+  <p class="sub" data-en>Arrow keys or <span>WASD</span> to move<br>Eat <span>🍎</span> to grow · Avoid walls and yourself<br>Grab <span>⭐ 5×</span> bonus before it disappears!</p>
 </div>
 
 <script>
@@ -221,57 +218,166 @@ function spawnBonus(){
 
 // ── Draw ───────────────────────────────────────────────
 function draw(){
-  // Background
-  ctx.fillStyle='#000';
+  // Background with subtle grid
+  ctx.fillStyle='#000d00';
   ctx.fillRect(0,0,W,H);
 
-  // Grid dots
-  ctx.fillStyle='rgba(255,255,255,0.04)';
-  for(let x=0;x<COLS;x++) for(let y=0;y<ROWS;y++){
-    ctx.fillRect(x*CELL+CELL/2-1,y*CELL+CELL/2-1,2,2);
-  }
+  // Grid
+  ctx.strokeStyle='rgba(0,80,20,0.25)';
+  ctx.lineWidth=0.5;
+  for(let x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,H);ctx.stroke();}
+  for(let y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(W,y*CELL);ctx.stroke();}
 
-  // Snake
-  snake.forEach((s,i)=>{
-    const alpha=1-i/(snake.length+8);
-    const g=i===0?'#00ff64':'#00cc44';
-    ctx.fillStyle=i===0?g:`rgba(0,${150+Math.floor(50*(1-i/snake.length))},${50+Math.floor(30*(1-i/snake.length))},${alpha})`;
-    const pad=i===0?1:2;
-    ctx.fillRect(s.x*CELL+pad,s.y*CELL+pad,CELL-pad*2,CELL-pad*2);
-    // Head eyes
-    if(i===0){
-      ctx.fillStyle='#000';
-      const ex=dir.x===0?2:dir.x>0?12:2;
-      const ey=dir.y===0?2:dir.y>0?12:2;
-      ctx.fillRect(s.x*CELL+ex,s.y*CELL+ey,3,3);
-      ctx.fillRect(s.x*CELL+ex+(dir.x===0?10:0),s.y*CELL+ey+(dir.y===0?10:0),3,3);
-    }
-  });
-
-  // Food — pulsing dot
-  const pulse=0.7+Math.sin(frameCount*0.15)*0.3;
-  ctx.shadowBlur=10*pulse; ctx.shadowColor='#ff4444';
-  ctx.fillStyle=`rgba(255,${50+Math.floor(50*pulse)},50,${0.8+pulse*0.2})`;
-  const fp=3;
-  ctx.beginPath();
-  ctx.arc(food.x*CELL+CELL/2,food.y*CELL+CELL/2,(CELL/2-fp)*pulse,0,Math.PI*2);
-  ctx.fill();
+  // Visible border
+  ctx.strokeStyle='rgba(0,255,80,0.6)';
+  ctx.lineWidth=3;
+  ctx.shadowBlur=8; ctx.shadowColor='rgba(0,255,80,0.4)';
+  ctx.strokeRect(1.5,1.5,W-3,H-3);
   ctx.shadowBlur=0;
 
-  // Bonus star
-  if(bonus){
-    const age=(frameCount-bonus.frame)/(8000/speed);
-    const bpulse=0.7+Math.sin(frameCount*0.25)*0.3;
-    ctx.shadowBlur=12; ctx.shadowColor='#ffdd00';
-    ctx.fillStyle=`rgba(255,220,0,${1-age*0.7})`;
-    drawStar(ctx,bonus.x*CELL+CELL/2,bonus.y*CELL+CELL/2,CELL/2-2,CELL/4,5);
+  // Snake body (draw tail to neck, skip head)
+  for(let i=snake.length-1;i>=1;i--){
+    const s=snake[i];
+    const t=i/snake.length;
+    // Gradient green — brighter near head
+    const green=Math.floor(120+100*(1-t));
+    const alpha=Math.max(0.4,1-t*0.5);
+    ctx.fillStyle=`rgba(0,${green},30,${alpha})`;
     ctx.shadowBlur=0;
+    // Rounded body segments
+    const pad=2;
+    const sx=s.x*CELL+pad, sy=s.y*CELL+pad;
+    const sw=CELL-pad*2, sh=CELL-pad*2;
+    ctx.beginPath();
+    ctx.roundRect(sx,sy,sw,sh,4);
+    ctx.fill();
+    // Scale highlight
+    ctx.fillStyle=`rgba(100,255,120,${0.08*(1-t)})`;
+    ctx.beginPath();
+    ctx.roundRect(sx+2,sy+2,sw-4,sh/2-2,3);
+    ctx.fill();
   }
 
-  // Border
-  ctx.strokeStyle='rgba(0,255,100,0.2)';
-  ctx.lineWidth=1;
-  ctx.strokeRect(0,0,W,H);
+  // Snake HEAD — proper face
+  if(snake.length>0){
+    const h=snake[0];
+    const hx=h.x*CELL, hy=h.y*CELL;
+    const cx=hx+CELL/2, cy=hy+CELL/2;
+
+    // Direction angle for rotating head
+    const angle=dir.x===1?0:dir.x===-1?Math.PI:dir.y===1?Math.PI/2:-Math.PI/2;
+
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(angle);
+
+    // Head glow
+    ctx.shadowBlur=12; ctx.shadowColor='#00ff44';
+
+    // Head shape — slightly wider front
+    const headGrad=ctx.createRadialGradient(2,0,1,0,0,CELL/2);
+    headGrad.addColorStop(0,'#44ff88');
+    headGrad.addColorStop(0.6,'#00cc44');
+    headGrad.addColorStop(1,'#006622');
+    ctx.fillStyle=headGrad;
+    ctx.beginPath();
+    ctx.moveTo(CELL/2-1,0); // nose tip
+    ctx.bezierCurveTo(CELL/2+1,-CELL/2+3, CELL/2-3,-CELL/2, 0,-CELL/2+2);
+    ctx.bezierCurveTo(-CELL/2+3,-CELL/2, -CELL/2+1,-CELL/2+3, -CELL/2+2,0);
+    ctx.bezierCurveTo(-CELL/2+1,CELL/2-3, -CELL/2+3,CELL/2, 0,CELL/2-2);
+    ctx.bezierCurveTo(CELL/2-3,CELL/2, CELL/2+1,CELL/2-3, CELL/2-1,0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Scales on head
+    ctx.fillStyle='rgba(0,180,50,0.3)';
+    ctx.beginPath(); ctx.ellipse(0,-3,4,3,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4,3,3,2,0.3,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4,3,3,2,-0.3,0,Math.PI*2); ctx.fill();
+
+    // Eyes — positioned on upper sides of head
+    [-1,1].forEach(side=>{
+      const ex=2, ey=side*5;
+      // Eye white/sclera
+      ctx.fillStyle='#ccffcc';
+      ctx.beginPath(); ctx.ellipse(ex,ey,4,3.5,0,0,Math.PI*2); ctx.fill();
+      // Pupil — vertical slit like a snake
+      ctx.fillStyle='#111';
+      ctx.beginPath(); ctx.ellipse(ex+1,ey,1.5,2.5,0,0,Math.PI*2); ctx.fill();
+      // Eye shine
+      ctx.fillStyle='rgba(255,255,255,0.8)';
+      ctx.beginPath(); ctx.arc(ex,ey-1,1,0,Math.PI*2); ctx.fill();
+    });
+
+    // Nostrils
+    ctx.fillStyle='rgba(0,80,20,0.7)';
+    ctx.beginPath(); ctx.arc(CELL/2-3,-2,1.2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(CELL/2-3,2,1.2,0,Math.PI*2); ctx.fill();
+
+    // Forked tongue — flicks every 30 frames
+    const tongueOut=Math.floor(frameCount/15)%4<2;
+    if(tongueOut){
+      const tongueLen=tongueOut?8:4;
+      ctx.strokeStyle='#ff2244';
+      ctx.lineWidth=1.5;
+      ctx.shadowBlur=4; ctx.shadowColor='#ff0044';
+      // Base
+      ctx.beginPath(); ctx.moveTo(CELL/2-1,0); ctx.lineTo(CELL/2+4,0); ctx.stroke();
+      // Fork
+      ctx.beginPath(); ctx.moveTo(CELL/2+4,0); ctx.lineTo(CELL/2+4+tongueLen/2,-3); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(CELL/2+4,0); ctx.lineTo(CELL/2+4+tongueLen/2,3); ctx.stroke();
+      ctx.shadowBlur=0;
+    }
+
+    ctx.restore();
+  }
+
+  // Food — glowing apple/orb
+  const pulse=0.75+Math.sin(frameCount*0.15)*0.25;
+  ctx.shadowBlur=14*pulse; ctx.shadowColor='#ff2200';
+  const fr=food.x*CELL+CELL/2, fy2=food.y*CELL+CELL/2;
+  const foodGrad=ctx.createRadialGradient(fr-2,fy2-2,1,fr,fy2,(CELL/2-3)*pulse);
+  foodGrad.addColorStop(0,'#ffaa88');
+  foodGrad.addColorStop(0.4,'#ff4422');
+  foodGrad.addColorStop(1,'#aa1100');
+  ctx.fillStyle=foodGrad;
+  ctx.beginPath();
+  ctx.arc(fr,fy2,(CELL/2-3)*pulse,0,Math.PI*2);
+  ctx.fill();
+  // Stem
+  ctx.shadowBlur=0;
+  ctx.strokeStyle='#44aa00';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(fr,fy2-(CELL/2-3)*pulse);ctx.lineTo(fr+2,fy2-(CELL/2-2)*pulse-3);ctx.stroke();
+  // Shine
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.beginPath();ctx.ellipse(fr-2,fy2-2,(CELL/2-6)*pulse,(CELL/2-7)*pulse,-0.5,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+
+  // Bonus star — with countdown ring
+  if(bonus){
+    const age=(frameCount-bonus.frame)/(8000/speed);
+    const bp=0.75+Math.sin(frameCount*0.25)*0.25;
+    const bx=bonus.x*CELL+CELL/2, by=bonus.y*CELL+CELL/2;
+    // Countdown ring
+    ctx.strokeStyle=`rgba(255,220,0,${0.5*(1-age)})`;
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.arc(bx,by,CELL/2,- Math.PI/2,-Math.PI/2+Math.PI*2*(1-age));
+    ctx.stroke();
+    // Star
+    ctx.shadowBlur=12*bp; ctx.shadowColor='#ffdd00';
+    ctx.fillStyle=`rgba(255,220,0,${1-age*0.5})`;
+    drawStar(ctx,bx,by,(CELL/2-3)*bp,(CELL/4)*bp,5);
+    // ★ label
+    ctx.shadowBlur=0;
+    ctx.fillStyle=`rgba(255,255,200,${1-age})`;
+    ctx.font=`bold 8px Audiowide`;
+    ctx.textAlign='center';
+    ctx.fillText('5×',bx,by-CELL/2-3);
+    ctx.textAlign='left';
+    ctx.shadowBlur=0;
+  }
 }
 
 function drawStar(ctx,cx,cy,r,ir,pts){

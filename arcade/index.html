@@ -264,8 +264,63 @@ body::after{
 }
 .instr-close:hover{filter:brightness(1.2);}
 
-/* ═══════════════════════════════════════════════
-   MOBILE — PORTRAIT
+/* TOUCH OVERLAY — only visible on touch devices */
+#touchOverlay{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:160px;z-index:50;
+  pointer-events:none;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:12px 20px 16px;
+}
+#dpad{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  pointer-events:all;
+}
+.dpad-row{display:flex;align-items:center;gap:2px;}
+.dpad-center{width:44px;height:44px;background:rgba(0,0,0,0.3);}
+.dpad-btn{
+  width:44px;height:44px;
+  background:rgba(0,0,0,0.55);
+  border:1px solid var(--border);
+  color:var(--text);font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:6px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;user-select:none;
+}
+.dpad-btn:active{background:var(--accent);}
+#actionBtns{
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:all;align-items:center;
+}
+.action-btn{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(0,0,0,0.55);
+  border:2px solid var(--border);
+  color:var(--text);font-size:20px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;user-select:none;
+  font-family:var(--font);letter-spacing:1px;
+}
+.action-btn:active{background:var(--accent);}
+.action-btn.secondary{width:48px;height:48px;font-size:13px;}
+
+/* Show touch overlay on touch devices */
+@media (pointer:coarse){
+  #touchOverlay{ display:flex; }
+  /* Add bottom padding so content isn't hidden under overlay */
+  body{ padding-bottom:160px; }
+}
+
+/* Keyboard shortcut hints on buttons */
+.button .shortcut{
+  display:block;font-size:0.7em;opacity:0.45;
+  letter-spacing:0;margin-top:1px;
+}
    Stack: header / right-pane / game-tabs / controls
 ═══════════════════════════════════════════════ */
 @media (max-width:767px) and (orientation:portrait){
@@ -451,13 +506,30 @@ body::after{
     <button class="button" id="selectButton">⏎ Select</button>
   </div>
   <div class="btn-group">
-    <button class="button" id="btn1p">1 Player</button>
-    <button class="button" id="btn2p">2 Players</button>
+    <button class="button" id="btn1p">1 Player<span class="shortcut">press 1</span></button>
+    <button class="button" id="btn2p">2 Players<span class="shortcut">press 2</span></button>
   </div>
   <div class="btn-group">
     <button class="button" id="skinButton">🎨 Skin</button>
     <button class="button" id="saveSkinButton">💾 Save</button>
-    <button class="button" id="instrButton">❓ How To Play</button>
+    <button class="button" id="instrButton">❓ How To Play<span class="shortcut">press H</span></button>
+  </div>
+</div>
+
+<!-- TOUCH OVERLAY CONTROLS -->
+<div id="touchOverlay">
+  <div id="dpad">
+    <button class="dpad-btn" id="dUp">▲</button>
+    <div class="dpad-row">
+      <button class="dpad-btn" id="dLeft">◀</button>
+      <div class="dpad-center"></div>
+      <button class="dpad-btn" id="dRight">▶</button>
+    </div>
+    <button class="dpad-btn" id="dDown">▼</button>
+  </div>
+  <div id="actionBtns">
+    <button class="action-btn" id="aFire">🔥</button>
+    <button class="action-btn secondary" id="aSelect">OK</button>
   </div>
 </div>
 
@@ -614,17 +686,88 @@ document.addEventListener('keydown',e=>{
   // Only handle console keys when game is NOT running
   if(gamePane.style.display!=='none'){
     if(e.key==='Escape') exitGame();
-    return; // let all other keys pass to iframe
+    return;
   }
-  if(e.key==='ArrowUp')  { sfxNav();    selectGame(selectedIndex-1); e.preventDefault(); }
-  if(e.key==='ArrowDown'){ sfxNav();    selectGame(selectedIndex+1); e.preventDefault(); }
-  if(e.key==='Enter')    { sfxSelect(); launchGame('1p');             e.preventDefault(); }
+  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W')  { sfxNav();    selectGame(selectedIndex-1); e.preventDefault(); }
+  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') { sfxNav();    selectGame(selectedIndex+1); e.preventDefault(); }
+  if(e.key==='Enter')    { sfxSelect(); launchGame('1p'); e.preventDefault(); }
+  if(e.key==='1')        { sfxSelect(); launchGame('1p'); e.preventDefault(); }
+  if(e.key==='2')        { sfxSelect(); launchGame('2p'); e.preventDefault(); }
+  if(e.key==='h'||e.key==='H'){
+    document.getElementById('instrButton').click();
+    e.preventDefault();
+  }
 });
 
 // ── Nav buttons ───────────────────────────────────────────
 document.getElementById('upButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex-1); });
 document.getElementById('downButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex+1); });
 document.getElementById('selectButton').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
+
+// ── Touch overlay wiring ──────────────────────────────────
+function setupTouchOverlay(){
+  const overlay=document.getElementById('touchOverlay');
+  if(!overlay) return;
+
+  // D-pad sends key events to the game iframe when active, else navigates console
+  function sendKey(key){
+    if(gamePane.style.display!=='none'){
+      try{
+        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}));
+        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',  {key,bubbles:true,cancelable:true}));
+      }catch(e){}
+    } else {
+      if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
+      if(key==='ArrowDown') { sfxNav(); selectGame(selectedIndex+1); }
+    }
+  }
+
+  // Hold support for d-pad
+  let holdInterval=null;
+  function startHold(key){
+    sendKey(key);
+    holdInterval=setInterval(()=>sendKey(key),120);
+  }
+  function stopHold(){
+    clearInterval(holdInterval);holdInterval=null;
+  }
+
+  function addDpadBtn(id,key){
+    const btn=document.getElementById(id);
+    btn.addEventListener('touchstart',e=>{ e.preventDefault(); startHold(key); },{passive:false});
+    btn.addEventListener('touchend',  e=>{ e.preventDefault(); stopHold(); },{passive:false});
+  }
+  addDpadBtn('dUp',   'ArrowUp');
+  addDpadBtn('dDown', 'ArrowDown');
+  addDpadBtn('dLeft', 'ArrowLeft');
+  addDpadBtn('dRight','ArrowRight');
+
+  // Fire button — sends Space
+  document.getElementById('aFire').addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(gamePane.style.display!=='none'){
+      try{
+        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
+        setTimeout(()=>gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',{key:' ',code:'Space',bubbles:true,cancelable:true})),80);
+      }catch(e){}
+    } else {
+      sfxSelect(); launchGame('1p');
+    }
+  },{passive:false});
+
+  // OK button — exits game or selects
+  document.getElementById('aSelect').addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(gamePane.style.display!=='none') exitGame();
+    else { sfxSelect(); launchGame('1p'); }
+  },{passive:false});
+
+  // Hide overlay when hardware keyboard used
+  document.addEventListener('keydown',()=>{
+    overlay.style.display='none';
+  },{once:true});
+}
+setupTouchOverlay();
 
 // ── 1P / 2P ───────────────────────────────────────────────
 document.getElementById('btn1p').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
@@ -674,7 +817,7 @@ const INSTRUCTIONS={
   },
   pong:{
     title:'PONG — Controls',
-    body:'1 Player\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Your paddle\nCPU difficulty scales each set\n\n2 Players\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 1\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 2\n\nFirst to 7 wins the set.\nBest of 3 sets wins the match.'
+    body:'1 Player\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp; Your paddle (right)\nCPU controls the left side\n\n2 Players\nW / S &nbsp;&nbsp;&nbsp;&nbsp; Left paddle (P1)\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp; Right paddle (P2)\n\nFirst to 7 wins the set.\nBest of 3 sets wins the match.'
   },
   frogger:{
     title:'FROGGER — Controls',
@@ -690,7 +833,7 @@ const INSTRUCTIONS={
   },
   snake:{
     title:'SNAKE — Controls',
-    body:'Arrow keys &nbsp; Move\n\nEat food to grow.\nDon\'t hit the walls or yourself.\n\nSpeed increases as you grow.\nBonus food appears occasionally.'
+    body:'Arrow keys or WASD to move\n\nEat 🍎 to grow and score.\nDon\'t hit the walls or yourself.\n\n⭐ Bonus star = 5× points!\nIt disappears fast — grab it!\nA ring shows time remaining.\n\nSpeed increases as you grow.'
   }
 };
 

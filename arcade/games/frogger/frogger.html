@@ -371,7 +371,28 @@ function draw(){
   ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(0,H-3,W,3);
   ctx.fillStyle=timeLeft<8?'#f44':'#f80';
   ctx.fillRect(0,H-3,(timeLeft/maxTime)*W,3);
-}
+
+  // Visible play boundary — bright border
+  ctx.shadowBlur=10; ctx.shadowColor='rgba(0,255,80,0.6)';
+  ctx.strokeStyle='rgba(0,255,80,0.8)';
+  ctx.lineWidth=3;
+  ctx.strokeRect(1.5,1.5,W-3,H-3);
+  ctx.shadowBlur=0;
+
+  // Section dividers — road/safe, safe/water boundaries
+  const roadTopY  = rowY(6);   // top of safe median
+  const waterTopY = rowY(12);  // top of safe strip above homes
+  [[rowY(6)+CELL,'rgba(255,200,0,0.4)'],[rowY(12)+CELL,'rgba(0,150,255,0.4)']].forEach(([y,col])=>{
+    ctx.strokeStyle=col; ctx.lineWidth=1.5;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Left/right edge markers — show safe zone walls
+  ctx.fillStyle='rgba(0,255,80,0.15)';
+  ctx.fillRect(0,0,4,H);
+  ctx.fillRect(W-4,0,4,H);
 
 function drawFrogAt(px,py,scale=1,home=false,death=0){
   ctx.save();ctx.translate(px,py);ctx.scale(scale,scale);

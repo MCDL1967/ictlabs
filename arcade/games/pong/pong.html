@@ -58,9 +58,9 @@ canvas { display:block; image-rendering:pixelated; }
 <body>
 
 <div id="ui">
-  <span class="sc1">P1: <b id="s1El">0</b></span>
+  <span class="sc1" id="cpuLabel">CPU: <b id="s1El">0</b></span>
   <span class="lv" id="setEl">SET 1</span>
-  <span class="sc2"><b id="s2El">0</b> :P2</span>
+  <span class="sc2" id="youLabel"><b id="s2El">0</b> :YOU</span>
 </div>
 <canvas id="c"></canvas>
 <div id="msgBox"><div id="msgText" id="msgText"></div></div>
@@ -70,9 +70,9 @@ canvas { display:block; image-rendering:pixelated; }
   <button class="menu-btn" id="btn1p">1 PLAYER</button>
   <button class="menu-btn" id="btn2p">2 PLAYERS</button>
   <p class="menu-sub">
-    P1: <span>W / S</span> &nbsp;·&nbsp; P2: <span>↑ / ↓</span><br>
-    First to <span>7</span> wins the set<br>
-    Best of <span>3</span> sets wins the match
+    1 Player: <span>↑ / ↓</span> Your paddle (right side)<br>
+    2 Players: <span>W / S</span> Left &nbsp;·&nbsp; <span>↑ / ↓</span> Right<br>
+    First to <span>7</span> wins the set &nbsp;·&nbsp; Best of <span>3</span> sets
   </p>
 </div>
 
@@ -152,6 +152,9 @@ function startGame(m){
   overlay.style.display='none';
   p1={y:H/2-PAD_H/2,score:0,sets:0};
   p2={y:H/2-PAD_H/2,score:0,sets:0};
+  // Update labels
+  document.getElementById('cpuLabel').innerHTML=(m==='1p'?'CPU: ':'P1: ')+'<b id="s1El">0</b>';
+  document.getElementById('youLabel').innerHTML='<b id="s2El">0</b> :'+(m==='1p'?'YOU':'P2');
   set=1; updateUI(); serveBall(1); gstate='playing';
 }
 
@@ -164,23 +167,22 @@ function serveBall(side){
   ball.vy=spd*Math.sin(ang)+(Math.random()*0.8-0.4);
 }
 
-// ── AI ────────────────────────────────────────────────
+// ── AI — controls LEFT paddle (p1) in 1P mode ────────
 function updateAI(){
   const diff=Math.min(AI_BASE+set*0.05,0.94);
   const target=ball.y-PAD_H/2;
-  const delta=target-p2.y;
+  const delta=target-p1.y;
   const maxMv=PAD_SPD*diff;
-  if(Math.abs(delta)>3) p2.y+=Math.sign(delta)*Math.min(Math.abs(delta),maxMv);
-  p2.y=Math.max(0,Math.min(H-PAD_H,p2.y));
+  if(Math.abs(delta)>3) p1.y+=Math.sign(delta)*Math.min(Math.abs(delta),maxMv);
+  p1.y=Math.max(0,Math.min(H-PAD_H,p1.y));
 }
 
 // ── Physics ───────────────────────────────────────────
 function moveBall(){
   ball.x+=ball.vx; ball.y+=ball.vy;
-  // Top/bottom walls
   if(ball.y<=0){ball.y=0;ball.vy*=-1;sfxWall();}
   if(ball.y>=H-BALL_SZ){ball.y=H-BALL_SZ;ball.vy*=-1;sfxWall();}
-  // P1 paddle (left)
+  // P1 paddle (left — CPU in 1P)
   if(ball.vx<0&&ball.x<=26&&ball.x>=10&&ball.y+BALL_SZ>=p1.y&&ball.y<=p1.y+PAD_H){
     ball.x=26;
     const hp=(ball.y+BALL_SZ/2-p1.y)/PAD_H;
@@ -190,7 +192,7 @@ function moveBall(){
     ball.vy=spd*Math.sin(ang);
     sfxPaddle();
   }
-  // P2 paddle (right)
+  // P2 paddle (right — human in 1P)
   if(ball.vx>0&&ball.x+BALL_SZ>=W-26&&ball.x+BALL_SZ<=W-10&&ball.y+BALL_SZ>=p2.y&&ball.y<=p2.y+PAD_H){
     ball.x=W-26-BALL_SZ;
     const hp=(ball.y+BALL_SZ/2-p2.y)/PAD_H;
@@ -200,9 +202,8 @@ function moveBall(){
     ball.vy=spd*Math.sin(ang);
     sfxPaddle();
   }
-  // Score
-  if(ball.x>W){ p2.score++; sfxScore(); updateUI(); checkSet(2); }
-  if(ball.x+BALL_SZ<0){ p1.score++; sfxScore(); updateUI(); checkSet(1); }
+  if(ball.x>W){ p1.score++; sfxScore(); updateUI(); checkSet(1); }
+  if(ball.x+BALL_SZ<0){ p2.score++; sfxScore(); updateUI(); checkSet(2); }
 }
 
 function checkSet(scorer){
@@ -233,15 +234,17 @@ function advanceSet(){
 // ── Update ────────────────────────────────────────────
 function update(){
   frameCount++;
-  // P1
-  if(keys['KeyW']) p1.y=Math.max(0,p1.y-PAD_SPD);
-  if(keys['KeyS']) p1.y=Math.min(H-PAD_H,p1.y+PAD_SPD);
-  // P2 / AI
-  if(mode==='2p'){
+  // 1P: human controls RIGHT paddle (p2) with ↑↓, CPU controls left (p1)
+  // 2P: W/S = left (p1), ↑↓ = right (p2)
+  if(mode==='1p'){
     if(keys['ArrowUp'])   p2.y=Math.max(0,p2.y-PAD_SPD);
     if(keys['ArrowDown']) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
-  } else {
     updateAI();
+  } else {
+    if(keys['KeyW'])      p1.y=Math.max(0,p1.y-PAD_SPD);
+    if(keys['KeyS'])      p1.y=Math.min(H-PAD_H,p1.y+PAD_SPD);
+    if(keys['ArrowUp'])   p2.y=Math.max(0,p2.y-PAD_SPD);
+    if(keys['ArrowDown']) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
   }
   moveBall();
 }
@@ -257,13 +260,13 @@ function draw(){
   ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
   ctx.setLineDash([]);
 
-  // P1 paddle — cyan accent
+  // P1 paddle — left (CPU in 1P, P1 in 2P) — orange
   ctx.fillStyle='#fff'; fillRoundRect(16,p1.y,PAD_W,PAD_H,3);
-  ctx.fillStyle='#0ff'; ctx.fillRect(16,p1.y,3,PAD_H);
+  ctx.fillStyle='#f80'; ctx.fillRect(16,p1.y,3,PAD_H);
 
-  // P2 paddle — orange accent
+  // P2 paddle — right (human in 1P, P2 in 2P) — cyan
   ctx.fillStyle='#fff'; fillRoundRect(W-PAD_W-16,p2.y,PAD_W,PAD_H,3);
-  ctx.fillStyle='#f80'; ctx.fillRect(W-19,p2.y,3,PAD_H);
+  ctx.fillStyle='#0ff'; ctx.fillRect(W-19,p2.y,3,PAD_H);
 
   // Ball + glow + trail
   if(gstate==='playing'||gstate==='setOver'){
@@ -279,19 +282,19 @@ function draw(){
     ctx.shadowBlur=0;
   }
 
-  // Set pips
+  // Set pips — left=CPU/P1 (orange), right=YOU/P2 (cyan)
   for(let i=0;i<WIN_SETS;i++){
-    ctx.fillStyle=i<p1.sets?'#0ff':'rgba(0,255,255,0.12)';
+    ctx.fillStyle=i<p1.sets?'#f80':'rgba(255,136,0,0.12)';
     ctx.fillRect(W/2-28-(i*16),H-14,10,6);
-    ctx.fillStyle=i<p2.sets?'#f80':'rgba(255,136,0,0.12)';
+    ctx.fillStyle=i<p2.sets?'#0ff':'rgba(0,255,255,0.12)';
     ctx.fillRect(W/2+18+(i*16),H-14,10,6);
   }
 
   // Mode label
   ctx.fillStyle='rgba(255,255,255,0.18)';
-  ctx.font='7px "Press Start 2P"';
+  ctx.font='7px Audiowide';
   ctx.textAlign='center';
-  ctx.fillText(mode==='1p'?'VS CPU':'2 PLAYERS',W/2,14);
+  ctx.fillText(mode==='1p'?'CPU vs YOU':'P1 vs P2',W/2,14);
   ctx.textAlign='left';
 }
 

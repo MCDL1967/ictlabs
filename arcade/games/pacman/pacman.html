@@ -148,11 +148,19 @@ let map,pac,ghosts,score,hiScore=0,lives,level,powerTimer,ghostEatCombo;
 let gstate='idle';
 let frameCount=0,animFrame=0;
 // ── Difficulty ─────────────────────────────────────────
-let difficulty='intermediate'; // 'beginner' | 'intermediate' | 'advanced'
+let difficulty='intermediate';
 function getDiffSpeeds(){
-  if(difficulty==='beginner')     return{pac:1.4,ghost:1.0,buffer:10};
-  if(difficulty==='advanced')     return{pac:2.8,ghost:2.4,buffer:0};
-  return{pac:2.0,ghost:1.6,buffer:4}; // intermediate
+  // Base speeds scale up with level
+  const lvlBonus=Math.min((level-1)*0.08, 0.8);
+  if(difficulty==='beginner')
+    return{pac:1.87+lvlBonus*0.7, ghost:1.36+lvlBonus*0.6};  // −15% base, gentler climb
+  if(difficulty==='advanced')
+    return{pac:2.53+lvlBonus,     ghost:2.07+lvlBonus};       // +15% base, steeper climb
+  return  {pac:2.2+lvlBonus*0.85, ghost:1.8+lvlBonus*0.75};  // intermediate
+}
+// Buffer only used when pac is CHANGING direction (turning at corner)
+function getBuffer(changingDir){
+  return (difficulty==='beginner'&&changingDir) ? 5 : 0;
 }
 
 const PAC_SPEED=2.2;  // overridden per difficulty at runtime
@@ -223,9 +231,10 @@ function cellAt(x,y){
   return map[cy][cx];
 }
 function isWall(x,y){ return cellAt(x,y)===1; }
-function canMove(px,py,dx,dy){
-  const {pac:pacSpd,buffer} = getDiffSpeeds();
-  const r=CELL/2-2-buffer; // buffer zone for beginner
+function canMove(px,py,dx,dy,changingDir=false){
+  const {pac:pacSpd} = getDiffSpeeds();
+  const buf=getBuffer(changingDir);
+  const r=CELL/2-2-buf;
   const nx=px+dx*pacSpd, ny=py+dy*pacSpd;
   const pts=[
     {x:nx+r*Math.sign(dx||1)*0.9, y:ny},
@@ -240,19 +249,20 @@ function canMove(px,py,dx,dy){
 // ── Pac movement ───────────────────────────────────────
 function movePac(){
   if(pac.dead){ pac.deadTimer--; if(pac.deadTimer<=0) killPac2(); return; }
+  const {pac:pacSpd}=getDiffSpeeds();
 
-  // Try next direction
+  // Try next direction — pass changingDir=true for corner buffer
+  const changingDir=(pac.nextDx!==pac.dx||pac.nextDy!==pac.dy);
   if((pac.nextDx!==0||pac.nextDy!==0)){
-    if(canMove(pac.x,pac.y,pac.nextDx,pac.nextDy)){
+    if(canMove(pac.x,pac.y,pac.nextDx,pac.nextDy,changingDir)){
       pac.dx=pac.nextDx; pac.dy=pac.nextDy;
     }
   }
-  // Continue current direction
+  // Continue current direction — no buffer
   if(pac.dx!==0||pac.dy!==0){
-    if(canMove(pac.x,pac.y,pac.dx,pac.dy)){
-      pac.x+=pac.dx*getDiffSpeeds().pac;
-      pac.y+=pac.dy*getDiffSpeeds().pac;
-      // Wrap tunnel
+    if(canMove(pac.x,pac.y,pac.dx,pac.dy,false)){
+      pac.x+=pac.dx*pacSpd;
+      pac.y+=pac.dy*pacSpd;
       if(pac.x<0) pac.x=W; if(pac.x>W) pac.x=0;
     }
   }
@@ -283,63 +293,62 @@ function moveGhost(g){
   if(g.exitTimer>0){ g.exitTimer--; return; }
 
   const gs=getDiffSpeeds().ghost;
-const speed=(g.scared?gs*0.55:g.eaten?gs*2:gs*(1+level*0.08));
+  const speed=(g.scared?gs*0.55:g.eaten?gs*2:gs);
   const DIRS4=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
-
-  // Simple movement — try to continue, else pick random valid direction
-  let moved=false;
-  const nx=g.x+g.dx*speed, ny=g.y+g.dy*speed;
-
-  // Check if can continue
   const r=CELL/2-3;
+
   function ghostWall(x,y){
     const pts=[{x:x+r,y:y},{x:x-r,y:y},{x:x,y:y+r},{x:x,y:y-r}];
     for(const p of pts){ if(cellAt(p.x,p.y)===1) return true; }
     return false;
   }
 
-  if((g.dx!==0||g.dy!==0)&&!ghostWall(nx,ny)){
-    g.x=nx; g.y=ny;
-    // Wrap tunnel
-    if(g.x<-CELL) g.x=W+CELL; if(g.x>W+CELL) g.x=-CELL;
-    moved=true;
+  // Snap to cell center when close enough
+  const cellCx=Math.floor(g.x/CELL)*CELL+CELL/2;
+  const cellCy=Math.floor(g.y/CELL)*CELL+CELL/2;
+  const atCenter=Math.abs(g.x-cellCx)<speed+1&&Math.abs(g.y-cellCy)<speed+1;
+
+  if(atCenter){
+    g.x=cellCx; g.y=cellCy;
+    // Get valid directions — no U-turn unless forced
+    let candidates=DIRS4.filter(d=>{
+      const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
+      return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
+    });
+    // Corner trap — allow U-turn
+    if(candidates.length===0){
+      candidates=DIRS4.filter(d=>!ghostWall(g.x+d.dx*CELL,g.y+d.dy*CELL));
+    }
+    if(candidates.length>0){
+      let pick;
+      if(g.scared||g.eaten){
+        pick=candidates[Math.floor(Math.random()*candidates.length)];
+      } else {
+        candidates.sort((a,b)=>{
+          const da=Math.hypot(g.x+a.dx*CELL-pac.x, g.y+a.dy*CELL-pac.y);
+          const db=Math.hypot(g.x+b.dx*CELL-pac.x, g.y+b.dy*CELL-pac.y);
+          return (da-db)+(Math.random()-0.5)*CELL*1.5;
+        });
+        pick=candidates[0];
+      }
+      g.dx=pick.dx; g.dy=pick.dy;
+    }
   }
 
-  // At cell center — pick new direction
-  const snapX=Math.abs(g.x-Math.floor(g.x/CELL)*CELL-CELL/2)<speed+1;
-  const snapY=Math.abs(g.y-Math.floor(g.y/CELL)*CELL-CELL/2)<speed+1;
-  if(!moved||(snapX&&snapY&&Math.random()<0.25)){
-    // Snap to center
-    g.x=Math.floor(g.x/CELL)*CELL+CELL/2;
-    g.y=Math.floor(g.y/CELL)*CELL+CELL/2;
-    // Pick direction — scared = random, else chase pac
-    let candidates;
-    if(g.scared||g.eaten){
-      candidates=DIRS4.filter(d=>{
-        const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
-        return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
-      });
-    } else {
-      // Chase pac with some randomness
-      candidates=DIRS4.filter(d=>{
-        const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
-        return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
-      }).sort((a,b)=>{
-        const da=Math.hypot(g.x+a.dx*CELL-pac.x, g.y+a.dy*CELL-pac.y);
-        const db=Math.hypot(g.x+b.dx*CELL-pac.x, g.y+b.dy*CELL-pac.y);
-        return (da-db)+(Math.random()-0.5)*CELL*2;
-      });
-    }
-    if(candidates.length){
-      const pick=candidates[Math.floor(Math.random()*Math.min(2,candidates.length))];
-      g.dx=pick.dx; g.dy=pick.dy;
-      const nx2=g.x+g.dx*speed, ny2=g.y+g.dy*speed;
-      if(!ghostWall(nx2,ny2)){ g.x=nx2; g.y=ny2; }
-    }
+  // Move
+  if(g.dx!==0||g.dy!==0){
+    const nx=g.x+g.dx*speed, ny=g.y+g.dy*speed;
+    if(!ghostWall(nx,ny)){ g.x=nx; g.y=ny; }
+    else { g.x=cellCx; g.y=cellCy; g.dx=0; g.dy=0; }
+  } else {
+    const any=DIRS4.filter(d=>!ghostWall(g.x+d.dx*CELL,g.y+d.dy*CELL));
+    if(any.length>0){ const p=any[Math.floor(Math.random()*any.length)]; g.dx=p.dx; g.dy=p.dy; }
   }
+
+  if(g.x<-CELL) g.x=W+CELL; if(g.x>W+CELL) g.x=-CELL;
 }
 
-// ── Collision ──────────────────────────────────────────
+
 function checkCollisions(){
   ghosts.forEach(g=>{
     const dist=Math.hypot(g.x-pac.x, g.y-pac.y);
