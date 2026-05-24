@@ -219,19 +219,19 @@ body::after{
   position:relative;
 }
 .instr-title{
-  font-family:var(--font);font-size:0.85em;
+  font-family:var(--font);font-size:1.1em;
   color:var(--text);letter-spacing:3px;
   text-transform:uppercase;margin-bottom:24px;
 }
 .instr-body{
-  font-family:var(--font);font-size:0.52em;
-  color:rgba(255,255,255,0.7);line-height:2.6;
+  font-family:var(--font);font-size:0.9em;
+  color:rgba(255,255,255,0.75);line-height:2.4;
   letter-spacing:1px;
 }
 .instr-close{
   margin-top:24px;background:var(--accent);color:#fff;
-  border:none;font-family:var(--font);font-size:0.52em;
-  letter-spacing:2px;padding:10px 24px;cursor:pointer;
+  border:none;font-family:var(--font);font-size:0.8em;
+  letter-spacing:2px;padding:12px 24px;cursor:pointer;
   width:100%;text-transform:uppercase;transition:filter 0.15s;
 }
 .instr-close:hover{filter:brightness(1.2);}
@@ -498,6 +498,10 @@ const INSTRUCTIONS={
   pong:{
     title:'PONG — Controls',
     body:'1 Player\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Your paddle\nCPU difficulty scales each set\n\n2 Players\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 1\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 2\n\nFirst to 7 wins the set.\nBest of 3 sets wins the match.'
+  },
+  pacman:{
+    title:'PAC-MAN — Controls',
+    body:'Arrow keys or WASD to move\n\nDot \xa0\xa010 pts\nPower Pellet \xa0\xa050 pts\nGhost (1st) \xa0200 pts\nGhost (2nd) \xa0400 pts\n\nEat all dots to advance.\nGrab power pellets to eat ghosts!'
   },
   snake:{
     title:'SNAKE — Controls',

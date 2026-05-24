@@ -2,6 +2,7 @@
   "games": [
     "galaga",
     "pong",
-    "snake"
+    "snake",
+    "pacman"
   ]
 }

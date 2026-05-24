@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>PAC-MAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  height:100vh;overflow:hidden;font-family:'Audiowide',sans-serif;
+}
+canvas{display:block;image-rendering:pixelated;}
+#ui{
+  color:#fff;text-align:center;margin-bottom:6px;
+  font-size:12px;letter-spacing:2px;
+  display:flex;gap:28px;justify-content:center;align-items:center;
+}
+#ui .sc{color:#ff0;}
+#ui .hi{color:#f80;}
+#ui .lv{color:#0cf;}
+#ui .lf{color:#f44;}
+#overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.9);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:#fff;text-align:center;z-index:10;
+}
+#overlay h1{
+  font-size:clamp(32px,6vw,60px);color:#ff0;
+  text-shadow:0 0 24px #ff0;margin-bottom:8px;letter-spacing:6px;
+}
+#overlay .sub{font-size:clamp(9px,1.3vw,13px);color:rgba(255,255,255,0.5);margin-bottom:24px;letter-spacing:2px;}
+.start-btn{
+  background:transparent;border:2px solid #ff0;color:#ff0;
+  font-family:'Audiowide',sans-serif;font-size:clamp(10px,1.5vw,14px);
+  letter-spacing:2px;padding:13px 48px;cursor:pointer;transition:all 0.15s;
+}
+.start-btn:hover{background:#ff0;color:#000;}
+.pts-table{font-size:clamp(8px,1.1vw,11px);color:rgba(255,255,255,0.5);margin-top:20px;line-height:2.2;letter-spacing:1px;}
+.pts-table span{color:#ff0;}
+#msg{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Audiowide',sans-serif;
+  font-size:clamp(14px,2.5vw,22px);color:#ff0;
+  letter-spacing:3px;pointer-events:none;display:none;z-index:9;
+  animation:blink .7s step-end infinite;text-align:center;line-height:1.8;
+}
+@keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="ui">
+  <span class="hi">HI: <b id="hiEl">0</b></span>
+  <span class="sc">SCORE: <b id="scEl">0</b></span>
+  <span class="lv">LEVEL: <b id="lvEl">1</b></span>
+  <span class="lf">LIVES: <b id="lfEl">3</b></span>
+</div>
+<canvas id="c"></canvas>
+<div id="msg"></div>
+
+<div id="overlay">
+  <h1>PAC-MAN</h1>
+  <p class="sub">Eat all dots · Avoid ghosts · Power up to fight back</p>
+  <button class="start-btn" id="startBtn">START GAME</button>
+  <div class="pts-table">
+    Dot <span>10 pts</span> &nbsp;·&nbsp; Power Pellet <span>50 pts</span><br>
+    Ghost (1st) <span>200</span> · (2nd) <span>400</span> · (3rd) <span>800</span> · (4th) <span>1600</span><br>
+    Arrow keys or WASD to move
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  PAC-MAN — ICTLabs Arcade
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const overlay= document.getElementById('overlay');
+const hiEl   = document.getElementById('hiEl');
+const scEl   = document.getElementById('scEl');
+const lvEl   = document.getElementById('lvEl');
+const lfEl   = document.getElementById('lfEl');
+const msgEl  = document.getElementById('msg');
+
+// ── Audio ──────────────────────────────────────────────
+const AC = new(window.AudioContext||window.webkitAudioContext)();
+function tone(freq,dur,vol=0.18,type='square'){
+  try{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    o.start();o.stop(AC.currentTime+dur+0.01);
+  }catch(e){}
+}
+function sfxDot(){    tone(660,0.03,0.08); }
+function sfxPower(){  [220,330,440,550].forEach((f,i)=>setTimeout(()=>tone(f,0.08,0.2),i*50)); }
+function sfxEatGhost(){ [880,660,440].forEach((f,i)=>setTimeout(()=>tone(f,0.1,0.25,'sawtooth'),i*80)); }
+function sfxDie(){    [440,330,220,165,110].forEach((f,i)=>setTimeout(()=>tone(f,0.15,0.3,'sawtooth'),i*100)); }
+function sfxWin(){    [523,659,784,1047,784,659,523].forEach((f,i)=>setTimeout(()=>tone(f,0.12,0.25,'square'),i*90)); }
+document.addEventListener('keydown',()=>{ if(AC.state==='suspended') AC.resume(); },{once:false});
+
+// ── Map ────────────────────────────────────────────────
+// 0=empty, 1=wall, 2=dot, 3=power pellet, 4=ghost house
+const MAP_W=19, MAP_H=21;
+const TEMPLATE=[
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+  [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
+  [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
+  [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+  [1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,1,4,4,4,1,0,1,2,1,1,1,1],
+  [0,0,0,0,2,0,0,1,4,4,4,1,0,0,2,0,0,0,0],
+  [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+  [1,3,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,3,1],
+  [1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1],
+  [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+  [1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+const CELL=24;
+const W=MAP_W*CELL, H=MAP_H*CELL+32;
+canvas.width=W; canvas.height=H;
+function resize(){
+  const s=Math.min(window.innerWidth/W,(window.innerHeight-52)/H);
+  canvas.style.width=(W*s)+'px'; canvas.style.height=(H*s)+'px';
+}
+resize(); window.addEventListener('resize',resize);
+
+// ── State ──────────────────────────────────────────────
+let map,pac,ghosts,score,hiScore=0,lives,level,powerTimer,ghostEatCombo;
+let gstate='idle';
+let frameCount=0,animFrame=0;
+const PAC_SPEED=2.2;
+const GHOST_SPEED=1.8;
+
+const GHOST_COLORS=['#f00','#f9c','#0cc','#f80'];
+const GHOST_NAMES=['Blinky','Pinky','Inky','Clyde'];
+
+function initMap(){
+  map=TEMPLATE.map(row=>[...row]);
+}
+
+function countDots(){
+  let n=0;
+  map.forEach(row=>row.forEach(c=>{ if(c===2||c===3) n++; }));
+  return n;
+}
+
+function initLevel(){
+  initMap();
+  pac={
+    x:9*CELL+CELL/2, y:16*CELL+CELL/2,
+    dx:0,dy:0,nextDx:0,nextDy:0,
+    mouthAngle:0.25,mouthDir:1,
+    dead:false,deadTimer:0
+  };
+  ghosts=[
+    {x:9*CELL+CELL/2, y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[0], scared:false, eaten:false, exitTimer:0,  mode:'scatter'},
+    {x:8*CELL+CELL/2, y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[1], scared:false, eaten:false, exitTimer:30, mode:'scatter'},
+    {x:9*CELL+CELL/2, y:10*CELL+CELL/2, dx:0,dy:0, color:GHOST_COLORS[2], scared:false, eaten:false, exitTimer:60, mode:'scatter'},
+    {x:10*CELL+CELL/2,y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[3], scared:false, eaten:false, exitTimer:90, mode:'scatter'},
+  ];
+  powerTimer=0;
+  ghostEatCombo=0;
+  frameCount=0;
+}
+
+function startGame(){
+  overlay.style.display='none';
+  hideMsg();
+  score=0; lives=3; level=1;
+  initLevel(); updateUI();
+  gstate='playing';
+}
+
+// ── Input ──────────────────────────────────────────────
+const DIRS={
+  ArrowUp:{dx:0,dy:-1},ArrowDown:{dx:0,dy:1},
+  ArrowLeft:{dx:-1,dy:0},ArrowRight:{dx:1,dy:0},
+  KeyW:{dx:0,dy:-1},KeyS:{dx:0,dy:1},
+  KeyA:{dx:-1,dy:0},KeyD:{dx:1,dy:0}
+};
+document.addEventListener('keydown',e=>{
+  if(gstate==='idle'&&e.code==='Space'){ startGame(); return; }
+  if(gstate==='dead_wait'&&e.code==='Space'){ respawn(); return; }
+  const d=DIRS[e.code];
+  if(d){ e.preventDefault(); pac.nextDx=d.dx; pac.nextDy=d.dy; }
+});
+document.getElementById('startBtn').onclick=startGame;
+
+// ── Map helpers ────────────────────────────────────────
+function cellAt(x,y){
+  const cx=Math.floor(x/CELL), cy=Math.floor(y/CELL);
+  if(cx<0||cx>=MAP_W||cy<0||cy>=MAP_H) return 0;
+  return map[cy][cx];
+}
+function isWall(x,y){ return cellAt(x,y)===1; }
+function canMove(px,py,dx,dy){
+  const r=CELL/2-2;
+  const nx=px+dx*PAC_SPEED, ny=py+dy*PAC_SPEED;
+  const pts=[
+    {x:nx+r*Math.sign(dx||1)*0.9, y:ny},
+    {x:nx-r*Math.sign(dx||1)*0.9, y:ny},
+    {x:nx, y:ny+r*Math.sign(dy||1)*0.9},
+    {x:nx, y:ny-r*Math.sign(dy||1)*0.9},
+  ];
+  for(const p of pts){ if(isWall(p.x,p.y)) return false; }
+  return true;
+}
+
+// ── Pac movement ───────────────────────────────────────
+function movePac(){
+  if(pac.dead){ pac.deadTimer--; if(pac.deadTimer<=0) killPac2(); return; }
+
+  // Try next direction
+  if((pac.nextDx!==0||pac.nextDy!==0)){
+    if(canMove(pac.x,pac.y,pac.nextDx,pac.nextDy)){
+      pac.dx=pac.nextDx; pac.dy=pac.nextDy;
+    }
+  }
+  // Continue current direction
+  if(pac.dx!==0||pac.dy!==0){
+    if(canMove(pac.x,pac.y,pac.dx,pac.dy)){
+      pac.x+=pac.dx*PAC_SPEED;
+      pac.y+=pac.dy*PAC_SPEED;
+      // Wrap tunnel
+      if(pac.x<0) pac.x=W; if(pac.x>W) pac.x=0;
+    }
+  }
+
+  // Mouth animation
+  pac.mouthAngle+=0.06*pac.mouthDir;
+  if(pac.mouthAngle>0.28||pac.mouthAngle<0.01) pac.mouthDir*=-1;
+
+  // Eat dots
+  const cx=Math.floor(pac.x/CELL), cy=Math.floor(pac.y/CELL);
+  if(cx>=0&&cx<MAP_W&&cy>=0&&cy<MAP_H){
+    const cell=map[cy][cx];
+    if(cell===2){ map[cy][cx]=0; score+=10; sfxDot(); updateUI(); }
+    if(cell===3){
+      map[cy][cx]=0; score+=50; sfxPower(); updateUI();
+      powerTimer=300+(level>3?0:level*-30);
+      ghostEatCombo=0;
+      ghosts.forEach(g=>{ if(!g.eaten){ g.scared=true; } });
+    }
+  }
+
+  // Check win
+  if(countDots()===0){ levelWin(); }
+}
+
+// ── Ghost movement ─────────────────────────────────────
+function moveGhost(g){
+  if(g.exitTimer>0){ g.exitTimer--; return; }
+
+  const speed=(g.scared?GHOST_SPEED*0.55:g.eaten?GHOST_SPEED*2:GHOST_SPEED*(1+level*0.08));
+  const DIRS4=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+
+  // Simple movement — try to continue, else pick random valid direction
+  let moved=false;
+  const nx=g.x+g.dx*speed, ny=g.y+g.dy*speed;
+
+  // Check if can continue
+  const r=CELL/2-3;
+  function ghostWall(x,y){
+    const pts=[{x:x+r,y:y},{x:x-r,y:y},{x:x,y:y+r},{x:x,y:y-r}];
+    for(const p of pts){ if(cellAt(p.x,p.y)===1) return true; }
+    return false;
+  }
+
+  if((g.dx!==0||g.dy!==0)&&!ghostWall(nx,ny)){
+    g.x=nx; g.y=ny;
+    // Wrap tunnel
+    if(g.x<-CELL) g.x=W+CELL; if(g.x>W+CELL) g.x=-CELL;
+    moved=true;
+  }
+
+  // At cell center — pick new direction
+  const snapX=Math.abs(g.x-Math.floor(g.x/CELL)*CELL-CELL/2)<speed+1;
+  const snapY=Math.abs(g.y-Math.floor(g.y/CELL)*CELL-CELL/2)<speed+1;
+  if(!moved||(snapX&&snapY&&Math.random()<0.25)){
+    // Snap to center
+    g.x=Math.floor(g.x/CELL)*CELL+CELL/2;
+    g.y=Math.floor(g.y/CELL)*CELL+CELL/2;
+    // Pick direction — scared = random, else chase pac
+    let candidates;
+    if(g.scared||g.eaten){
+      candidates=DIRS4.filter(d=>{
+        const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
+        return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
+      });
+    } else {
+      // Chase pac with some randomness
+      candidates=DIRS4.filter(d=>{
+        const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
+        return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
+      }).sort((a,b)=>{
+        const da=Math.hypot(g.x+a.dx*CELL-pac.x, g.y+a.dy*CELL-pac.y);
+        const db=Math.hypot(g.x+b.dx*CELL-pac.x, g.y+b.dy*CELL-pac.y);
+        return (da-db)+(Math.random()-0.5)*CELL*2;
+      });
+    }
+    if(candidates.length){
+      const pick=candidates[Math.floor(Math.random()*Math.min(2,candidates.length))];
+      g.dx=pick.dx; g.dy=pick.dy;
+      const nx2=g.x+g.dx*speed, ny2=g.y+g.dy*speed;
+      if(!ghostWall(nx2,ny2)){ g.x=nx2; g.y=ny2; }
+    }
+  }
+}
+
+// ── Collision ──────────────────────────────────────────
+function checkCollisions(){
+  ghosts.forEach(g=>{
+    const dist=Math.hypot(g.x-pac.x, g.y-pac.y);
+    if(dist<CELL*0.75){
+      if(g.scared&&!g.eaten){
+        // Eat ghost
+        g.scared=false; g.eaten=true; g.exitTimer=120;
+        ghostEatCombo++;
+        const pts=200*Math.pow(2,ghostEatCombo-1);
+        score+=pts; sfxEatGhost(); updateUI();
+        // Reset ghost position
+        setTimeout(()=>{ g.eaten=false; g.x=9*CELL+CELL/2; g.y=9*CELL+CELL/2; },2000);
+      } else if(!g.scared&&!g.eaten&&!pac.dead){
+        pac.dead=true; pac.deadTimer=60; sfxDie();
+      }
+    }
+  });
+}
+
+function killPac2(){
+  lives--; updateUI();
+  if(lives<=0){ gameOver(); return; }
+  gstate='dead_wait';
+  showMsg('SPACE TO CONTINUE');
+}
+
+function respawn(){
+  hideMsg();
+  pac.x=9*CELL+CELL/2; pac.y=16*CELL+CELL/2;
+  pac.dx=0; pac.dy=0; pac.nextDx=0; pac.nextDy=0;
+  pac.dead=false; pac.deadTimer=0;
+  ghosts.forEach((g,i)=>{
+    g.x=9*CELL+CELL/2; g.y=9*CELL+CELL/2;
+    g.dx=0; g.dy=0; g.scared=false; g.eaten=false;
+    g.exitTimer=i*40;
+  });
+  powerTimer=0;
+  gstate='playing';
+}
+
+function levelWin(){
+  gstate='levelup';
+  sfxWin();
+  showMsg(`LEVEL ${level} CLEAR!`);
+  setTimeout(()=>{
+    level++; initLevel(); updateUI(); hideMsg(); gstate='playing';
+  },2000);
+}
+
+function gameOver(){
+  gstate='gameover';
+  if(score>hiScore) hiScore=score;
+  updateUI();
+  overlay.innerHTML=`
+    <h1 style="font-size:clamp(24px,4vw,48px);color:#f44;text-shadow:0 0 20px #f44;margin-bottom:16px;">GAME OVER</h1>
+    <p style="font-size:clamp(9px,1.3vw,13px);color:#aaa;margin-bottom:24px;letter-spacing:2px;">SCORE: ${score} &nbsp;·&nbsp; HI: ${hiScore}</p>
+    <button class="start-btn" id="retryBtn" style="border-color:#f44;color:#f44;">PLAY AGAIN</button>
+  `;
+  overlay.style.display='flex';
+  document.getElementById('retryBtn').onclick=()=>{ lives=3; level=1; score=0; initLevel(); updateUI(); overlay.style.display='none'; gstate='playing'; };
+}
+
+// ── Power timer ────────────────────────────────────────
+function updatePower(){
+  if(powerTimer>0){
+    powerTimer--;
+    if(powerTimer===0){
+      ghosts.forEach(g=>{ g.scared=false; });
+    }
+  }
+}
+
+// ── Draw ───────────────────────────────────────────────
+function draw(){
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  // Draw map
+  map.forEach((row,cy)=>{
+    row.forEach((cell,cx)=>{
+      const x=cx*CELL, y=cy*CELL;
+      if(cell===1){
+        ctx.fillStyle='#1a1aff';
+        ctx.fillRect(x+1,y+1,CELL-2,CELL-2);
+        // Border highlight
+        ctx.fillStyle='#4444ff';
+        ctx.fillRect(x+1,y+1,CELL-2,2);
+        ctx.fillRect(x+1,y+1,2,CELL-2);
+      }
+      if(cell===2){
+        ctx.fillStyle='#fff';
+        ctx.beginPath();
+        ctx.arc(x+CELL/2,y+CELL/2,2,0,Math.PI*2);
+        ctx.fill();
+      }
+      if(cell===3){
+        const pulse=0.7+Math.sin(frameCount*0.12)*0.3;
+        ctx.fillStyle=`rgba(255,200,50,${0.8+pulse*0.2})`;
+        ctx.shadowBlur=8*pulse; ctx.shadowColor='#ff0';
+        ctx.beginPath();
+        ctx.arc(x+CELL/2,y+CELL/2,5*pulse,0,Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur=0;
+      }
+    });
+  });
+
+  // Draw pac-man
+  if(!pac.dead||pac.deadTimer>30){
+    const angle=pac.mouthAngle*Math.PI;
+    let rotation=0;
+    if(pac.dx>0) rotation=0;
+    else if(pac.dx<0) rotation=Math.PI;
+    else if(pac.dy>0) rotation=Math.PI/2;
+    else if(pac.dy<0) rotation=-Math.PI/2;
+    ctx.fillStyle='#ff0';
+    ctx.shadowBlur=6; ctx.shadowColor='#ff0';
+    ctx.beginPath();
+    ctx.moveTo(pac.x,pac.y);
+    ctx.arc(pac.x,pac.y,CELL/2-2,rotation+angle,rotation+Math.PI*2-angle);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur=0;
+  } else if(pac.dead){
+    // Death animation
+    const prog=1-(pac.deadTimer/60);
+    ctx.fillStyle='#ff0';
+    ctx.beginPath();
+    ctx.moveTo(pac.x,pac.y);
+    ctx.arc(pac.x,pac.y,CELL/2-2,Math.PI*prog,-Math.PI*prog+Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw ghosts
+  ghosts.forEach(g=>{
+    if(g.eaten) return;
+    const scared=g.scared&&powerTimer>0;
+    const flashing=scared&&powerTimer<60&&Math.floor(frameCount/8)%2===0;
+    const color=flashing?'#fff':scared?'#00f':g.color;
+
+    // Ghost body
+    ctx.fillStyle=color;
+    ctx.shadowBlur=scared?0:8; ctx.shadowColor=color;
+    const gx=g.x, gy=g.y, gr=CELL/2-2;
+    ctx.beginPath();
+    ctx.arc(gx,gy-2,gr,Math.PI,0);
+    ctx.lineTo(gx+gr,gy+gr);
+    // Wavy bottom
+    const waves=3;
+    for(let i=waves;i>=0;i--){
+      const wx=gx+gr-i*(gr*2/waves);
+      const wy=gy+gr-(i%2===0?gr*0.4:0);
+      ctx.lineTo(wx,wy);
+    }
+    ctx.lineTo(gx-gr,gy+gr);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Eyes
+    if(!scared){
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(gx-4,gy-2,3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+4,gy-2,3,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#00f';
+      const ex=(g.dx||0)*1.5, ey=(g.dy||0)*1.5;
+      ctx.beginPath(); ctx.arc(gx-4+ex,gy-2+ey,1.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+4+ex,gy-2+ey,1.5,0,Math.PI*2); ctx.fill();
+    } else {
+      // Scared face
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(gx-4,gy-1,2,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+4,gy-1,2,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(gx-5,gy+3);
+      ctx.lineTo(gx-3,gy+1);
+      ctx.lineTo(gx-1,gy+3);
+      ctx.lineTo(gx+1,gy+1);
+      ctx.lineTo(gx+3,gy+3);
+      ctx.lineTo(gx+5,gy+1);
+      ctx.stroke();
+    }
+  });
+
+  // Power timer bar
+  if(powerTimer>0){
+    const maxPow=300;
+    ctx.fillStyle='rgba(255,255,0,0.15)';
+    ctx.fillRect(0,H-4,W,4);
+    ctx.fillStyle='#ff0';
+    ctx.fillRect(0,H-4,(powerTimer/maxPow)*W,4);
+  }
+}
+
+// ── UI ─────────────────────────────────────────────────
+function updateUI(){ hiEl.textContent=hiScore; scEl.textContent=score; lvEl.textContent=level; lfEl.textContent=lives; }
+function showMsg(t){ msgEl.innerHTML=t.replace(/\n/g,'<br>'); msgEl.style.display='block'; }
+function hideMsg(){ msgEl.style.display='none'; }
+
+// ── Loop ───────────────────────────────────────────────
+function loop(){
+  requestAnimationFrame(loop);
+  frameCount++;
+  if(gstate==='playing'){
+    movePac();
+    ghosts.forEach(g=>moveGhost(g));
+    checkCollisions();
+    updatePower();
+  }
+  draw();
+}
+
+// ── Boot ───────────────────────────────────────────────
+updateUI();
+loop();
+const urlMode=new URLSearchParams(window.location.search).get('mode');
+if(urlMode) startGame();
+</script>
+</body>
+</html>

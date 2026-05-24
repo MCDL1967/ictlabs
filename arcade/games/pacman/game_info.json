@@ -1,0 +1,9 @@
+{
+  "name": "PAC-MAN",
+  "image_desc": "Eat all the dots, avoid the ghosts. Grab a power pellet to turn the tables.",
+  "video_src": "https://www.youtube.com/embed/dScq4P5gn4A?autoplay=1&mute=1&controls=0&loop=1&playlist=dScq4P5gn4A",
+  "genre": "Maze",
+  "release_year": 1980,
+  "play_url": "games/pacman/pacman.html",
+  "multiplayer": false
+}
