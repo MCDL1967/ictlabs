@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOL — AI Concierge · ICTLabs</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;--black-2:#0a0800;--black-3:#12100a;
+  --gold:#c9a84c;--gold-lite:#e2c47a;--gold-dim:#8a6e2f;--gold-pale:rgba(201,168,76,0.12);
+  --white:#fff;--cream:#f5f0e8;--warm-muted:rgba(245,240,232,0.55);
+  --border-g:rgba(201,168,76,0.25);--border-g2:rgba(201,168,76,0.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--black);color:var(--cream);
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,0.025) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+
+/* NAV SHELL */
+.site-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(0,0,0,0.97);
+  border-bottom:1px solid var(--border-g);
+}
+.nav-logo img{height:72px;width:auto;}
+.nav-right{display:flex;align-items:center;gap:20px;}
+.back{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(201,168,76,0.6);text-decoration:none;transition:color 0.2s;}
+.back::before{content:'← ';}
+.back:hover{color:var(--gold);}
+.lang-toggle{display:flex;gap:6px;}
+.lang-btn{background:transparent;border:1px solid rgba(201,168,76,0.2);color:rgba(201,168,76,0.5);padding:4px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;}
+.lang-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* HERO */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:140px 24px 80px;overflow:hidden;
+}
+.hero-img{
+  position:absolute;inset:0;z-index:0;
+  background:url('assets/img/sol-card.png') center/cover no-repeat;
+  opacity:0.18;
+  filter:saturate(0.6);
+}
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.85) 100%);
+}
+.hero-glow{
+  position:absolute;top:20%;left:50%;transform:translateX(-50%);
+  width:600px;height:400px;z-index:1;
+  background:radial-gradient(ellipse,rgba(201,168,76,0.1) 0%,transparent 70%);
+  pointer-events:none;animation:goldPulse 5s ease-in-out infinite;
+}
+@keyframes goldPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+
+.hero-eyebrow{
+  position:relative;z-index:2;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:20px;
+  opacity:0;animation:fadeUp 0.7s 0.2s forwards;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:inline-block;width:28px;height:1px;background:var(--gold);vertical-align:middle;margin:0 12px;opacity:0.5;}
+.hero-name{
+  position:relative;z-index:2;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(80px,14vw,160px);
+  font-weight:300;line-height:1;letter-spacing:12px;
+  color:var(--gold-lite);margin-bottom:0;
+  text-shadow:0 0 60px rgba(201,168,76,0.3);
+  opacity:0;animation:fadeUp 0.9s 0.35s forwards;
+}
+.hero-sub-title{
+  position:relative;z-index:2;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(22px,4vw,40px);
+  font-weight:300;font-style:italic;
+  color:var(--cream);margin-bottom:24px;letter-spacing:4px;
+  opacity:0;animation:fadeUp 0.8s 0.5s forwards;
+}
+.hero-tagline{
+  position:relative;z-index:2;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;
+  color:rgba(245,240,232,0.6);
+  border-top:1px solid var(--border-g);border-bottom:1px solid var(--border-g);
+  padding:12px 32px;display:inline-block;margin-bottom:48px;
+  opacity:0;animation:fadeUp 0.8s 0.65s forwards;
+}
+.hero-cta{
+  position:relative;z-index:2;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+  opacity:0;animation:fadeUp 0.8s 0.8s forwards;
+}
+.btn-gold{
+  background:var(--gold);color:var(--black);
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;
+  text-decoration:none;padding:14px 40px;border:none;cursor:pointer;
+  box-shadow:0 0 24px rgba(201,168,76,0.3);transition:all 0.2s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+.btn-gold:hover{background:var(--gold-lite);box-shadow:0 0 40px rgba(201,168,76,0.5);transform:translateY(-2px);}
+.btn-outline-gold{
+  background:transparent;color:var(--cream);
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;
+  text-decoration:none;padding:13px 40px;border:1px solid rgba(245,240,232,0.3);cursor:pointer;transition:all 0.2s;
+}
+.btn-outline-gold:hover{border-color:var(--gold);color:var(--gold);}
+
+/* SECTIONS */
+section{position:relative;z-index:1;}
+.sec-inner{max-width:1100px;margin:0 auto;padding:100px 48px;}
+.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.sec-label::before{content:'';width:20px;height:1px;background:var(--gold);opacity:0.5;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,64px);font-weight:300;line-height:1.1;color:var(--cream);margin-bottom:20px;}
+.sec-title em{font-style:italic;color:var(--gold);}
+.sec-body{font-size:15px;color:var(--warm-muted);max-width:600px;line-height:1.9;}
+
+/* INTRO */
+.intro{background:var(--black);}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:48px;align-items:start;}
+.intro-text p{font-size:15px;color:var(--warm-muted);line-height:1.9;margin-bottom:16px;}
+.connect-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+.connect-list li{
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--cream);padding:12px 20px;
+  border:1px solid var(--border-g);border-left:2px solid var(--gold);
+  background:rgba(201,168,76,0.04);
+  display:flex;align-items:center;gap:12px;
+}
+.connect-list li::before{content:'◆';color:var(--gold);font-size:8px;}
+.intro-quote{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3vw,44px);
+  font-style:italic;color:var(--gold-lite);line-height:1.2;
+  border-left:2px solid var(--gold);padding-left:28px;
+  align-self:center;
+}
+
+/* FEATURES */
+.features{background:var(--black-2);}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-g);border:1px solid var(--border-g);margin-top:48px;}
+.feat-card{background:var(--black);padding:36px 28px;position:relative;overflow:hidden;transition:background 0.3s;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.5;}
+.feat-card:hover{background:var(--gold-pale);}
+.feat-icon{font-size:28px;margin-bottom:16px;display:block;}
+.feat-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.feat-desc{font-size:13px;color:var(--warm-muted);line-height:1.7;}
+.feat-list{list-style:none;margin-top:10px;}
+.feat-list li{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:rgba(245,240,232,0.6);padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;gap:8px;}
+.feat-list li::before{content:'·';color:var(--gold);}
+
+/* BENEFITS */
+.benefits{background:var(--black);}
+.benefits-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px;}
+.benefit-item{
+  padding:32px;border:1px solid var(--border-g);
+  background:rgba(201,168,76,0.02);
+  transition:border-color 0.2s,background 0.2s;
+}
+.benefit-item:hover{border-color:var(--gold);background:var(--gold-pale);}
+.benefit-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.benefit-desc{font-size:14px;color:var(--warm-muted);line-height:1.7;}
+
+/* DIFFERENTIATORS */
+.diff{background:var(--black-3);}
+.diff-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:48px;}
+.diff-item{display:flex;gap:16px;align-items:flex-start;padding:24px;border:1px solid var(--border-g);}
+.diff-check{color:var(--gold);font-size:20px;flex-shrink:0;margin-top:2px;}
+.diff-body strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--cream);margin-bottom:6px;}
+.diff-body span{font-size:13px;color:var(--warm-muted);line-height:1.7;}
+
+/* TAGLINE SECTION */
+.tagline-section{
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(201,168,76,0.08),transparent 70%),var(--black);
+  border-top:1px solid var(--border-g);border-bottom:1px solid var(--border-g);
+  text-align:center;padding:80px 48px;
+}
+.tagline-main{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(32px,5vw,64px);font-weight:300;font-style:italic;
+  color:var(--gold-lite);line-height:1.2;margin-bottom:16px;
+}
+.tagline-sub{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;color:var(--warm-muted);}
+
+/* FOOTER */
+footer{background:var(--black-2);border-top:1px solid var(--border-g);padding:36px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;position:relative;z-index:1;}
+.footer-logo img{height:60px;width:auto;}
+.ft-contact{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--warm-muted);text-align:center;line-height:2.2;}
+.ft-contact a{color:var(--gold);text-decoration:none;}
+.ft-legal{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,0.2);text-align:right;line-height:2;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s,transform 0.7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* BILINGUAL */
+[data-en]{display:none;}
+html[lang="en"] [data-es]{display:none;}
+html[lang="en"] [data-en]{display:revert;}
+
+@media(max-width:900px){
+  .site-nav{padding:12px 20px;}.nav-logo img{height:50px;}
+  .sec-inner{padding:64px 20px;}
+  .intro-grid,.benefits-grid,.diff-grid{grid-template-columns:1fr;gap:24px;}
+  .features-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;text-align:center;padding:28px 20px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-logo">
+    <img src="../assets/img/ictlabs-logo.png" alt="ICTLabs" width="144" height="96"/>
+  </a>
+  <div class="nav-right">
+    <a class="back" href="index.html" data-es>Área de Pruebas</a>
+    <a class="back" href="index.html" data-en>Test Area</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-img"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow" data-es>Plataforma AI para Casinos y Hospitalidad</div>
+  <div class="hero-eyebrow" data-en>AI Platform for Casinos & Hospitality</div>
+  <div class="hero-name">SOL</div>
+  <div class="hero-sub-title" data-es>AI Concierge</div>
+  <div class="hero-sub-title" data-en>AI Concierge</div>
+  <div class="hero-tagline" data-es>Atención Inteligente. Siempre Disponible.</div>
+  <div class="hero-tagline" data-en>Always Available. Always Casino Ready.</div>
+  <div class="hero-cta">
+    <a href="#features" class="btn-gold" data-es>Ver Características</a>
+    <a href="#features" class="btn-gold" data-en>See Features</a>
+    <div class="btn-outline-gold" data-es style="cursor:default">DEMO · PRÓXIMAMENTE</div>
+    <div class="btn-outline-gold" data-en style="cursor:default">DEMO · COMING SOON</div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="intro" id="intro">
+  <div class="sec-inner">
+    <div class="sec-label" data-es>Qué es SOL</div>
+    <div class="sec-label" data-en>What is SOL</div>
+    <h2 class="sec-title" data-es>La capa de inteligencia detrás de <em>un servicio excepcional.</em></h2>
+    <h2 class="sec-title" data-en>The AI layer behind <em>exceptional casino service.</em></h2>
+    <div class="intro-grid reveal">
+      <div class="intro-text">
+        <p data-es>SOL es una plataforma AI diseñada específicamente para casinos y propiedades de entretenimiento. Funciona como una capa inteligente de atención y coordinación operacional disponible 24/7.</p>
+        <p data-en>SOL is an AI platform designed specifically for casinos and entertainment properties. It works as an intelligent layer of guest service and operational coordination, available 24/7.</p>
+        <p data-es>No es un chatbot genérico adaptado. Es una plataforma operacional inteligente construida desde cero para el mundo del casino.</p>
+        <p data-en>Not a generic chatbot adapted for casinos. An intelligent operational platform built from the ground up for the casino world.</p>
+        <ul class="connect-list">
+          <li data-es>Huéspedes & VIP Services</li><li data-en>Guests & VIP Services</li>
+          <li data-es>Guest Services & Reservas</li><li data-en>Guest Services & Reservations</li>
+          <li data-es>Promociones & Gaming</li><li data-en>Promotions & Gaming</li>
+          <li data-es>Seguridad & Operaciones</li><li data-en>Security & Operations</li>
+        </ul>
+      </div>
+      <blockquote class="intro-quote">
+        <span data-es>"Casino Intelligence Meets Guest Experience."</span>
+        <span data-en>"Casino Intelligence Meets Guest Experience."</span>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="sec-inner">
+    <div class="sec-label" data-es>Características Principales</div>
+    <div class="sec-label" data-en>Key Features</div>
+    <h2 class="sec-title" data-es>Todo lo que necesita <em>una operación moderna.</em></h2>
+    <h2 class="sec-title" data-en>Everything a <em>modern operation needs.</em></h2>
+    <div class="features-grid reveal">
+      <div class="feat-card">
+        <span class="feat-icon">🎰</span>
+        <div class="feat-name" data-es>Casino-Focused AI</div>
+        <div class="feat-name" data-en>Casino-Focused AI</div>
+        <p class="feat-desc" data-es>Diseñado para casinos, resorts, gaming floors, VIP programs y entertainment venues. No adaptado — construido para esto.</p>
+        <p class="feat-desc" data-en>Built for casinos, resorts, gaming floors, VIP programs and entertainment venues. Not adapted — built for this.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">📲</span>
+        <div class="feat-name">WhatsApp Experience</div>
+        <p class="feat-desc" data-es>Tus huéspedes interactúan desde el canal que ya usan. Sin apps. Sin entrenamiento. Sin fricción.</p>
+        <p class="feat-desc" data-en>Your guests interact from the channel they already use. No apps. No training. No friction.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🛎️</span>
+        <div class="feat-name" data-es>Asistencia Instantánea</div>
+        <div class="feat-name" data-en>Instant Assistance</div>
+        <p class="feat-desc" data-es>Responde sobre restaurantes, eventos, promociones, horarios, gaming, shows, amenities, transporte y player services.</p>
+        <p class="feat-desc" data-en>Responds about restaurants, events, promotions, schedules, gaming, shows, amenities, transportation and player services.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">👑</span>
+        <div class="feat-name" data-es>Coordinación VIP</div>
+        <div class="feat-name" data-en>VIP Coordination</div>
+        <p class="feat-desc" data-es>Facilita solicitudes VIP, reservas prioritarias, atención personalizada y coordinación entre departamentos.</p>
+        <p class="feat-desc" data-en>Facilitates VIP requests, priority reservations, personalized service and cross-department coordination.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🚨</span>
+        <div class="feat-name" data-es>Escalamiento Operacional</div>
+        <div class="feat-name" data-en>Operational Escalation</div>
+        <p class="feat-desc" data-es>Escala automáticamente casos hacia seguridad, guest services, VIP desk, management y operations teams.</p>
+        <p class="feat-desc" data-en>Automatically escalates cases to security, guest services, VIP desk, management and operations teams.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">📊</span>
+        <div class="feat-name" data-es>Inteligencia Operacional</div>
+        <div class="feat-name" data-en>Operational Intelligence</div>
+        <p class="feat-desc" data-es>Todas las interacciones generan KPIs, trazabilidad, incident tracking, response metrics y visibilidad operacional.</p>
+        <p class="feat-desc" data-en>All interactions generate KPIs, traceability, incident tracking, response metrics and operational visibility.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefits" id="benefits">
+  <div class="sec-inner">
+    <div class="sec-label" data-es>Beneficios Comerciales</div>
+    <div class="sec-label" data-en>Business Benefits</div>
+    <h2 class="sec-title" data-es>Resultados que se <em>miden desde el día uno.</em></h2>
+    <h2 class="sec-title" data-en>Results that are <em>measurable from day one.</em></h2>
+    <div class="benefits-grid reveal">
+      <div class="benefit-item">
+        <div class="benefit-title" data-es>Mejor Experiencia del Huésped</div>
+        <div class="benefit-title" data-en>Better Guest Experience</div>
+        <p class="benefit-desc" data-es>Menos espera, atención inmediata, experiencia moderna. El huésped siempre tiene respuesta.</p>
+        <p class="benefit-desc" data-en>Less waiting, immediate attention, modern experience. Guests always get a response.</p>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title" data-es>Reduce Carga Operacional</div>
+        <div class="benefit-title" data-en>Reduced Operational Load</div>
+        <p class="benefit-desc" data-es>Menos llamadas repetitivas, menos saturación del personal, workflows más organizados.</p>
+        <p class="benefit-desc" data-en>Fewer repetitive calls, less staff saturation, more organized workflows.</p>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title" data-es>Mayor Eficiencia Operacional</div>
+        <div class="benefit-title" data-en>Higher Operational Efficiency</div>
+        <p class="benefit-desc" data-es>Coordinación más rápida, mejor trazabilidad, escalamiento inteligente en tiempo real.</p>
+        <p class="benefit-desc" data-en>Faster coordination, better traceability, intelligent real-time escalation.</p>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title" data-es>Escalable por Diseño</div>
+        <div class="benefit-title" data-en>Scalable by Design</div>
+        <p class="benefit-desc" data-es>Preparado para múltiples propiedades, expansión regional y futuras integraciones AI.</p>
+        <p class="benefit-desc" data-en>Ready for multiple properties, regional expansion and future AI integrations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENTIATORS -->
+<section class="diff">
+  <div class="sec-inner">
+    <div class="sec-label" data-es>Diferenciadores</div>
+    <div class="sec-label" data-en>Differentiators</div>
+    <h2 class="sec-title" data-es>Por qué SOL es <em>diferente.</em></h2>
+    <h2 class="sec-title" data-en>Why SOL is <em>different.</em></h2>
+    <div class="diff-grid reveal">
+      <div class="diff-item">
+        <span class="diff-check">✦</span>
+        <div class="diff-body">
+          <strong data-es>Built for Casino Operations</strong>
+          <strong data-en>Built for Casino Operations</strong>
+          <span data-es>No adaptado. Diseñado desde cero para la industria del casino y hospitalidad.</span>
+          <span data-en>Not adapted. Designed from the ground up for the casino and hospitality industry.</span>
+        </div>
+      </div>
+      <div class="diff-item">
+        <span class="diff-check">✦</span>
+        <div class="diff-body">
+          <strong data-es>AI + Human Workflow</strong>
+          <strong data-en>AI + Human Workflow</strong>
+          <span data-es>SOL potencia al personal humano. No intenta reemplazarlo. Colaboración inteligente.</span>
+          <span data-en>SOL empowers human staff. It doesn't try to replace them. Intelligent collaboration.</span>
+        </div>
+      </div>
+      <div class="diff-item">
+        <span class="diff-check">✦</span>
+        <div class="diff-body">
+          <strong data-es>Operationally Aware</strong>
+          <strong data-en>Operationally Aware</strong>
+          <span data-es>Entiende flujos reales de operación de casino, no solo responde preguntas genéricas.</span>
+          <span data-en>Understands real casino operational flows, not just answers generic questions.</span>
+        </div>
+      </div>
+      <div class="diff-item">
+        <span class="diff-check">✦</span>
+        <div class="diff-body">
+          <strong data-es>Front + Back Unidos</strong>
+          <strong data-en>Front + Back United</strong>
+          <span data-es>Une la experiencia del huésped con la coordinación operacional en una sola plataforma.</span>
+          <span data-en>Unites guest experience with operational coordination in a single platform.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAGLINE -->
+<div class="tagline-section reveal">
+  <div class="tagline-main" data-es>"La IA Operacional para Casinos Modernos."</div>
+  <div class="tagline-main" data-en>"The Operational AI Layer for Modern Casinos."</div>
+  <div class="tagline-sub" data-es>Bilingüe · 24/7 · WhatsApp · Casino-Ready</div>
+  <div class="tagline-sub" data-en>Bilingual · 24/7 · WhatsApp · Casino-Ready</div>
+</div>
+
+<footer>
+  <div class="footer-logo">
+    <img src="../assets/img/ictlabs-logo.png" alt="ICTLabs" width="120" height="80"/>
+  </div>
+  <div class="ft-contact">
+    <a href="mailto:marcelo@gransolux.com">marcelo@gransolux.com</a><br>
+    <a href="tel:+50762574995">+507.6257.4995</a><br>
+    <span>Panama · Integrated Computer Technology</span>
+  </div>
+  <div class="ft-legal">© 2026 ICTLabs<br>ict-labs.com</div>
+</footer>
+
+<script>
+function setLang(lang){
+  document.getElementById('html-root').lang=lang;
+  document.getElementById('btn-es').classList.toggle('active',lang==='es');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  localStorage.setItem('ictlabs-lang',lang);
+}
+const saved=localStorage.getItem('ictlabs-lang')||'es';
+setLang(saved);
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1});
+reveals.forEach(el=>obs.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.site-nav').classList.toggle('scrolled',scrollY>60));
+</script>
+</body>
+</html>

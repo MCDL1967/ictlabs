@@ -3,45 +3,155 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ICTLabs — Aplicaciones</title>
+<title>ICTLabs — Área de Pruebas</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--black:#000;--black-2:#05080f;--blue:#1a4fd6;--blue-glow:#3b82f6;--steel:#94a3b8;--muted:rgba(148,163,184,0.7);--border-b:rgba(37,99,235,0.3);}
+:root{
+  --black:#000;--black-2:#05080f;
+  --blue:#1a4fd6;--blue-glow:#3b82f6;
+  --steel:#94a3b8;--muted:rgba(148,163,184,0.7);
+  --border-b:rgba(37,99,235,0.3);
+  --white:#fff;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:var(--black);color:#fff;min-height:100vh;
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--black);color:var(--white);min-height:100vh;
   background-image:linear-gradient(rgba(26,79,214,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(26,79,214,0.05) 1px,transparent 1px);
-  background-size:44px 44px;}
-header{display:flex;justify-content:space-between;align-items:center;padding:20px 48px;background:rgba(0,0,0,0.97);border-bottom:1px solid var(--border-b);}
+  background-size:44px 44px;
+}
+
+/* HEADER */
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 48px;background:rgba(0,0,0,0.97);
+  border-bottom:1px solid var(--border-b);
+  position:sticky;top:0;z-index:50;
+}
 .header-logo img{height:120px;width:auto;}
 .header-right{display:flex;align-items:center;gap:20px;}
-.back{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color 0.2s;}
-.back:hover{color:var(--blue-glow);}
+.back{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--steel);text-decoration:none;transition:color 0.2s;
+}
 .back::before{content:'← ';}
+.back:hover{color:var(--blue-glow);}
 .lang-toggle{display:flex;gap:6px;}
-.lang-btn{background:transparent;border:1px solid rgba(148,163,184,0.2);color:var(--muted);padding:4px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;}
+.lang-btn{
+  background:transparent;border:1px solid rgba(148,163,184,0.2);
+  color:var(--muted);padding:4px 10px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;
+}
 .lang-btn.active{border-color:var(--blue-glow);color:var(--blue-glow);box-shadow:0 0 8px rgba(37,99,235,0.3);}
-main{max-width:1100px;margin:0 auto;padding:64px 48px;}
-.page-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+
+/* MAIN */
+main{max-width:1200px;margin:0 auto;padding:64px 48px;}
+.page-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;
+  letter-spacing:5px;text-transform:uppercase;
+  color:var(--blue-glow);margin-bottom:12px;
+  display:flex;align-items:center;gap:12px;
+}
 .page-label::before{content:'';width:18px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue);}
-.page-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,5vw,64px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:48px;line-height:1;}
-.page-title span{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.5));}
-.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border-b);border:1px solid var(--border-b);}
-.app-card{background:var(--black);padding:36px 32px;text-decoration:none;color:#fff;position:relative;overflow:hidden;transition:background 0.2s;display:block;}
-.app-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);}
-.app-card:not(.soon):hover{background:rgba(26,79,214,0.07);}
-.app-card.soon{opacity:0.45;cursor:default;}
-.app-icon{font-size:32px;margin-bottom:20px;display:block;}
-.app-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:6px;filter:drop-shadow(0 0 6px rgba(59,130,246,0.3));}
-.app-card.soon .app-name{color:var(--steel);filter:none;}
-.app-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
-.app-tag{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;border:1px solid var(--border-b);}
-.app-tag.live{color:var(--blue-glow);border-color:var(--blue);box-shadow:0 0 8px rgba(26,79,214,0.2);}
-.app-tag.soon-tag{color:var(--muted);border-color:rgba(148,163,184,0.2);}
-.footer-note{margin-top:48px;padding-top:24px;border-top:1px solid var(--border-b);font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(148,163,184,0.3);text-align:center;}
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(36px,5vw,64px);font-weight:800;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--white);margin-bottom:56px;line-height:1;
+}
+.page-title span{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));}
+
+/* CARDS GRID */
+.apps-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+
+/* APP CARD */
+.app-card{
+  background:var(--black-2);
+  border:1px solid var(--border-b);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  transition:border-color 0.3s,box-shadow 0.3s;
+}
+.app-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);
+  box-shadow:0 0 8px var(--blue);
+}
+.app-card:hover{
+  border-color:rgba(37,99,235,0.6);
+  box-shadow:0 0 32px rgba(26,79,214,0.12);
+}
+
+/* CARD IMAGE */
+.card-img{
+  width:100%;aspect-ratio:16/9;overflow:hidden;
+  position:relative;flex-shrink:0;
+}
+.card-img img{
+  width:100%;height:100%;object-fit:cover;
+  display:block;transition:transform 0.4s;
+}
+.app-card:hover .card-img img{transform:scale(1.03);}
+
+/* CARD BODY */
+.card-body{padding:20px 22px 16px;}
+.card-cat{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:4px;text-transform:uppercase;
+  color:#6b8ccc;margin-bottom:8px;
+}
+.card-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:26px;
+  font-weight:800;letter-spacing:3px;text-transform:uppercase;
+  color:var(--blue-glow);margin-bottom:6px;
+  filter:drop-shadow(0 0 4px rgba(59,130,246,0.2));
+}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* CARD BUTTONS */
+.card-buttons{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1px;background:var(--border-b);
+  border-top:1px solid var(--border-b);
+  margin-top:auto;
+}
+.card-btn{
+  padding:14px;text-align:center;text-decoration:none;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  letter-spacing:3px;text-transform:uppercase;
+  background:var(--black);color:var(--steel);
+  transition:all 0.2s;cursor:pointer;border:none;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.card-btn:hover{background:rgba(26,79,214,0.1);color:var(--blue-glow);}
+.card-btn.demo{border-left:1px solid var(--border-b);}
+.card-btn.soon-demo{color:rgba(148,163,184,0.3);cursor:default;pointer-events:none;}
+.card-btn.soon-demo:hover{background:var(--black);color:rgba(148,163,184,0.3);}
+
+.footer-note{
+  margin-top:56px;padding-top:24px;
+  border-top:1px solid var(--border-b);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:rgba(148,163,184,0.25);text-align:center;
+}
+
+/* BILINGUAL */
 [data-en]{display:none;}
 html[lang="en"] [data-es]{display:none;}
 html[lang="en"] [data-en]{display:revert;}
-@media(max-width:600px){header{padding:14px 20px;}main{padding:40px 20px;}.header-logo img{height:90px;}}
+
+@media(max-width:900px){
+  header{padding:14px 20px;}
+  .header-logo img{height:90px;}
+  main{padding:40px 20px;}
+  .apps-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -49,8 +159,8 @@ html[lang="en"] [data-en]{display:revert;}
   <div class="header-logo">
     <img src="../assets/img/ictlabs-logo.png"
          srcset="../assets/img/ictlabs-logo-sm.png 200w, ../assets/img/ictlabs-logo.png 480w"
-         sizes="(max-width:600px) 160px, 200px"
-         alt="ICTLabs" width="200" height="133"/>
+         sizes="(max-width:600px) 160px, 240px"
+         alt="ICTLabs" width="240" height="160"/>
   </div>
   <div class="header-right">
     <a class="back" href="../index.html" data-es>Volver al Sitio</a>
@@ -61,39 +171,88 @@ html[lang="en"] [data-en]{display:revert;}
     </div>
   </div>
 </header>
+
 <main>
-  <div class="page-label" data-es>Área Privada de Clientes</div>
-  <div class="page-label" data-en>Private Client Area</div>
-  <h1 class="page-title" data-es>Aplicaciones <span>de Clientes</span></h1>
-  <h1 class="page-title" data-en>Client <span>Applications</span></h1>
+  <div class="page-label" data-es>Área de Pruebas</div>
+  <div class="page-label" data-en>Test Area</div>
+  <h1 class="page-title" data-es>Aplicaciones <span>ICTLabs</span></h1>
+  <h1 class="page-title" data-en>ICTLabs <span>Applications</span></h1>
+
   <div class="apps-grid">
-    <div class="app-card soon">
-      <span class="app-icon">🕹️</span>
-      <div class="app-name">Arcade</div>
-      <p class="app-desc" data-es>Consola Retro ICTLabs — juegos clásicos en el navegador.</p>
-      <p class="app-desc" data-en>ICTLabs Retro Console — browser-based classic games.</p>
-      <span class="app-tag soon-tag" data-es>Próximamente</span>
-      <span class="app-tag soon-tag" data-en>Coming Soon</span>
+
+    <!-- SOL -->
+    <div class="app-card">
+      <div class="card-img">
+        <img src="assets/img/sol-card.png" alt="SOL AI Concierge"/>
+      </div>
+      <div class="card-body">
+        <div class="card-cat" data-es>01 · Atención al Cliente</div>
+        <div class="card-cat" data-en>01 · Customer Service</div>
+        <div class="card-name">SOL</div>
+        <p class="card-desc" data-es>Plataforma AI Concierge para casinos y hospitalidad. Atención inteligente, siempre disponible.</p>
+        <p class="card-desc" data-en>AI Concierge platform for casinos and hospitality. Intelligent service, always available.</p>
+      </div>
+      <div class="card-buttons">
+        <a href="sol.html" class="card-btn info">
+          <span>APP-INFO</span>
+        </a>
+        <div class="card-btn demo soon-demo">
+          <span data-es>PRÓXIMAMENTE</span>
+          <span data-en>COMING SOON</span>
+        </div>
+      </div>
     </div>
-    <div class="app-card soon">
-      <span class="app-icon">✈️</span>
-      <div class="app-name">HP Fleet</div>
-      <p class="app-desc" data-es>Gestión de operaciones de vuelo y facturación para HP-1861 y HP-1862FX.</p>
-      <p class="app-desc" data-en>Flight operations & billing management for HP-1861 and HP-1862FX.</p>
-      <span class="app-tag soon-tag" data-es>Próximamente</span>
-      <span class="app-tag soon-tag" data-en>Coming Soon</span>
+
+    <!-- HP FLEET -->
+    <div class="app-card">
+      <div class="card-img">
+        <img src="assets/img/hpfleet-card.png" alt="HP Fleet"/>
+      </div>
+      <div class="card-body">
+        <div class="card-cat" data-es>02 · Atención al Cliente Interno</div>
+        <div class="card-cat" data-en>02 · Internal Operations</div>
+        <div class="card-name">HP FLEET</div>
+        <p class="card-desc" data-es>Plataforma operacional de aviación. Bitácoras, revisión, auditoría y pre-facturación.</p>
+        <p class="card-desc" data-en>Aviation operations platform. Flight logs, review, audit and pre-billing.</p>
+      </div>
+      <div class="card-buttons">
+        <a href="hpfleet.html" class="card-btn info">
+          <span>APP-INFO</span>
+        </a>
+        <a href="https://fleet-test.ict-labs.com/" target="_blank" class="card-btn demo">
+          <span>DEMO</span>
+        </a>
+      </div>
     </div>
-    <div class="app-card soon">
-      <span class="app-icon">🤖</span>
-      <div class="app-name">SOL</div>
-      <p class="app-desc" data-es>Plataforma Concierge IA — WhatsApp · Web · 24/7 bilingüe.</p>
-      <p class="app-desc" data-en>AI Guest Concierge platform — WhatsApp · Web · 24/7 bilingual.</p>
-      <span class="app-tag soon-tag" data-es>Próximamente</span>
-      <span class="app-tag soon-tag" data-en>Coming Soon</span>
+
+    <!-- ARCADE -->
+    <div class="app-card">
+      <div class="card-img">
+        <img src="assets/img/arcade-card.png" alt="ICTLabs Arcade"/>
+      </div>
+      <div class="card-body">
+        <div class="card-cat" data-es>03 · Capacitación</div>
+        <div class="card-cat" data-en>03 · Training</div>
+        <div class="card-name">ARCADE</div>
+        <p class="card-desc" data-es>Consola retro ICTLabs — juegos clásicos recreados con sonido sintetizado y gráficos fieles al arcade original.</p>
+        <p class="card-desc" data-en>ICTLabs Retro Console — classic games recreated with synthesized sound and faithful arcade graphics.</p>
+      </div>
+      <div class="card-buttons">
+        <a href="arcade.html" class="card-btn info">
+          <span>APP-INFO</span>
+        </a>
+        <div class="card-btn demo soon-demo">
+          <span data-es>PRÓXIMAMENTE</span>
+          <span data-en>COMING SOON</span>
+        </div>
+      </div>
     </div>
+
   </div>
+
   <p class="footer-note">© 2026 ICTLabs · ict-labs.com</p>
 </main>
+
 <script>
 function setLang(lang){
   document.getElementById('html-root').lang=lang;
