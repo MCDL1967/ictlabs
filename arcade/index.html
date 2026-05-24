@@ -599,6 +599,8 @@ function launchGame(mode){
   gameFrame.src=url;
   gameBarTitle.textContent=game.name+(mode==='2p'?' · 2P':'');
   gamePane.style.display='flex';
+  // Focus the iframe so keyboard events go straight to the game
+  setTimeout(()=>gameFrame.focus(),200);
 }
 
 function exitGame(){
@@ -609,18 +611,20 @@ function exitGame(){
 
 document.getElementById('exitButton').addEventListener('click',exitGame);
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&gamePane.style.display!=='none') exitGame();
+  // Only handle console keys when game is NOT running
+  if(gamePane.style.display!=='none'){
+    if(e.key==='Escape') exitGame();
+    return; // let all other keys pass to iframe
+  }
+  if(e.key==='ArrowUp')  { sfxNav();    selectGame(selectedIndex-1); e.preventDefault(); }
+  if(e.key==='ArrowDown'){ sfxNav();    selectGame(selectedIndex+1); e.preventDefault(); }
+  if(e.key==='Enter')    { sfxSelect(); launchGame('1p');             e.preventDefault(); }
 });
 
 // ── Nav buttons ───────────────────────────────────────────
 document.getElementById('upButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex-1); });
 document.getElementById('downButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex+1); });
 document.getElementById('selectButton').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowUp')  { sfxNav();    selectGame(selectedIndex-1); e.preventDefault(); }
-  if(e.key==='ArrowDown'){ sfxNav();    selectGame(selectedIndex+1); e.preventDefault(); }
-  if(e.key==='Enter')    { sfxSelect(); launchGame('1p');             e.preventDefault(); }
-});
 
 // ── 1P / 2P ───────────────────────────────────────────────
 document.getElementById('btn1p').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });

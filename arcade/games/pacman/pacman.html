@@ -63,10 +63,14 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="overlay">
   <h1>PAC-MAN</h1>
   <p class="sub">Eat all dots · Avoid ghosts · Power up to fight back</p>
-  <button class="start-btn" id="startBtn">START GAME</button>
+  <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="start-btn" id="btnBeginner" style="font-size:clamp(8px,1.2vw,11px);padding:10px 20px;border-color:#0f0;color:#0f0;">BEGINNER</button>
+    <button class="start-btn" id="btnInter"    style="font-size:clamp(8px,1.2vw,11px);padding:10px 20px;border-color:#ff0;color:#ff0;">INTERMEDIATE</button>
+    <button class="start-btn" id="btnAdvanced" style="font-size:clamp(8px,1.2vw,11px);padding:10px 20px;border-color:#f44;color:#f44;">ADVANCED</button>
+  </div>
   <div class="pts-table">
     Dot <span>10 pts</span> &nbsp;·&nbsp; Power Pellet <span>50 pts</span><br>
-    Ghost (1st) <span>200</span> · (2nd) <span>400</span> · (3rd) <span>800</span> · (4th) <span>1600</span><br>
+    Ghost ×1 <span>200</span> · ×2 <span>400</span> · ×3 <span>800</span> · ×4 <span>1600</span><br>
     Arrow keys or WASD to move
   </div>
 </div>
@@ -143,7 +147,15 @@ resize(); window.addEventListener('resize',resize);
 let map,pac,ghosts,score,hiScore=0,lives,level,powerTimer,ghostEatCombo;
 let gstate='idle';
 let frameCount=0,animFrame=0;
-const PAC_SPEED=2.2;
+// ── Difficulty ─────────────────────────────────────────
+let difficulty='intermediate'; // 'beginner' | 'intermediate' | 'advanced'
+function getDiffSpeeds(){
+  if(difficulty==='beginner')     return{pac:1.4,ghost:1.0,buffer:10};
+  if(difficulty==='advanced')     return{pac:2.8,ghost:2.4,buffer:0};
+  return{pac:2.0,ghost:1.6,buffer:4}; // intermediate
+}
+
+const PAC_SPEED=2.2;  // overridden per difficulty at runtime
 const GHOST_SPEED=1.8;
 
 const GHOST_COLORS=['#f00','#f9c','#0cc','#f80'];
@@ -178,7 +190,8 @@ function initLevel(){
   frameCount=0;
 }
 
-function startGame(){
+function startGame(diff){
+  if(diff) difficulty=diff;
   overlay.style.display='none';
   hideMsg();
   score=0; lives=3; level=1;
@@ -199,7 +212,9 @@ document.addEventListener('keydown',e=>{
   const d=DIRS[e.code];
   if(d){ e.preventDefault(); pac.nextDx=d.dx; pac.nextDy=d.dy; }
 });
-document.getElementById('startBtn').onclick=startGame;
+document.getElementById('btnBeginner').onclick=()=>startGame('beginner');
+document.getElementById('btnInter').onclick=()=>startGame('intermediate');
+document.getElementById('btnAdvanced').onclick=()=>startGame('advanced');
 
 // ── Map helpers ────────────────────────────────────────
 function cellAt(x,y){
@@ -209,8 +224,9 @@ function cellAt(x,y){
 }
 function isWall(x,y){ return cellAt(x,y)===1; }
 function canMove(px,py,dx,dy){
-  const r=CELL/2-2;
-  const nx=px+dx*PAC_SPEED, ny=py+dy*PAC_SPEED;
+  const {pac:pacSpd,buffer} = getDiffSpeeds();
+  const r=CELL/2-2-buffer; // buffer zone for beginner
+  const nx=px+dx*pacSpd, ny=py+dy*pacSpd;
   const pts=[
     {x:nx+r*Math.sign(dx||1)*0.9, y:ny},
     {x:nx-r*Math.sign(dx||1)*0.9, y:ny},
@@ -234,8 +250,8 @@ function movePac(){
   // Continue current direction
   if(pac.dx!==0||pac.dy!==0){
     if(canMove(pac.x,pac.y,pac.dx,pac.dy)){
-      pac.x+=pac.dx*PAC_SPEED;
-      pac.y+=pac.dy*PAC_SPEED;
+      pac.x+=pac.dx*getDiffSpeeds().pac;
+      pac.y+=pac.dy*getDiffSpeeds().pac;
       // Wrap tunnel
       if(pac.x<0) pac.x=W; if(pac.x>W) pac.x=0;
     }
@@ -266,7 +282,8 @@ function movePac(){
 function moveGhost(g){
   if(g.exitTimer>0){ g.exitTimer--; return; }
 
-  const speed=(g.scared?GHOST_SPEED*0.55:g.eaten?GHOST_SPEED*2:GHOST_SPEED*(1+level*0.08));
+  const gs=getDiffSpeeds().ghost;
+const speed=(g.scared?gs*0.55:g.eaten?gs*2:gs*(1+level*0.08));
   const DIRS4=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
 
   // Simple movement — try to continue, else pick random valid direction
@@ -382,7 +399,7 @@ function gameOver(){
     <button class="start-btn" id="retryBtn" style="border-color:#f44;color:#f44;">PLAY AGAIN</button>
   `;
   overlay.style.display='flex';
-  document.getElementById('retryBtn').onclick=()=>{ lives=3; level=1; score=0; initLevel(); updateUI(); overlay.style.display='none'; gstate='playing'; };
+  document.getElementById('retryBtn').onclick=()=>{ overlay.style.display='none'; overlay.innerHTML=savedOverlay; rebindDiff(); gstate='idle'; };
 }
 
 // ── Power timer ────────────────────────────────────────
@@ -540,6 +557,12 @@ function loop(){
 updateUI();
 loop();
 const urlMode=new URLSearchParams(window.location.search).get('mode');
+let savedOverlay=overlay.innerHTML;
+function rebindDiff(){
+  document.getElementById('btnBeginner').onclick=()=>startGame('beginner');
+  document.getElementById('btnInter').onclick=()=>startGame('intermediate');
+  document.getElementById('btnAdvanced').onclick=()=>startGame('advanced');
+}
 if(urlMode) startGame();
 </script>
 </body>
