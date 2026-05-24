@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>ZAXXON</title>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  height:100vh;overflow:hidden;font-family:'Audiowide',sans-serif;
+}
+canvas{display:block;image-rendering:pixelated;}
+#ui{
+  color:#fff;text-align:center;margin-bottom:6px;
+  font-size:11px;letter-spacing:2px;
+  display:flex;gap:20px;justify-content:center;align-items:center;flex-wrap:wrap;
+}
+#ui .sc{color:#ff0;}
+#ui .hi{color:#f80;}
+#ui .lv{color:#0cf;}
+#ui .lf{color:#f44;}
+#ui .fu{color:#0f0;}
+#ui .al{color:#0ff;}
+#overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.92);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:#fff;text-align:center;z-index:10;
+}
+#overlay h1{
+  font-size:clamp(28px,5vw,56px);color:#ff0;
+  text-shadow:0 0 24px #ff0;margin-bottom:8px;letter-spacing:6px;
+}
+#overlay .sub{font-size:clamp(8px,1.2vw,12px);color:rgba(255,255,255,0.5);margin-bottom:24px;letter-spacing:2px;line-height:2;}
+.start-btn{
+  background:transparent;border:2px solid #ff0;color:#ff0;
+  font-family:'Audiowide',sans-serif;font-size:clamp(10px,1.5vw,13px);
+  letter-spacing:2px;padding:13px 48px;cursor:pointer;transition:all 0.15s;
+}
+.start-btn:hover{background:#ff0;color:#000;}
+#msg{
+  position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Audiowide',sans-serif;
+  font-size:clamp(14px,2.5vw,22px);color:#ff0;
+  letter-spacing:3px;pointer-events:none;display:none;z-index:9;
+  animation:blink .7s step-end infinite;text-align:center;line-height:1.8;
+}
+@keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="ui">
+  <span class="hi">HI: <b id="hiEl">0</b></span>
+  <span class="sc">SCORE: <b id="scEl">0</b></span>
+  <span class="lv">WAVE: <b id="lvEl">1</b></span>
+  <span class="lf">SHIPS: <b id="lfEl">3</b></span>
+  <span class="fu">FUEL: <b id="fuEl">100</b>%</span>
+  <span class="al">ALT: <b id="alEl">5</b></span>
+</div>
+<canvas id="c"></canvas>
+<div id="msg"></div>
+
+<div id="overlay">
+  <h1>ZAXXON</h1>
+  <p class="sub">
+    Isometric space fortress assault<br>
+    ↑↓ Altitude &nbsp;·&nbsp; ←→ Strafe &nbsp;·&nbsp; Space Fire<br>
+    Destroy turrets · Collect fuel · Reach the robot
+  </p>
+  <button class="start-btn" id="startBtn">START GAME</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ZAXXON — Isometric space shooter · ICTLabs Arcade
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const overlay= document.getElementById('overlay');
+const hiEl=document.getElementById('hiEl');
+const scEl=document.getElementById('scEl');
+const lvEl=document.getElementById('lvEl');
+const lfEl=document.getElementById('lfEl');
+const fuEl=document.getElementById('fuEl');
+const alEl=document.getElementById('alEl');
+const msgEl=document.getElementById('msg');
+
+// ── Canvas sizing ──────────────────────────────────────
+const W=640, H=480;
+canvas.width=W; canvas.height=H;
+function resize(){
+  const s=Math.min(window.innerWidth/W,(window.innerHeight-52)/H);
+  canvas.style.width=(W*s)+'px'; canvas.style.height=(H*s)+'px';
+}
+resize(); window.addEventListener('resize',resize);
+
+// ── Web Audio ──────────────────────────────────────────
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function tone(freq,dur,vol=0.15,type='square'){
+  try{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    o.start();o.stop(AC.currentTime+dur+0.01);
+  }catch(e){}
+}
+function sfxShoot(){ tone(880,0.06,0.15,'square'); }
+function sfxExplosion(freq=200){
+  const buf=AC.createBuffer(1,AC.sampleRate*0.3,AC.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,0.5);
+  const src=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();
+  src.buffer=buf;f.type='bandpass';f.frequency.value=freq;f.Q.value=0.8;
+  src.connect(f);f.connect(g);g.connect(AC.destination);
+  g.gain.setValueAtTime(0.4,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.3);
+  src.start();src.stop(AC.currentTime+0.31);
+}
+function sfxDie(){   [440,330,220,110].forEach((f,i)=>setTimeout(()=>tone(f,0.15,0.3,'sawtooth'),i*90)); }
+function sfxFuel(){  [660,880].forEach((f,i)=>setTimeout(()=>tone(f,0.08,0.2,'square'),i*80)); }
+function sfxWave(){  [523,659,784,1047,784,659].forEach((f,i)=>setTimeout(()=>tone(f,0.1,0.25,'square'),i*80)); }
+document.addEventListener('keydown',()=>{ if(AC.state==='suspended') AC.resume(); },{once:false});
+
+// ── Isometric projection ───────────────────────────────
+// World coords: x=right, y=depth(scroll), z=height
+// Screen: isoX = (x - y) * cos30, isoY = (x + y) * sin30 - z * tileH
+const TILE_W=48, TILE_H=24;
+const ISO_ORIGIN_X=W/2, ISO_ORIGIN_Y=H*0.55;
+
+function toScreen(wx,wy,wz){
+  const sx = ISO_ORIGIN_X + (wx - wy) * (TILE_W/2);
+  const sy = ISO_ORIGIN_Y + (wx + wy) * (TILE_H/2) - wz * TILE_H;
+  return {sx,sy};
+}
+
+// ── Game constants ─────────────────────────────────────
+const WORLD_W=8;    // tiles wide
+const SCROLL_SPEED=0.04;
+const PLAYER_SPEED=0.08;
+const BULLET_SPEED=0.25;
+const MAX_ALT=9, MIN_ALT=1;
+const MAX_FUEL=100;
+
+// ── State ──────────────────────────────────────────────
+let player,bullets,enemies,explosions,fuelTanks,walls;
+let scrollY,score,hiScore=0,lives,wave,fuel;
+let gstate='idle';
+let frameCount=0;
+let zaxxonBot=null, zaxxonPhase=0;
+
+function startGame(){
+  overlay.style.display='none';
+  hideMsg();
+  score=0; lives=3; wave=1; fuel=MAX_FUEL;
+  initWave();
+  gstate='playing';
+}
+
+function initWave(){
+  scrollY=0;
+  player={
+    wx:WORLD_W/2, wy:8, wz:5,
+    dead:false, deadTimer:0,
+    invincible:120,
+    dx:0, dz:0
+  };
+  bullets=[];
+  enemies=generateEnemies(wave);
+  fuelTanks=generateFuel(wave);
+  walls=generateWalls(wave);
+  explosions=[];
+  zaxxonBot=null;
+  updateUI();
+}
+
+// ── Level generation ───────────────────────────────────
+function generateEnemies(w){
+  const list=[];
+  const count=6+w*2;
+  for(let i=0;i<count;i++){
+    const wx=1+Math.random()*(WORLD_W-2);
+    const wy=-(10+i*4+Math.random()*3);
+    const wz=1+Math.floor(Math.random()*7);
+    list.push({
+      wx,wy,wz,
+      type:Math.random()<0.3?'missile':'turret',
+      alive:true,
+      shootTimer:60+Math.random()*120,
+      dx:(Math.random()-0.5)*0.03,
+      dz:0
+    });
+  }
+  // Boss at the end
+  if(w>=1){
+    list.push({
+      wx:WORLD_W/2, wy:-(10+count*4+20),
+      wz:5, type:'zaxxon', alive:true,
+      shootTimer:80, dx:0.04, dz:0,
+      hp:3+w
+    });
+  }
+  return list;
+}
+
+function generateFuel(w){
+  const list=[];
+  for(let i=0;i<4;i++){
+    list.push({
+      wx:1+Math.random()*(WORLD_W-2),
+      wy:-(8+i*12+Math.random()*4),
+      collected:false
+    });
+  }
+  return list;
+}
+
+function generateWalls(w){
+  const list=[];
+  // Fortress walls with gaps
+  for(let i=0;i<3+w;i++){
+    const wy=-(15+i*18);
+    const gap=1+Math.floor(Math.random()*(WORLD_W-3));
+    for(let x=0;x<WORLD_W;x++){
+      if(x<gap||x>gap+1){
+        list.push({wx:x,wy,wz:0,height:2+Math.floor(Math.random()*3),alive:true});
+      }
+    }
+  }
+  return list;
+}
+
+// ── Input ──────────────────────────────────────────────
+const keys={};
+document.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  ['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k=>{ if(e.code===k) e.preventDefault(); });
+  if(gstate==='idle'&&e.code==='Space'){ startGame(); return; }
+  if(gstate==='dead_wait'&&e.code==='Space'){ respawn(); return; }
+  if(gstate==='playing'&&e.code==='Space'){ fireBullet(); }
+});
+document.addEventListener('keyup',e=>{ keys[e.code]=false; });
+document.getElementById('startBtn').onclick=startGame;
+
+// ── Fire ───────────────────────────────────────────────
+let fireCooldown=0;
+function fireBullet(){
+  if(fireCooldown>0) return;
+  bullets.push({wx:player.wx, wy:player.wy-0.5, wz:player.wz, alive:true, age:0});
+  fireCooldown=12;
+  sfxShoot();
+}
+
+// ── Update ─────────────────────────────────────────────
+function update(){
+  frameCount++;
+  if(fireCooldown>0) fireCooldown--;
+
+  // Scroll world
+  scrollY+=SCROLL_SPEED*(1+wave*0.1);
+
+  // Player input
+  if(!player.dead){
+    if(player.invincible>0) player.invincible--;
+    let dx=0,dz=0;
+    if(keys['ArrowLeft']||keys['KeyA'])  dx=-PLAYER_SPEED;
+    if(keys['ArrowRight']||keys['KeyD']) dx= PLAYER_SPEED;
+    if(keys['ArrowUp']||keys['KeyW'])    dz= PLAYER_SPEED*0.7;
+    if(keys['ArrowDown']||keys['KeyS'])  dz=-PLAYER_SPEED*0.7;
+    player.wx=Math.max(0.5,Math.min(WORLD_W-0.5,player.wx+dx));
+    player.wz=Math.max(MIN_ALT,Math.min(MAX_ALT,player.wz+dz));
+    // Continuous fire
+    if(keys['Space']&&fireCooldown<=0) fireBullet();
+    // Fuel drain
+    fuel=Math.max(0,fuel-0.015*(1+wave*0.05));
+    if(fuel<=0){ killPlayer(); return; }
+    updateUI();
+  } else {
+    player.deadTimer--;
+    if(player.deadTimer<=0) killPlayer2();
+    return;
+  }
+
+  // Move bullets
+  for(let i=bullets.length-1;i>=0;i--){
+    const b=bullets[i];
+    b.wy-=BULLET_SPEED;
+    b.age++;
+    if(b.age>120||b.wy<player.wy-40){ bullets.splice(i,1); continue; }
+    // Hit enemies
+    enemies.forEach(e=>{
+      if(!e.alive||!b.alive) return;
+      const dist=Math.hypot(b.wx-e.wx,b.wy-e.wy)*1.5+Math.abs(b.wz-e.wz);
+      if(dist<1.2){
+        b.alive=false;
+        if(e.type==='zaxxon'){
+          e.hp--;
+          spawnExplosion(e.wx,e.wy,e.wz);
+          sfxExplosion(400);
+          if(e.hp<=0){ e.alive=false; score+=2000; sfxExplosion(300); setTimeout(waveComplete,1500); }
+        } else {
+          e.alive=false;
+          score+=e.type==='missile'?150:100;
+          spawnExplosion(e.wx,e.wy,e.wz);
+          sfxExplosion(e.type==='missile'?300:200);
+        }
+        updateUI();
+      }
+    });
+    // Hit walls
+    walls.forEach(w=>{
+      if(!w.alive||!b.alive) return;
+      if(Math.abs(b.wx-w.wx)<0.7&&Math.abs(b.wy-w.wy)<0.5&&b.wz<w.height){
+        b.alive=false;
+        w.alive=false;
+        spawnExplosion(w.wx,w.wy,w.height/2);
+        sfxExplosion(150); score+=50; updateUI();
+      }
+    });
+    if(!b.alive) bullets.splice(i,1);
+  }
+
+  // Move enemies
+  enemies.forEach(e=>{
+    if(!e.alive) return;
+    // Scroll with world
+    e.wy+=SCROLL_SPEED*(1+wave*0.1);
+    if(e.type==='missile'){
+      e.wx+=e.dx; if(e.wx<0.5||e.wx>WORLD_W-0.5) e.dx*=-1;
+    }
+    if(e.type==='zaxxon'){
+      e.wx+=e.dx; if(e.wx<1||e.wx>WORLD_W-1) e.dx*=-1;
+    }
+    // Enemy shoots
+    e.shootTimer--;
+    if(e.shootTimer<=0&&e.type!=='zaxxon'){
+      e.shootTimer=80+Math.random()*80;
+      // Enemy bullet toward player
+      bullets.push({
+        wx:e.wx, wy:e.wy, wz:e.wz,
+        alive:true, age:0, enemy:true,
+        dvx:(player.wx-e.wx)*0.03,
+        dvy:BULLET_SPEED*0.6,
+        dvz:(player.wz-e.wz)*0.02
+      });
+    }
+    if(e.type==='zaxxon'&&e.shootTimer<=0){
+      e.shootTimer=50+Math.random()*40;
+      bullets.push({wx:e.wx,wy:e.wy,wz:e.wz,alive:true,age:0,enemy:true,dvx:0,dvy:BULLET_SPEED*0.5,dvz:0});
+    }
+    // Collision with player
+    if(!player.dead&&player.invincible<=0){
+      const dist=Math.hypot(e.wx-player.wx,e.wy-player.wy)+Math.abs(e.wz-player.wz)*0.5;
+      if(dist<1.0){ player.dead=true; player.deadTimer=60; sfxDie(); }
+    }
+  });
+
+  // Enemy bullets
+  for(let i=bullets.length-1;i>=0;i--){
+    const b=bullets[i];
+    if(!b.enemy) continue;
+    b.wy+=b.dvy||BULLET_SPEED*0.5;
+    if(b.dvx) b.wx+=b.dvx;
+    if(b.dvz) b.wz+=b.dvz;
+    b.age++;
+    if(b.age>80) { bullets.splice(i,1); continue; }
+    // Hit player
+    if(!player.dead&&player.invincible<=0){
+      const dist=Math.hypot(b.wx-player.wx,b.wy-player.wy)+Math.abs(b.wz-player.wz)*0.5;
+      if(dist<0.9){ player.dead=true; player.deadTimer=60; sfxDie(); bullets.splice(i,1); }
+    }
+  }
+
+  // Walls scroll
+  walls.forEach(w=>{ w.wy+=SCROLL_SPEED*(1+wave*0.1); });
+  // Player hits wall
+  if(!player.dead&&player.invincible<=0){
+    walls.forEach(w=>{
+      if(!w.alive) return;
+      if(Math.abs(player.wx-w.wx)<0.8&&Math.abs(player.wy-w.wy)<0.5&&player.wz<w.height){
+        player.dead=true; player.deadTimer=60; sfxDie();
+      }
+    });
+  }
+
+  // Fuel tanks scroll + collect
+  fuelTanks.forEach(f=>{
+    if(f.collected) return;
+    f.wy+=SCROLL_SPEED*(1+wave*0.1);
+    const dist=Math.hypot(f.wx-player.wx,f.wy-player.wy)+Math.abs(1-player.wz)*0.3;
+    if(dist<1.0){ f.collected=true; fuel=Math.min(MAX_FUEL,fuel+30); sfxFuel(); updateUI(); }
+  });
+
+  // Update explosions
+  for(let i=explosions.length-1;i>=0;i--){
+    explosions[i].life--;
+    if(explosions[i].life<=0) explosions.splice(i,1);
+  }
+}
+
+function spawnExplosion(wx,wy,wz){
+  for(let i=0;i<8;i++){
+    explosions.push({
+      wx:wx+(Math.random()-0.5)*0.5,
+      wy:wy+(Math.random()-0.5)*0.5,
+      wz:wz+(Math.random()-0.5)*0.5,
+      dvx:(Math.random()-0.5)*0.04,
+      dvy:(Math.random()-0.5)*0.04,
+      dvz:Math.random()*0.04,
+      life:20+Math.random()*20,
+      maxLife:40,
+      color:`hsl(${30+Math.random()*30},100%,${50+Math.random()*30}%)`
+    });
+  }
+}
+
+function killPlayer(){
+  lives--; updateUI();
+  if(lives<=0){ gameOver(); return; }
+  gstate='dead_wait';
+  showMsg('SHIP DESTROYED\nSPACE TO CONTINUE');
+}
+function killPlayer2(){
+  lives--; updateUI();
+  if(lives<=0){ gameOver(); return; }
+  gstate='dead_wait';
+  showMsg('SHIP DESTROYED\nSPACE TO CONTINUE');
+}
+
+function respawn(){
+  hideMsg();
+  player.wx=WORLD_W/2; player.wz=5;
+  player.dead=false; player.deadTimer=0;
+  player.invincible=180;
+  fuel=Math.min(MAX_FUEL,fuel+20);
+  gstate='playing';
+}
+
+function waveComplete(){
+  wave++;
+  sfxWave();
+  showMsg(`WAVE ${wave-1} CLEAR!\nPREPARING WAVE ${wave}...`);
+  setTimeout(()=>{ initWave(); hideMsg(); },2500);
+}
+
+function gameOver(){
+  gstate='gameover';
+  if(score>hiScore) hiScore=score;
+  updateUI();
+  overlay.innerHTML=`
+    <h1 style="font-size:clamp(22px,4vw,44px);color:#f44;text-shadow:0 0 20px #f44;margin-bottom:16px;">GAME OVER</h1>
+    <p style="font-size:clamp(8px,1.2vw,12px);color:#aaa;margin-bottom:24px;letter-spacing:2px;">SCORE: ${score} &nbsp;·&nbsp; HI: ${hiScore}</p>
+    <button class="start-btn" id="retryBtn" style="border-color:#f44;color:#f44;">PLAY AGAIN</button>
+  `;
+  overlay.style.display='flex';
+  document.getElementById('retryBtn').onclick=()=>{
+    lives=3;wave=1;score=0;fuel=MAX_FUEL;
+    initWave();updateUI();
+    overlay.style.display='none';gstate='playing';
+  };
+}
+
+// ── Draw ───────────────────────────────────────────────
+function drawIsoRect(wx,wy,wz,w,d,h,topColor,leftColor,rightColor){
+  const p=toScreen(wx,wy,wz+h);
+  const a=toScreen(wx,wy,wz);
+  const b=toScreen(wx+w,wy,wz);
+  const c=toScreen(wx+w,wy+d,wz);
+  const e=toScreen(wx,wy+d,wz);
+  const f=toScreen(wx,wy+d,wz+h);
+  const g2=toScreen(wx+w,wy+d,wz+h);
+  const q=toScreen(wx+w,wy,wz+h);
+
+  // Top face
+  ctx.fillStyle=topColor;
+  ctx.beginPath();
+  ctx.moveTo(p.sx,p.sy);ctx.lineTo(q.sx,q.sy);
+  ctx.lineTo(g2.sx,g2.sy);ctx.lineTo(f.sx,f.sy);
+  ctx.closePath();ctx.fill();
+
+  // Left face (front-left)
+  ctx.fillStyle=leftColor;
+  ctx.beginPath();
+  ctx.moveTo(p.sx,p.sy);ctx.lineTo(a.sx,a.sy);
+  ctx.lineTo(e.sx,e.sy);ctx.lineTo(f.sx,f.sy);
+  ctx.closePath();ctx.fill();
+
+  // Right face (front-right)
+  ctx.fillStyle=rightColor;
+  ctx.beginPath();
+  ctx.moveTo(f.sx,f.sy);ctx.lineTo(e.sx,e.sy);
+  ctx.lineTo(c.sx,c.sy);ctx.lineTo(g2.sx,g2.sy);
+  ctx.closePath();ctx.fill();
+}
+
+function draw(){
+  // Sky background — gradient from dark blue to black
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#000010');
+  grad.addColorStop(1,'#000820');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+
+  // Stars
+  ctx.fillStyle='rgba(255,255,255,0.6)';
+  for(let i=0;i<60;i++){
+    const sx=(((i*173+frameCount*0.2)%W+W)%W);
+    const sy=(i*97)%H;
+    ctx.fillRect(sx,sy,1,1);
+  }
+
+  // Ground plane tiles
+  const groundY=player.wy;
+  for(let gx=0;gx<WORLD_W;gx++){
+    for(let gy=groundY-2;gy<groundY+12;gy++){
+      const {sx,sy}=toScreen(gx,gy,0);
+      if(sy<-20||sy>H+20) continue;
+      const checker=(gx+Math.floor(gy))%2;
+      ctx.fillStyle=checker?'#0a1a0a':'#051005';
+      ctx.beginPath();
+      const a=toScreen(gx,gy,0);
+      const b=toScreen(gx+1,gy,0);
+      const c=toScreen(gx+1,gy+1,0);
+      const d2=toScreen(gx,gy+1,0);
+      ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);
+      ctx.lineTo(c.sx,c.sy);ctx.lineTo(d2.sx,d2.sy);
+      ctx.closePath();ctx.fill();
+    }
+  }
+
+  // Sort all objects by depth (wy desc = further = draw first)
+  const drawOrder=[];
+
+  // Walls
+  walls.forEach(w=>{
+    if(!w.alive) return;
+    const screenY=toScreen(w.wx,w.wy,w.height).sy;
+    if(screenY>-50&&screenY<H+100)
+      drawOrder.push({type:'wall',obj:w,depth:w.wy});
+  });
+
+  // Fuel tanks
+  fuelTanks.forEach(f=>{
+    if(f.collected) return;
+    const screenY=toScreen(f.wx,f.wy,1).sy;
+    if(screenY>-50&&screenY<H+100)
+      drawOrder.push({type:'fuel',obj:f,depth:f.wy});
+  });
+
+  // Enemies
+  enemies.forEach(e=>{
+    if(!e.alive) return;
+    const screenY=toScreen(e.wx,e.wy,e.wz).sy;
+    if(screenY>-80&&screenY<H+80)
+      drawOrder.push({type:'enemy',obj:e,depth:e.wy});
+  });
+
+  // Bullets
+  bullets.forEach(b=>{
+    drawOrder.push({type:'bullet',obj:b,depth:b.wy});
+  });
+
+  // Player
+  if(!player.dead||(player.dead&&Math.floor(frameCount/6)%2===0))
+    drawOrder.push({type:'player',obj:player,depth:player.wy});
+
+  // Explosions
+  explosions.forEach(ex=>{
+    drawOrder.push({type:'explosion',obj:ex,depth:ex.wy});
+  });
+
+  // Sort by depth (furthest first)
+  drawOrder.sort((a,b)=>a.depth-b.depth);
+
+  // Draw all
+  drawOrder.forEach(item=>{
+    const {type,obj}=item;
+
+    if(type==='wall'){
+      const w=obj;
+      drawIsoRect(w.wx,w.wy,0,0.9,0.3,w.height,
+        '#445544','#223322','#334433');
+      // Warning light on top
+      if(Math.floor(frameCount/15)%2===0){
+        const {sx,sy}=toScreen(w.wx+0.45,w.wy+0.15,w.height);
+        ctx.fillStyle='#f00';
+        ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    if(type==='fuel'){
+      const f=obj;
+      drawIsoRect(f.wx-0.3,f.wy-0.15,0,0.6,0.3,0.6,'#00aa00','#005500','#007700');
+      const {sx,sy}=toScreen(f.wx,f.wy,0.8);
+      ctx.fillStyle='#0f0';
+      ctx.font='8px Audiowide';ctx.textAlign='center';
+      ctx.fillText('FUEL',sx,sy-4);
+    }
+
+    if(type==='enemy'){
+      const e=obj;
+      if(e.type==='turret'){
+        // Base
+        drawIsoRect(e.wx-0.3,e.wy-0.15,e.wz-0.5,0.6,0.3,0.5,'#888','#444','#666');
+        // Gun barrel
+        const {sx,sy}=toScreen(e.wx,e.wy,e.wz);
+        ctx.fillStyle='#aaa';
+        ctx.fillRect(sx-3,sy-12,6,14);
+        // Muzzle flash
+        if(frameCount%4===0){
+          ctx.fillStyle='rgba(255,200,0,0.3)';
+          ctx.beginPath();ctx.arc(sx,sy-14,4,0,Math.PI*2);ctx.fill();
+        }
+      }
+      if(e.type==='missile'){
+        const {sx,sy}=toScreen(e.wx,e.wy,e.wz);
+        ctx.fillStyle='#f80';
+        ctx.shadowBlur=8;ctx.shadowColor='#f80';
+        ctx.fillRect(sx-4,sy-8,8,16);
+        ctx.fillStyle='#ff0';
+        ctx.beginPath();ctx.moveTo(sx,sy-12);ctx.lineTo(sx-4,sy-8);ctx.lineTo(sx+4,sy-8);ctx.closePath();ctx.fill();
+        ctx.shadowBlur=0;
+      }
+      if(e.type==='zaxxon'){
+        const {sx,sy}=toScreen(e.wx,e.wy,e.wz);
+        // Zaxxon robot
+        ctx.shadowBlur=16;ctx.shadowColor='#f00';
+        // Body
+        ctx.fillStyle='#880000';
+        ctx.fillRect(sx-14,sy-20,28,24);
+        ctx.fillStyle='#cc0000';
+        ctx.fillRect(sx-12,sy-18,24,20);
+        // Head
+        ctx.fillStyle='#aa0000';
+        ctx.fillRect(sx-8,sy-30,16,12);
+        // Eyes
+        ctx.fillStyle='#ff0';
+        ctx.fillRect(sx-6,sy-27,4,4);
+        ctx.fillRect(sx+2,sy-27,4,4);
+        // Arms
+        ctx.fillStyle='#880000';
+        ctx.fillRect(sx-22,sy-18,10,8);
+        ctx.fillRect(sx+12,sy-18,10,8);
+        // HP bar
+        const maxHp=3+wave;
+        ctx.fillStyle='#440000';
+        ctx.fillRect(sx-14,sy-38,28,4);
+        ctx.fillStyle='#f00';
+        ctx.fillRect(sx-14,sy-38,(e.hp/maxHp)*28,4);
+        ctx.shadowBlur=0;
+      }
+    }
+
+    if(type==='bullet'){
+      const b=obj;
+      const {sx,sy}=toScreen(b.wx,b.wy,b.wz);
+      if(b.enemy){
+        ctx.fillStyle='#f44';
+        ctx.shadowBlur=6;ctx.shadowColor='#f44';
+        ctx.fillRect(sx-2,sy-4,4,8);
+      } else {
+        ctx.fillStyle='#ff0';
+        ctx.shadowBlur=8;ctx.shadowColor='#ff0';
+        ctx.fillRect(sx-2,sy-6,4,12);
+      }
+      ctx.shadowBlur=0;
+    }
+
+    if(type==='player'){
+      const p=obj;
+      const {sx,sy}=toScreen(p.wx,p.wy,p.wz);
+      const flash=p.invincible>0&&Math.floor(frameCount/6)%2===0;
+      if(!flash){
+        ctx.shadowBlur=12;ctx.shadowColor='#4af';
+        // Ship body — isometric fighter
+        ctx.fillStyle='#4af';
+        ctx.beginPath();
+        ctx.moveTo(sx,sy-14);
+        ctx.lineTo(sx-10,sy+4);
+        ctx.lineTo(sx-5,sy+2);
+        ctx.lineTo(sx,sy+6);
+        ctx.lineTo(sx+5,sy+2);
+        ctx.lineTo(sx+10,sy+4);
+        ctx.closePath();ctx.fill();
+        // Cockpit
+        ctx.fillStyle='#88ddff';
+        ctx.beginPath();ctx.arc(sx,sy-4,4,0,Math.PI*2);ctx.fill();
+        // Engine glow
+        ctx.fillStyle='rgba(100,200,255,0.6)';
+        ctx.beginPath();ctx.arc(sx,sy+8,3+Math.sin(frameCount*0.3)*1,0,Math.PI*2);ctx.fill();
+        ctx.shadowBlur=0;
+      }
+    }
+
+    if(type==='explosion'){
+      const ex=obj;
+      ex.wx+=ex.dvx; ex.wy+=ex.dvy; ex.wz+=ex.dvz;
+      const {sx,sy}=toScreen(ex.wx,ex.wy,ex.wz);
+      const alpha=ex.life/ex.maxLife;
+      const size=3+(1-alpha)*8;
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle=ex.color;
+      ctx.beginPath();ctx.arc(sx,sy,size,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  });
+
+  // HUD elements
+  // Altitude meter
+  const altMeterX=W-24, altMeterY=80, altH=120;
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  ctx.fillRect(altMeterX-4,altMeterY-4,16,altH+8);
+  ctx.strokeStyle='#0ff';ctx.lineWidth=1;
+  ctx.strokeRect(altMeterX-4,altMeterY-4,16,altH+8);
+  const altFill=((player.wz-MIN_ALT)/(MAX_ALT-MIN_ALT))*altH;
+  ctx.fillStyle='#0ff';
+  ctx.fillRect(altMeterX,altMeterY+altH-altFill,8,altFill);
+  ctx.fillStyle='#0ff';ctx.font='8px Audiowide';ctx.textAlign='center';
+  ctx.fillText('ALT',altMeterX+4,altMeterY-8);
+
+  // Fuel meter
+  const fuelMeterX=W-24, fuelMeterY=220;
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  ctx.fillRect(fuelMeterX-4,fuelMeterY-4,16,altH+8);
+  ctx.strokeStyle='#0f0';ctx.lineWidth=1;
+  ctx.strokeRect(fuelMeterX-4,fuelMeterY-4,16,altH+8);
+  const fuelFill=(fuel/MAX_FUEL)*altH;
+  ctx.fillStyle=fuel<30?'#f44':'#0f0';
+  ctx.fillRect(fuelMeterX,fuelMeterY+altH-fuelFill,8,fuelFill);
+  ctx.fillStyle='#0f0';ctx.font='8px Audiowide';ctx.textAlign='center';
+  ctx.fillText('FUEL',fuelMeterX+4,fuelMeterY-8);
+
+  // Wave indicator
+  ctx.fillStyle='rgba(255,255,0,0.6)';
+  ctx.font='10px Audiowide';ctx.textAlign='left';
+  ctx.fillText(`WAVE ${wave}`,8,H-8);
+}
+
+function updateUI(){
+  hiEl.textContent=hiScore;
+  scEl.textContent=score;
+  lvEl.textContent=wave;
+  lfEl.textContent=lives;
+  fuEl.textContent=Math.round(fuel);
+  alEl.textContent=Math.round(player?.wz||5);
+}
+
+// ── Loop ───────────────────────────────────────────────
+let lastTime=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  frameCount++;
+  if(gstate==='playing') update();
+  draw();
+}
+
+// ── Boot ───────────────────────────────────────────────
+updateUI();
+requestAnimationFrame(loop);
+const urlMode=new URLSearchParams(window.location.search).get('mode');
+if(urlMode) startGame();
+</script>
+</body>
+</html>
