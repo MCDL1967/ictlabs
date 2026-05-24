@@ -1,6 +1,7 @@
 {
   "games": [
     "galaga",
-    "pong"
+    "pong",
+    "snake"
   ]
 }

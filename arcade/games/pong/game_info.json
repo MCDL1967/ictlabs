@@ -1,7 +1,7 @@
 {
   "name": "PONG",
   "image_desc": "The original arcade game. Two paddles, one ball. 1 Player vs CPU or 2 Players local.",
-  "video_src": "https://www.youtube.com/embed/fiShX2pTz9A?autoplay=1&mute=1&controls=0&loop=1&playlist=fiShX2pTz9A",
+  "video_src": "https://www.youtube.com/embed/e4VRgY3tkh0?autoplay=1&mute=1&controls=0&loop=1&playlist=e4VRgY3tkh0",
   "genre": "Classic",
   "release_year": 1972,
   "play_url": "games/pong/pong.html",
