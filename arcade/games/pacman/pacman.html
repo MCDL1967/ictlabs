@@ -231,7 +231,7 @@ function isWall(x,y){ return cellAt(x,y)===1; }
 function canMove(px,py,dx,dy,changingDir=false){
   const {pac:pacSpd} = getDiffSpeeds();
   const buf=getBuffer(changingDir);
-  const r=CELL/2-2-buf;
+  const r=(CELL/2-2)*0.85-buf; // 5% smaller than before
   const nx=px+dx*pacSpd, ny=py+dy*pacSpd;
   const pts=[
     {x:nx+r*Math.sign(dx||1)*0.9, y:ny},
@@ -298,20 +298,21 @@ function moveGhost(g){
 
   const spd=getDiffSpeeds().ghost*(g.scared?0.5:g.eaten?2:1);
   const DIRS=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
-  const R=CELL/2-4;
+  const R=CELL/2-5; // ghost collision radius
 
   function hit(x,y){
-    return cellAt(x-R,y)===1||cellAt(x+R,y)===1||
-           cellAt(x,y-R)===1||cellAt(x,y+R)===1;
+    // Check all 4 corners of ghost bounding box
+    return cellAt(x-R,y-R)===1||cellAt(x+R,y-R)===1||
+           cellAt(x-R,y+R)===1||cellAt(x+R,y+R)===1;
   }
 
-  // Snap to nearest cell center with generous threshold
-  const snapX=Math.round(g.x/CELL)*CELL+CELL/2;
-  const snapY=Math.round(g.y/CELL)*CELL+CELL/2;
-  const near=Math.abs(g.x-snapX)<spd+2&&Math.abs(g.y-snapY)<spd+2;
+  // Snap to current cell center — use floor to get the cell we're IN
+  const cellX=Math.floor(g.x/CELL)*CELL+CELL/2;
+  const cellY=Math.floor(g.y/CELL)*CELL+CELL/2;
+  const near=Math.abs(g.x-cellX)<spd+1.5&&Math.abs(g.y-cellY)<spd+1.5;
 
   if(near){
-    g.x=snapX; g.y=snapY;
+    g.x=cellX; g.y=cellY;
     // Build valid direction list — no reverse unless forced
     let dirs=DIRS.filter(d=>
       !(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy)) &&
@@ -334,13 +335,12 @@ function moveGhost(g){
     g.dx=pick.dx; g.dy=pick.dy;
   }
 
-  // Move — if blocked, snap back and wait
+  // Move — if blocked, snap back to cell center and clear direction
   if(g.dx||g.dy){
     const nx=g.x+g.dx*spd, ny=g.y+g.dy*spd;
     if(!hit(nx,ny)){ g.x=nx; g.y=ny; }
-    else { g.x=snapX; g.y=snapY; g.dx=0; g.dy=0; }
+    else { g.x=cellX; g.y=cellY; g.dx=0; g.dy=0; }
   } else {
-    // No direction — pick anything
     const any=DIRS.filter(d=>!hit(g.x+d.dx*CELL,g.y+d.dy*CELL));
     if(any.length){ const p=any[Math.floor(Math.random()*any.length)]; g.dx=p.dx; g.dy=p.dy; }
   }
@@ -562,6 +562,16 @@ function loop(){
   draw();
 }
 
+
+// Touch overlay postMessage bridge
+window.addEventListener("message",function(e){
+  if(!e.data||e.data.type!=="key")return;
+  const key=e.data.key;
+  const code=key==="ArrowUp"?"ArrowUp":key==="ArrowDown"?"ArrowDown":
+             key==="ArrowLeft"?"ArrowLeft":key==="ArrowRight"?"ArrowRight":"Space";
+  document.dispatchEvent(new KeyboardEvent("keydown",{key,code,bubbles:true,cancelable:true}));
+  setTimeout(()=>document.dispatchEvent(new KeyboardEvent("keyup",{key,code,bubbles:true,cancelable:true})),80);
+});
 // ── Boot ───────────────────────────────────────────────
 updateUI();
 loop();

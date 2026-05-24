@@ -624,6 +624,16 @@ function loop(){
   renderer.render(scene,camera);
 }
 
+
+// Touch overlay postMessage bridge
+window.addEventListener("message",function(e){
+  if(!e.data||e.data.type!=="key")return;
+  const key=e.data.key;
+  const code=key==="ArrowUp"?"ArrowUp":key==="ArrowDown"?"ArrowDown":
+             key==="ArrowLeft"?"ArrowLeft":key==="ArrowRight"?"ArrowRight":"Space";
+  document.dispatchEvent(new KeyboardEvent("keydown",{key,code,bubbles:true,cancelable:true}));
+  setTimeout(()=>document.dispatchEvent(new KeyboardEvent("keyup",{key,code,bubbles:true,cancelable:true})),80);
+});
 // ── Boot ──────────────────────────────────────────────────
 updateUI();
 loop();

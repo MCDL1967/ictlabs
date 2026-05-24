@@ -375,8 +375,12 @@ body::after{
 ═══════════════════════════════════════════════ */
 @media (max-width:767px) and (orientation:portrait){
 
-  body{ height:100dvh; }
+  body{
+    height:100dvh;
+    overflow:hidden;
+  }
 
+  /* Wrap everything in a scroll container so controls always show */
   .header{
     padding:8px 12px;
     font-size:0.75em;letter-spacing:2px;
@@ -434,20 +438,22 @@ body::after{
     width:100%;max-width:unset;
   }
 
-  /* Controls — two compact rows */
+  /* Controls — two compact rows, always visible */
   .controls{
-    margin:0 6px 6px;
+    margin:0 6px;
+    margin-bottom:max(6px, env(safe-area-inset-bottom, 6px));
     padding:6px 8px;
     flex-direction:column;
     gap:5px;
     align-items:stretch;
+    flex-shrink:0;
   }
   .btn-group{
     display:flex;flex-wrap:nowrap;gap:4px;justify-content:center;
   }
   .button{
-    flex:1;padding:8px 6px;
-    font-size:0.58em;letter-spacing:0.5px;
+    flex:1;padding:8px 4px;
+    font-size:0.55em;letter-spacing:0.5px;
   }
 }
 
@@ -772,13 +778,17 @@ function setupTouchOverlay(){
   toggle.addEventListener('touchstart',e=>{ e.preventDefault(); open?closePanel():openPanel(); },{passive:false});
   toggle.addEventListener('click',()=>{ open?closePanel():openPanel(); });
 
-  // Send key to game iframe or navigate console
+  // Send key to game iframe via postMessage (works across origin boundaries)
   function fire(key){
     if(gamePane.style.display!=='none'){
+      // postMessage approach — games listen for this
+      try{ gameFrame.contentWindow.postMessage({type:'key',key},'*'); }catch(ex){}
+      // Also try direct dispatch as fallback
       try{
-        const iw=gameFrame.contentWindow;
-        iw.dispatchEvent(new KeyboardEvent('keydown',{key,code:key==' '?'Space':key,bubbles:true,cancelable:true}));
-        setTimeout(()=>iw.dispatchEvent(new KeyboardEvent('keyup',{key,code:key==' '?'Space':key,bubbles:true,cancelable:true})),80);
+        const code=key==='ArrowUp'?'ArrowUp':key==='ArrowDown'?'ArrowDown':
+                   key==='ArrowLeft'?'ArrowLeft':key==='ArrowRight'?'ArrowRight':'Space';
+        const ev=new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true,view:gameFrame.contentWindow});
+        gameFrame.contentDocument&&gameFrame.contentDocument.dispatchEvent(ev);
       }catch(ex){}
     } else {
       if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
