@@ -62,6 +62,36 @@ body::after{
   transition:all 0.4s;
   color:var(--text);
 }
+.back-arrow{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  font-family:var(--font);font-size:0.55em;letter-spacing:2px;
+  color:var(--text);text-decoration:none;opacity:0.6;
+  transition:all 0.2s;padding:4px 10px;
+  border:1px solid var(--border);text-transform:uppercase;
+}
+.back-arrow:hover{opacity:1;background:var(--accent);color:var(--bg-dark);}
+
+/* GAME META — prominent, centered above preview */
+.game-meta{
+  width:100%;text-align:center;
+  padding:12px 16px 8px;flex-shrink:0;
+}
+.game-meta .title{
+  font-size:clamp(1em,2.5vw,1.8em);
+  letter-spacing:4px;color:var(--text);
+  text-shadow:0 0 12px var(--accent);
+  margin-bottom:6px;
+}
+.game-meta .subtitle{
+  font-size:clamp(0.6em,1.2vw,0.85em);
+  letter-spacing:3px;opacity:0.5;margin-bottom:8px;
+}
+.meta-desc{
+  font-size:clamp(0.55em,1vw,0.72em);
+  color:var(--text);opacity:0.45;
+  line-height:1.7;max-width:500px;
+  margin:0 auto;letter-spacing:1px;
+}
 
 /* MAIN */
 .main-content{
@@ -103,20 +133,13 @@ body::after{
 
 /* RIGHT PANE */
 .right-pane{
-  flex:1;padding:14px;
+  flex:1;padding:10px 14px;
   display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+  align-items:center;justify-content:flex-start;
   background:var(--bg-pane);
-  position:relative;gap:12px;
+  position:relative;gap:8px;
   transition:background 0.4s;overflow:hidden;
 }
-.game-meta{
-  text-align:center;
-  font-size:clamp(0.55em,1vw,0.78em);
-  color:var(--text);max-width:90%;line-height:1.8;
-}
-.game-meta .title{font-size:1.4em;margin-bottom:6px;letter-spacing:3px;}
-.game-meta .subtitle{opacity:0.5;font-size:0.85em;letter-spacing:2px;}
 
 .game-preview{
   width:90%;max-width:640px;aspect-ratio:16/9;
@@ -239,7 +262,10 @@ body::after{
 </head>
 <body>
 
-<div class="header">⚡ ICTLabs Retro Console ⚡</div>
+<div class="header">
+  ⚡ ICTLabs Retro Console ⚡
+  <a href="/apps/" class="back-arrow" title="Back to ICTLabs">←</a>
+</div>
 
 <div class="main-content">
   <div class="left-pane" id="gameListPane">
@@ -247,9 +273,11 @@ body::after{
   </div>
   <div class="right-pane" id="rightPane">
     <div class="game-meta" id="gameMeta" style="display:none">
-      <div class="title" id="metaTitle"></div>
-      <div class="subtitle" id="metaSubtitle"></div>
-      <div id="metaDesc" style="margin-top:10px;font-size:0.9em;opacity:0.6;"></div>
+      <div class="meta-inner">
+        <div class="title" id="metaTitle"></div>
+        <div class="subtitle" id="metaSubtitle"></div>
+        <div class="meta-desc" id="metaDesc"></div>
+      </div>
     </div>
     <div class="game-preview" id="gamePreview" style="display:none">
       <iframe id="previewFrame" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -498,6 +526,10 @@ const INSTRUCTIONS={
   pong:{
     title:'PONG — Controls',
     body:'1 Player\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Your paddle\nCPU difficulty scales each set\n\n2 Players\nW / S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 1\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Player 2\n\nFirst to 7 wins the set.\nBest of 3 sets wins the match.'
+  },
+  frogger:{
+    title:'FROGGER — Controls',
+    body:'↑ ↓ ← → or WASD to hop\n\nCross the road — avoid cars & trucks\nCross the river — ride logs & turtles\nDiving turtles will sink — jump off!\n\nGet all 5 frogs home to advance.\nTime limit — move fast!'
   },
   zaxxon:{
     title:'ZAXXON — Controls',
