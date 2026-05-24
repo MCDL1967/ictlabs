@@ -1,484 +1,446 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="ICTLabs — AI-powered casino operations. Better service. Higher productivity. Lower costs."/>
-<title>ICTLabs — AI-Powered Casino Operations</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --black:     #000000;
-  --black-2:   #05080f;
-  --blue:      #1a4fd6;
-  --blue-bright:#2563eb;
-  --blue-glow: #3b82f6;
-  --blue-dim:  #0f2d7a;
-  --gold:      #c9a84c;
-  --white:     #ffffff;
-  --silver:    #cbd5e1;
-  --steel:     #94a3b8;
-  --muted:     rgba(148,163,184,0.7);
-  --border-b:  rgba(37,99,235,0.3);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  font-family:'Barlow',sans-serif;
-  background:var(--black);
-  color:var(--white);
-  overflow-x:hidden;
-}
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(26,79,214,0.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(26,79,214,0.05) 1px,transparent 1px);
-  background-size:44px 44px;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICTLab's Retro Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Courier+Prime&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #1a1a1a;
+      --bg-dark:  #000;
+      --bg-pane:  #222;
+      --accent:   #00ff00;
+      --accent2:  #00cc00;
+      --text:     #00ff00;
+      --text-inv: #000;
+      --border:   #00ff00;
+      --glow:     rgba(0,255,0,0.55);
+      --font:     'Press Start 2P', cursive;
+    }
+    body.alt-skin    { --bg:#2a2a1a; --bg-dark:#111100; --bg-pane:#332; --accent:#ffff00; --accent2:#cccc00; --text:#ffff00; --border:#ffff00; --glow:rgba(255,255,0,0.55); --font:'Press Start 2P',cursive; }
+    body.purple-skin { --bg:#300030; --bg-dark:#200020; --bg-pane:#350035; --accent:#cc00cc; --accent2:#990099; --text:#cc00cc; --border:#cc00cc; --glow:rgba(204,0,204,0.55); --font:'VT323',monospace; }
+    body.red-skin    { --bg:#300000; --bg-dark:#200000; --bg-pane:#350000; --accent:#ff4444; --accent2:#cc2222; --text:#ff4444; --border:#ff4444; --glow:rgba(255,68,68,0.55); --font:'Courier Prime',monospace; }
 
-/* NAV */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:22px 56px;transition:all 0.3s;
-}
-nav.scrolled{
-  background:rgba(0,0,0,0.97);
-  border-bottom:1px solid var(--border-b);
-  backdrop-filter:blur(12px);
-  padding:14px 56px;
-}
-.logo{text-decoration:none;}
-.logo-3d{
-  position:relative;display:inline-block;
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:28px;font-weight:900;letter-spacing:4px;text-transform:uppercase;
-}
-.logo-3d .ld2{position:absolute;top:4px;left:4px;color:#04112e;user-select:none;pointer-events:none;z-index:0;}
-.logo-3d .ld1{position:absolute;top:2px;left:2px;color:#0a2a7a;user-select:none;pointer-events:none;z-index:1;}
-.logo-3d .lf{position:relative;z-index:2;color:var(--white);}
-.logo-3d .lf em{font-style:normal;color:var(--blue-glow);text-shadow:0 0 18px rgba(59,130,246,0.9);}
-.logo-sub{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:4px;color:var(--steel);display:block;margin-top:1px;text-transform:uppercase;}
-.nav-links{display:flex;align-items:center;gap:36px;}
-.nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color 0.2s;}
-.nav-links a:hover{color:var(--blue-glow);}
-.nav-cta{border:1px solid var(--blue) !important;color:var(--blue-glow) !important;padding:7px 20px;box-shadow:0 0 10px rgba(26,79,214,0.25);transition:all 0.2s !important;}
-.nav-cta:hover{background:var(--blue) !important;color:var(--white) !important;box-shadow:0 0 24px rgba(37,99,235,0.5) !important;}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HERO */
-.hero{
-  position:relative;min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:120px 24px 80px;overflow:hidden;
-}
-.hero-glow{position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(37,99,235,0.2) 0%,transparent 65%);pointer-events:none;z-index:0;animation:pulse 4s ease-in-out infinite;}
-.hero-glow-2{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(201,168,76,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
-@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.4s, color 0.4s;
+    }
 
-.eyebrow{
-  position:relative;z-index:1;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:6px;text-transform:uppercase;
-  color:var(--blue-glow);margin-bottom:28px;
-  opacity:0;animation:fadeUp 0.7s 0.2s forwards;
-}
-.eyebrow::before,.eyebrow::after{content:'';display:inline-block;width:28px;height:1px;background:var(--blue);vertical-align:middle;margin:0 10px;box-shadow:0 0 6px var(--blue);}
+    /* SCANLINE OVERLAY */
+    body::after {
+      content: '';
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 4px
+      );
+      z-index: 9999;
+    }
 
-/* 3D HERO HEADLINE */
-.hero-3d{
-  position:relative;z-index:1;display:inline-block;
-  margin-bottom:20px;
-  opacity:0;animation:fadeUp 0.8s 0.35s forwards;
-}
-.hero-3d .hd2{position:absolute;top:8px;left:8px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;color:#04112e;user-select:none;pointer-events:none;z-index:0;white-space:nowrap;}
-.hero-3d .hd1{position:absolute;top:4px;left:4px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;color:#0a2a7a;user-select:none;pointer-events:none;z-index:1;white-space:nowrap;}
-.hero-3d .hf{position:relative;z-index:2;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,10vw,100px);font-weight:900;letter-spacing:6px;line-height:0.92;text-transform:uppercase;white-space:nowrap;}
-.hf .silver{color:var(--silver);}
-.hf .blue{color:var(--blue-glow);text-shadow:0 0 40px rgba(59,130,246,0.7),0 0 80px rgba(37,99,235,0.3);}
+    /* HEADER */
+    .header {
+      background-color: var(--bg-dark);
+      padding: 14px 20px;
+      text-align: center;
+      font-size: clamp(0.9em, 2vw, 1.6em);
+      border-bottom: 4px solid var(--border);
+      box-shadow: 0 4px 20px var(--glow);
+      text-shadow: 0 0 12px var(--accent);
+      letter-spacing: 2px;
+      flex-shrink: 0;
+      transition: all 0.4s;
+    }
 
-.hero-sub{
-  position:relative;z-index:1;
-  font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,2vw,20px);letter-spacing:3px;text-transform:uppercase;
-  color:var(--steel);margin-bottom:32px;
-  opacity:0;animation:fadeUp 0.8s 0.5s forwards;
-}
-.hero-divider{
-  position:relative;z-index:1;
-  display:flex;align-items:center;gap:16px;margin-bottom:40px;
-  opacity:0;animation:fadeUp 0.8s 0.65s forwards;
-}
-.div-line{width:48px;height:1px;background:var(--border-b);}
-.div-text{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;color:var(--steel);text-transform:uppercase;}
-.div-text span{color:var(--gold);}
-.hero-actions{
-  position:relative;z-index:1;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
-  opacity:0;animation:fadeUp 0.8s 0.8s forwards;
-}
-.btn-primary{
-  background:var(--blue);color:var(--white);
-  font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:3px;text-transform:uppercase;
-  text-decoration:none;padding:14px 44px;border:none;cursor:pointer;
-  box-shadow:0 0 28px rgba(26,79,214,0.5);transition:all 0.2s;
-  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-}
-.btn-primary:hover{background:var(--blue-bright);box-shadow:0 0 48px rgba(37,99,235,0.8);transform:translateY(-2px);}
-.btn-secondary{
-  background:transparent;color:var(--steel);
-  font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:3px;text-transform:uppercase;
-  text-decoration:none;padding:13px 44px;border:1px solid rgba(148,163,184,0.3);cursor:pointer;transition:all 0.2s;
-}
-.btn-secondary:hover{border-color:var(--blue-glow);color:var(--blue-glow);}
-.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fadeUp 1s 1.3s forwards;}
-.hero-scroll span{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;}
-.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--blue-glow),transparent);box-shadow:0 0 8px var(--blue);animation:scrollPulse 2s ease-in-out infinite;}
-@keyframes scrollPulse{0%,100%{opacity:0.2}50%{opacity:1}}
+    /* MAIN AREA */
+    .main-content {
+      display: flex;
+      flex: 1;
+      margin: 10px;
+      border: 3px solid var(--border);
+      box-shadow: 0 0 18px var(--glow), inset 0 0 40px rgba(0,0,0,0.4);
+      background-color: var(--bg);
+      overflow: hidden;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
 
-/* STATS */
-.stats-bar{position:relative;z-index:1;background:var(--black-2);border-top:1px solid var(--border-b);border-bottom:1px solid var(--border-b);display:grid;grid-template-columns:repeat(4,1fr);}
-.stat-item{padding:32px 20px;text-align:center;border-right:1px solid var(--border-b);position:relative;overflow:hidden;}
-.stat-item::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(37,99,235,0.07),transparent 70%);}
-.stat-item:last-child{border-right:none;}
-.stat-number{font-family:'Barlow Condensed',sans-serif;font-size:clamp(32px,3.5vw,52px);font-weight:700;letter-spacing:2px;color:var(--blue-glow);line-height:1;margin-bottom:7px;text-shadow:0 0 18px rgba(59,130,246,0.5);}
-.stat-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;line-height:1.5;}
+    /* LEFT PANE */
+    .left-pane {
+      width: 28%;
+      min-width: 160px;
+      border-right: 3px solid var(--border);
+      overflow-y: auto;
+      padding: 8px;
+      background-color: var(--bg-pane);
+      transition: all 0.4s;
+    }
+    .left-pane::-webkit-scrollbar { width: 6px; }
+    .left-pane::-webkit-scrollbar-track { background: var(--bg-dark); }
+    .left-pane::-webkit-scrollbar-thumb { background: var(--accent2); }
 
-/* SECTIONS */
-section{position:relative;z-index:1;}
-.section-inner{max-width:1100px;margin:0 auto;padding:100px 48px;}
-.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
-.sec-label::before{content:'';width:20px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue);}
-.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,4.5vw,64px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--white);margin-bottom:20px;line-height:1;}
-.sec-title .bl{color:var(--blue-glow);text-shadow:0 0 16px rgba(59,130,246,0.5);}
-.sec-body{font-size:15px;color:var(--muted);max-width:580px;line-height:1.8;}
+    .game-item {
+      padding: 10px 8px;
+      cursor: pointer;
+      border-bottom: 1px dotted var(--accent2);
+      font-size: clamp(0.55em, 1vw, 0.85em);
+      line-height: 1.6;
+      transition: background-color 0.15s, color 0.15s;
+      word-break: break-word;
+    }
+    .game-item:hover,
+    .game-item.selected {
+      background-color: var(--accent);
+      color: var(--text-inv);
+      text-shadow: none;
+      padding-left: 14px;
+    }
+    .game-item.selected::before {
+      content: '▶ ';
+    }
 
-/* PROBLEM */
-.problem{background:var(--black);}
-.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:52px;align-items:center;}
-.prob-cards{display:flex;flex-direction:column;gap:12px;}
-.prob-card{background:var(--black-2);border:1px solid var(--border-b);border-left:2px solid var(--blue);padding:16px 20px;display:flex;gap:12px;align-items:flex-start;transition:box-shadow 0.2s;}
-.prob-card:hover{box-shadow:0 0 18px rgba(37,99,235,0.15);}
-.prob-card strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--white);margin-bottom:3px;}
-.prob-card span{font-size:13px;color:var(--muted);}
-.prob-quote{font-family:'Barlow Condensed',sans-serif;font-size:clamp(24px,3vw,40px);font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white);line-height:1.15;border-left:2px solid var(--blue);padding-left:24px;}
-.prob-quote span{color:var(--blue-glow);text-shadow:0 0 14px rgba(59,130,246,0.6);}
+    /* RIGHT PANE */
+    .right-pane {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-pane);
+      position: relative;
+      gap: 12px;
+      transition: background-color 0.4s;
+    }
 
-/* PRODUCTS */
-.products{background:var(--black-2);}
-.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-b);border:1px solid var(--border-b);margin-top:48px;}
-.prod-card{background:var(--black);padding:36px 28px;position:relative;overflow:hidden;transition:background 0.3s;}
-.prod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);}
-.prod-card:hover{background:rgba(26,79,214,0.05);}
-.prod-num{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--blue-dim);margin-bottom:16px;}
-.prod-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:4px;text-shadow:0 0 16px rgba(59,130,246,0.4);}
-.prod-layer{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:16px;}
-.prod-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
-.prod-feat{list-style:none;}
-.prod-feat li{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);padding:6px 0;border-bottom:1px solid rgba(26,79,214,0.12);display:flex;align-items:center;gap:8px;}
-.prod-feat li::before{content:'›';color:var(--blue-glow);font-size:16px;}
+    .game-meta {
+      text-align: center;
+      font-size: clamp(0.55em, 1vw, 0.8em);
+      color: var(--text);
+      text-shadow: 0 0 8px var(--accent);
+      max-width: 90%;
+      line-height: 1.8;
+    }
+    .game-meta .title { font-size: 1.3em; margin-bottom: 6px; }
+    .game-meta .subtitle { opacity: 0.75; font-size: 0.85em; }
 
-/* WHY */
-.why{background:var(--black);}
-.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:52px;align-items:start;}
-.why-pts{display:flex;flex-direction:column;gap:28px;}
-.why-pt{display:flex;gap:16px;align-items:flex-start;}
-.why-n{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;color:var(--blue);opacity:0.2;line-height:1;flex-shrink:0;width:48px;text-align:right;}
-.why-b strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
-.why-b span{font-size:13px;color:var(--muted);line-height:1.7;}
-.why-creds{background:var(--black-2);border:1px solid var(--border-b);position:relative;overflow:hidden;}
-.why-creds::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue-glow),transparent);box-shadow:0 0 10px var(--blue);}
-.creds-inner{padding:36px;}
-.creds-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:24px;}
-.cred-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(26,79,214,0.15);}
-.cred-row:last-child{border-bottom:none;}
-.cred-num{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;letter-spacing:2px;color:var(--blue-glow);text-shadow:0 0 14px rgba(59,130,246,0.4);}
-.cred-lbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right;max-width:170px;line-height:1.4;}
+    .game-preview {
+      width: 90%;
+      max-width: 640px;
+      aspect-ratio: 16/9;
+      position: relative;
+      background-color: #000;
+      border: 2px solid var(--border);
+      box-shadow: 0 0 20px var(--glow);
+      transition: border-color 0.4s;
+      overflow: hidden;
+    }
+    .game-preview iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      transition: opacity 0.4s;
+    }
 
-/* APPROACH */
-.approach{background:var(--black-2);}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-b);border:1px solid var(--border-b);margin-top:48px;}
-.step{background:var(--black);padding:40px 32px;position:relative;overflow:hidden;}
-.step-bg{position:absolute;bottom:-12px;right:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:120px;color:rgba(26,79,214,0.05);line-height:1;pointer-events:none;}
-.step-num{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.step-num::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--blue),transparent);max-width:32px;}
-.step-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:12px;}
-.step-body{font-size:13px;color:var(--muted);line-height:1.7;}
-.approach-note{margin-top:24px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);display:flex;align-items:center;justify-content:center;gap:12px;}
-.approach-note::before,.approach-note::after{content:'';width:36px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue);}
+    .no-game-msg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent2);
+      font-size: clamp(0.5em, 1.2vw, 0.75em);
+      text-align: center;
+      padding: 20px;
+      opacity: 0.6;
+    }
 
-/* GATEWAY */
-.gateway{background:var(--black);border-top:1px solid var(--border-b);position:relative;overflow:hidden;}
-.gw-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(26,79,214,0.1),transparent 70%);pointer-events:none;}
-.gw-inner{max-width:700px;margin:0 auto;padding:120px 48px;text-align:center;position:relative;z-index:1;}
+    .loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--accent);
+      font-size: clamp(0.6em, 1.5vw, 1.2em);
+      text-shadow: 0 0 10px var(--accent);
+      display: none;
+      animation: blink 0.8s step-end infinite;
+      z-index: 2;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
-/* 3D GATEWAY TITLE */
-.gw-3d{position:relative;display:inline-block;margin-bottom:14px;}
-.gw-3d .gd2{position:absolute;top:6px;left:6px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;color:#04112e;pointer-events:none;user-select:none;}
-.gw-3d .gd1{position:absolute;top:3px;left:3px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;color:#0a2a7a;pointer-events:none;user-select:none;}
-.gw-3d .gf{position:relative;z-index:1;font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:900;letter-spacing:4px;line-height:1;text-transform:uppercase;}
-.gf .silver{color:var(--silver);}
-.gf .blue{color:var(--blue-glow);text-shadow:0 0 30px rgba(59,130,246,0.7);}
+    /* CONTROLS BAR */
+    .controls {
+      background-color: var(--bg-dark);
+      padding: 10px 16px;
+      border-top: 4px solid var(--border);
+      box-shadow: 0 -4px 20px var(--glow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex-shrink: 0;
+      transition: all 0.4s;
+    }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 4px; }
 
-.gw-sub{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:48px;line-height:1.7;}
-.gw-box{background:var(--black-2);border:1px solid rgba(37,99,235,0.4);padding:44px;box-shadow:0 0 60px rgba(26,79,214,0.1),inset 0 1px 0 var(--border-b);position:relative;}
-.gw-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue-glow),transparent);box-shadow:0 0 14px var(--blue);}
-.gw-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:8px;}
-.gw-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:6px;}
-.gw-sub2{font-size:13px;color:var(--muted);margin-bottom:28px;}
-.gw-form{display:flex;flex-direction:column;gap:10px;text-align:left;}
-.gw-input{background:rgba(255,255,255,0.04);border:1px solid var(--border-b);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:1px;padding:14px 18px;width:100%;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-.gw-input::placeholder{color:var(--muted);}
-.gw-input:focus{border-color:var(--blue-glow);box-shadow:0 0 16px rgba(37,99,235,0.2);}
-.gw-btn{background:var(--blue);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;padding:16px;border:none;cursor:pointer;width:100%;margin-top:8px;box-shadow:0 0 24px rgba(26,79,214,0.4);transition:all 0.2s;}
-.gw-btn:hover{background:var(--blue-bright);box-shadow:0 0 40px rgba(37,99,235,0.7);transform:translateY(-1px);}
-.gw-disc{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:rgba(148,163,184,0.4);margin-top:14px;}
-.gw-alt{margin-top:22px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
-.gw-alt a{color:var(--blue-glow);text-decoration:none;}
+    .button {
+      background-color: var(--accent);
+      color: var(--text-inv);
+      border: none;
+      padding: 8px 14px;
+      font-family: var(--font);
+      font-size: clamp(0.45em, 0.9vw, 0.75em);
+      cursor: pointer;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+      transition: background-color 0.15s, transform 0.1s, box-shadow 0.1s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .button:hover {
+      filter: brightness(1.25);
+      transform: translateY(-2px);
+      box-shadow: 2px 4px 0 rgba(0,0,0,0.5);
+    }
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
 
-/* FOOTER */
-footer{background:var(--black-2);border-top:1px solid var(--border-b);padding:44px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;position:relative;z-index:1;}
-.ft-legal-sub{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(148,163,184,0.35);margin-top:4px;}
-.ft-contact{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;line-height:2.2;}
-.ft-contact a{color:var(--blue-glow);text-decoration:none;}
-.ft-legal{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(148,163,184,0.25);text-align:right;line-height:2;}
-
-/* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
-.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease;}
-.reveal.visible{opacity:1;transform:translateY(0);}
-.reveal-d1{transition-delay:0.15s;}
-.reveal-d2{transition-delay:0.3s;}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  nav{padding:16px 24px;}nav.scrolled{padding:12px 24px;}
-  .nav-links{display:none;}
-  .stats-bar{grid-template-columns:1fr 1fr;}
-  .stat-item:nth-child(2){border-right:none;}
-  .stat-item:nth-child(3){border-top:1px solid var(--border-b);}
-  .section-inner{padding:64px 24px;}
-  .prob-grid,.why-grid{grid-template-columns:1fr;gap:32px;}
-  .prod-grid,.steps{grid-template-columns:1fr;}
-  footer{flex-direction:column;text-align:center;padding:32px 24px;}
-  .ft-legal,.ft-contact{text-align:center;}
-}
-</style>
+    /* EMPTY STATE */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      opacity: 0.5;
+      font-size: clamp(0.5em, 0.9vw, 0.7em);
+      text-align: center;
+      padding: 20px;
+    }
+    .empty-state .big { font-size: 2em; }
+  </style>
 </head>
 <body>
 
-<nav id="nav">
-  <a class="logo" href="#">
-    <div class="logo-3d">
-      <div class="ld2">ICT<span>Labs</span></div>
-      <div class="ld1">ICT<span>Labs</span></div>
-      <div class="lf">ICT<em>Labs</em></div>
-    </div>
-    <span class="logo-sub">AI · Casino Operations</span>
-  </a>
-  <div class="nav-links">
-    <a href="#solutions">Solutions</a>
-    <a href="#why">Why ICTLabs</a>
-    <a href="#approach">Approach</a>
-    <a href="#gateway" class="nav-cta">Client Access</a>
-  </div>
-</nav>
+  <div class="header">⚡ ICTLab's Retro Console ⚡</div>
 
-<section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-glow-2"></div>
-  <div class="eyebrow">Integrated Computer Technology</div>
-  <div class="hero-3d">
-    <div class="hd2">AI POWERED<br>CASINO<br>OPERATIONS</div>
-    <div class="hd1">AI POWERED<br>CASINO<br>OPERATIONS</div>
-    <div class="hf">
-      <span class="silver">AI POWERED</span><br>
-      <span class="blue">CASINO</span><br>
-      <span class="silver">OPERATIONS</span>
-    </div>
-  </div>
-  <p class="hero-sub">Better service &nbsp;·&nbsp; Higher productivity &nbsp;·&nbsp; Lower costs</p>
-  <div class="hero-divider">
-    <div class="div-line"></div>
-    <div class="div-text"><span>40 yrs</span> Technology &nbsp;·&nbsp; <span>25 yrs</span> Casino Operations &nbsp;·&nbsp; Live in <span>Weeks</span></div>
-    <div class="div-line"></div>
-  </div>
-  <div class="hero-actions">
-    <a href="#gateway" class="btn-primary">Enter Client Area</a>
-    <a href="#solutions" class="btn-secondary">Our Solutions</a>
-  </div>
-  <div class="hero-scroll"><div class="scroll-line"></div><span>Scroll</span></div>
-</section>
-
-<div class="stats-bar reveal">
-  <div class="stat-item"><div class="stat-number">30–70%</div><div class="stat-label">Productivity Increase<br>Knowledge & Reporting</div></div>
-  <div class="stat-item"><div class="stat-number">40–60%</div><div class="stat-label">Less Manual Work<br>Data Entry Eliminated</div></div>
-  <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">AI Guest Attention<br>No Breaks. No Overtime.</div></div>
-  <div class="stat-item"><div class="stat-number">ZERO</div><div class="stat-label">New Hires Needed<br>Scale With Your Team</div></div>
-</div>
-
-<section class="problem" id="problem">
-  <div class="section-inner">
-    <div class="sec-label">The Problem</div>
-    <h2 class="sec-title">THE TOOL IS <span class="bl">MISSING.</span></h2>
-    <div class="prob-grid reveal">
-      <div class="prob-cards">
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📋</span><div><strong>Manual Reports → Slow Decisions</strong><span>Data that arrives too late to act on. Hours lost every reporting cycle.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📊</span><div><strong>Data Available — Not Exploited</strong><span>Your operation generates intelligence you're not using.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">📁</span><div><strong>Compliance Reports — Hours Lost</strong><span>AI produces these automatically, accurately, every time.</span></div></div>
-        <div class="prob-card"><span style="font-size:18px;flex-shrink:0">⚡</span><div><strong>Competition Already Moving</strong><span>First mover advantage compounds. The window is now.</span></div></div>
+  <div class="main-content">
+    <div class="left-pane" id="gameListPane">
+      <div class="empty-state">
+        <div class="big">📂</div>
+        <div>No games found.<br>Check games/manifest.json</div>
       </div>
-      <div class="prob-quote">THE BIGGEST RISK ISN'T MAKING A MISTAKE.<br>IT'S <span>NOT MOVING</span> AT ALL.</div>
     </div>
-  </div>
-</section>
-
-<section class="products" id="solutions">
-  <div class="section-inner">
-    <div class="sec-label">Our Solutions</div>
-    <h2 class="sec-title">WHERE WE GENERATE <span class="bl">IMMEDIATE VALUE.</span></h2>
-    <p class="sec-body">We don't build AI models. We implement proven models in real casino operations — fast, focused, tied to measurable KPIs.</p>
-    <div class="prod-grid reveal">
-      <div class="prod-card">
-        <div class="prod-num">01 · Front of House</div>
-        <div class="prod-name">SOL</div>
-        <div class="prod-layer">AI Guest Concierge · WhatsApp · 24/7</div>
-        <p class="prod-desc">Your first AI collaborator that never sleeps and handles unlimited simultaneous guest requests — in English and Spanish.</p>
-        <ul class="prod-feat">
-          <li>Instant guest response, zero wait</li>
-          <li>WhatsApp from any location</li>
-          <li>Incident logging & calendaring</li>
-          <li>Replaces repetitive tasks, not your team</li>
-          <li>Bilingual EN / ES</li>
-        </ul>
+    <div class="right-pane" id="rightPane">
+      <div class="game-meta" id="gameMeta" style="display:none">
+        <div class="title" id="metaTitle"></div>
+        <div class="subtitle" id="metaSubtitle"></div>
+        <div id="metaDesc" style="margin-top:8px;"></div>
       </div>
-      <div class="prod-card">
-        <div class="prod-num">02 · Back of House</div>
-        <div class="prod-name">OPS IA</div>
-        <div class="prod-layer">Reporting · KPIs · Compliance</div>
-        <p class="prod-desc">Automated regulatory compliance, real-time KPI dashboards, cross-system data consolidation, and shift-level productivity metrics.</p>
-        <ul class="prod-feat">
-          <li>Automated compliance reports</li>
-          <li>Real-time KPI dashboards</li>
-          <li>Multi-system data consolidation</li>
-          <li>Structured incident registry</li>
-          <li>Shift productivity metrics</li>
-        </ul>
+      <div class="game-preview" id="gamePreview" style="display:none">
+        <iframe id="previewFrame" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div class="loading-indicator" id="loadingIndicator">LOADING...</div>
+        <div class="no-game-msg" id="noVideoMsg" style="display:none">NO PREVIEW AVAILABLE</div>
       </div>
-      <div class="prod-card">
-        <div class="prod-num">03 · Intelligence Layer</div>
-        <div class="prod-name">KNOWLEDGE IA</div>
-        <div class="prod-layer">Agents · Search · Decision Support</div>
-        <p class="prod-desc">Internal AI knowledge systems that automate documentation, enable intelligent search, and support real-time operational decisions.</p>
-        <ul class="prod-feat">
-          <li>Internal AI knowledge base</li>
-          <li>Document automation</li>
-          <li>AI-assisted decision support</li>
-          <li>HR & team performance tracking</li>
-          <li>Scalable agent architecture</li>
-        </ul>
+      <div class="empty-state" id="emptyState">
+        <div class="big">🕹️</div>
+        <div>SELECT A GAME<br>TO GET STARTED</div>
       </div>
     </div>
   </div>
-</section>
 
-<section class="why" id="why">
-  <div class="section-inner">
-    <div class="sec-label">Why ICTLabs</div>
-    <h2 class="sec-title">AI AS A REAL <span class="bl">OPERATIONAL ADVANTAGE.</span></h2>
-    <div class="why-grid reveal">
-      <div class="why-pts">
-        <div class="why-pt"><div class="why-n">01</div><div class="why-b"><strong>Deep Casino Domain Knowledge</strong><span>Compliance, internal controls, incident management, reservations, loyalty programs — we know this business from the inside out.</span></div></div>
-        <div class="why-pt"><div class="why-n">02</div><div class="why-b"><strong>Your Data — Not Generic AI</strong><span>AI fed by your operation's data. Contextual, accurate, tuned specifically to your environment.</span></div></div>
-        <div class="why-pt"><div class="why-n">03</div><div class="why-b"><strong>Intelligent Workflows</strong><span>Automate the repetitive. Free your team to focus on what drives real value and guest experience.</span></div></div>
-        <div class="why-pt"><div class="why-n">04</div><div class="why-b"><strong>KPI-Driven — Functional in Days</strong><span>Functional prototypes in days. Live systems in weeks. Every project tied to measurable outcomes.</span></div></div>
-      </div>
-      <div class="why-creds reveal reveal-d1">
-        <div class="creds-inner">
-          <div class="creds-title">Track Record</div>
-          <div class="cred-row"><div class="cred-num">40</div><div class="cred-lbl">Years IT & Systems Integration</div></div>
-          <div class="cred-row"><div class="cred-num">25</div><div class="cred-lbl">Years Casino Operations Expertise</div></div>
-          <div class="cred-row"><div class="cred-num">WEEKS</div><div class="cred-lbl">From kickoff to live — not months</div></div>
-          <div class="cred-row"><div class="cred-num">ZERO</div><div class="cred-lbl">Generic AI — built for your operation</div></div>
-        </div>
-      </div>
+  <div class="controls">
+    <div class="btn-group">
+      <button class="button" id="upButton">▲ UP</button>
+      <button class="button" id="downButton">▼ DOWN</button>
+      <button class="button" id="selectButton">⏎ SELECT</button>
+    </div>
+    <div class="btn-group">
+      <button class="button" onclick="">Trackpad</button>
+      <button class="button" onclick="">Keyboard</button>
+      <button class="button" onclick="">Mouse</button>
+    </div>
+    <div class="btn-group">
+      <button class="button" id="chooseSkinButton">🎨 Skin</button>
     </div>
   </div>
-</section>
 
-<section class="approach" id="approach">
-  <div class="section-inner">
-    <div class="sec-label">Our Approach</div>
-    <h2 class="sec-title">START SMALL. <span class="bl">SCALE FAST.</span></h2>
-    <p class="sec-body">No complex integrations on day one. No disruption to your operation. A proven three-phase path built on real results.</p>
-    <div class="steps reveal">
-      <div class="step"><div class="step-bg">1</div><div class="step-num">Phase 01</div><div class="step-title">Launch SOL</div><p class="step-body">Go live in your casino. Real guests. Real data. Immediate, measurable results your team can see from day one.</p></div>
-      <div class="step"><div class="step-bg">2</div><div class="step-num">Phase 02</div><div class="step-title">Analyze Performance</div><p class="step-body">Measure real results. Identify where AI adds the most value in your specific operation before expanding scope.</p></div>
-      <div class="step"><div class="step-bg">3</div><div class="step-num">Phase 03</div><div class="step-title">Expand Back-of-House</div><p class="step-body">Compliance, reporting, knowledge systems — layer by layer, on your timeline, without disruption.</p></div>
-    </div>
-    <p class="approach-note reveal">No complex integrations &nbsp;·&nbsp; Live in weeks, not months</p>
-  </div>
-</section>
+  <audio id="selectSound"   src="https://www.soundjay.com/buttons/beep-07.mp3"    preload="auto"></audio>
+  <audio id="navigateSound" src="https://www.soundjay.com/buttons/beep-01a.mp3"   preload="auto"></audio>
+  <audio id="skinSound"     src="https://www.soundjay.com/buttons/button-10.mp3"  preload="auto"></audio>
 
-<section class="gateway" id="gateway">
-  <div class="gw-glow"></div>
-  <div class="gw-inner">
-    <div class="gw-3d reveal">
-      <div class="gd2">AI IS NO LONGER<br>OPTIONAL.</div>
-      <div class="gd1">AI IS NO LONGER<br>OPTIONAL.</div>
-      <div class="gf">
-        <span class="silver">AI IS NO LONGER</span><br>
-        <span class="blue">OPTIONAL.</span>
-      </div>
-    </div>
-    <p class="gw-sub">The speed of execution defines the advantage.<br>The advantage belongs to whoever moves first.</p>
-    <div class="gw-box reveal">
-      <div class="gw-lbl">Private Client Area</div>
-      <div class="gw-title">Access ICTLabs Applications</div>
-      <p class="gw-sub2">Enter your details to access our client tools and project dashboards.</p>
-      <form class="gw-form" onsubmit="handleAccess(event)">
-        <input class="gw-input" type="text"  id="g-name"  placeholder="Full Name" required/>
-        <input class="gw-input" type="email" id="g-email" placeholder="Email Address" required/>
-        <input class="gw-input" type="tel"   id="g-phone" placeholder="Phone Number"/>
-        <button class="gw-btn" type="submit">Enter Client Area →</button>
-      </form>
-      <p class="gw-disc">Your information is kept private and used solely for access management.</p>
-    </div>
-    <p class="gw-alt">Or &nbsp;<a href="mailto:marcelo@gransolux.com">Contact us directly</a></p>
-  </div>
-</section>
+  <script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    let GAMES = [];
+    let selectedIndex = 0;
+    const skins = ['', 'alt-skin', 'purple-skin', 'red-skin'];
+    let skinIndex = 0;
+    let loadTimer = null;
 
-<footer>
-  <div>
-    <div class="logo-3d" style="font-size:22px;">
-      <div class="ld2">ICT<span>Labs</span></div>
-      <div class="ld1">ICT<span>Labs</span></div>
-      <div class="lf">ICT<em>Labs</em></div>
-    </div>
-    <div class="ft-legal-sub">Integrated Computer Technology · AI Consulting Division</div>
-  </div>
-  <div class="ft-contact">
-    <a href="mailto:marcelo@gransolux.com">marcelo@gransolux.com</a><br>
-    <a href="tel:+50762574995">+507.6257.4995</a><br>
-    Panama · GRANSOLUX S.A.
-  </div>
-  <div class="ft-legal">© 2026 ICTLabs / GRANSOLUX S.A.<br>All rights reserved.<br>ict-labs.com</div>
-</footer>
+    // ── DOM refs ───────────────────────────────────────────────────────────────
+    const listPane       = document.getElementById('gameListPane');
+    const metaBox        = document.getElementById('gameMeta');
+    const metaTitle      = document.getElementById('metaTitle');
+    const metaSubtitle   = document.getElementById('metaSubtitle');
+    const metaDesc       = document.getElementById('metaDesc');
+    const previewWrap    = document.getElementById('gamePreview');
+    const previewFrame   = document.getElementById('previewFrame');
+    const loadingInd     = document.getElementById('loadingIndicator');
+    const noVideoMsg     = document.getElementById('noVideoMsg');
+    const emptyState     = document.getElementById('emptyState');
+    const sfxSelect      = document.getElementById('selectSound');
+    const sfxNav         = document.getElementById('navigateSound');
+    const sfxSkin        = document.getElementById('skinSound');
 
-<script>
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } });
-}, { threshold: 0.1 });
-reveals.forEach(el => observer.observe(el));
-function handleAccess(e) {
-  e.preventDefault();
-  const name  = document.getElementById('g-name').value.trim();
-  const email = document.getElementById('g-email').value.trim();
-  const phone = document.getElementById('g-phone').value.trim();
-  console.log('[ICTLabs Access]', { name, email, phone });
-  window.location.href = 'apps/index.html';
-}
-</script>
+    // ── Audio helper ───────────────────────────────────────────────────────────
+    function play(el) { try { el.currentTime = 0; el.play(); } catch(e) {} }
+
+    // ── Load manifest then all game_info.json files ────────────────────────────
+    async function loadGames() {
+      try {
+        const mRes = await fetch('games/manifest.json');
+        if (!mRes.ok) throw new Error('manifest not found');
+        const manifest = await mRes.json();
+        const folders = manifest.games || [];
+
+        const promises = folders.map(async folder => {
+          try {
+            const r = await fetch(`games/${folder}/game_info.json`);
+            if (!r.ok) return null;
+            const data = await r.json();
+            data._folder = folder;
+            return data;
+          } catch { return null; }
+        });
+
+        GAMES = (await Promise.all(promises)).filter(Boolean);
+      } catch (e) {
+        console.warn('Could not load games manifest:', e.message);
+        GAMES = [];
+      }
+      renderList();
+      if (GAMES.length > 0) selectGame(0);
+    }
+
+    // ── Render left pane ───────────────────────────────────────────────────────
+    function renderList() {
+      listPane.innerHTML = '';
+      if (GAMES.length === 0) {
+        listPane.innerHTML = '<div class="empty-state"><div class="big">📂</div><div>No games found.<br>Run update_manifest.py<br>then reload.</div></div>';
+        return;
+      }
+      GAMES.forEach((g, i) => {
+        const el = document.createElement('div');
+        el.className = 'game-item';
+        el.textContent = g.name || `Game ${i+1}`;
+        el.addEventListener('click', () => { play(sfxSelect); selectGame(i); });
+        listPane.appendChild(el);
+      });
+    }
+
+    // ── Select a game ──────────────────────────────────────────────────────────
+    function selectGame(index) {
+      if (GAMES.length === 0) return;
+      if (index < 0) index = GAMES.length - 1;
+      if (index >= GAMES.length) index = 0;
+      selectedIndex = index;
+
+      document.querySelectorAll('.game-item').forEach((el, i) => {
+        el.classList.toggle('selected', i === selectedIndex);
+        if (i === selectedIndex) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      showDetails(GAMES[selectedIndex]);
+    }
+
+    // ── Show right pane details ────────────────────────────────────────────────
+    function showDetails(game) {
+      emptyState.style.display   = 'none';
+      metaBox.style.display      = 'block';
+      previewWrap.style.display  = 'block';
+
+      metaTitle.textContent    = game.name || '—';
+      metaSubtitle.textContent = [game.genre, game.release_year].filter(Boolean).join(' · ');
+      metaDesc.textContent     = game.image_desc || '';
+
+      // Clear & show loading
+      if (loadTimer) clearTimeout(loadTimer);
+      previewFrame.src            = 'about:blank';
+      previewFrame.style.opacity  = '0';
+      loadingInd.style.display    = 'block';
+      noVideoMsg.style.display    = 'none';
+
+      if (game.video_src) {
+        loadTimer = setTimeout(() => {
+          previewFrame.src = game.video_src;
+        }, 1500);
+      } else {
+        loadingInd.style.display  = 'none';
+        noVideoMsg.style.display  = 'flex';
+        previewFrame.style.opacity = '1';
+      }
+    }
+
+    previewFrame.addEventListener('load', () => {
+      if (previewFrame.src !== 'about:blank' && previewFrame.src !== '') {
+        loadingInd.style.display   = 'none';
+        previewFrame.style.opacity = '1';
+      }
+    });
+
+    // ── Keyboard nav ───────────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp')   { play(sfxNav);    selectGame(selectedIndex - 1); e.preventDefault(); }
+      if (e.key === 'ArrowDown') { play(sfxNav);    selectGame(selectedIndex + 1); e.preventDefault(); }
+      if (e.key === 'Enter')     { play(sfxSelect); launchGame(); e.preventDefault(); }
+    });
+
+    // ── Button nav ─────────────────────────────────────────────────────────────
+    document.getElementById('upButton').addEventListener('click',     () => { play(sfxNav);    selectGame(selectedIndex - 1); });
+    document.getElementById('downButton').addEventListener('click',   () => { play(sfxNav);    selectGame(selectedIndex + 1); });
+    document.getElementById('selectButton').addEventListener('click', () => { play(sfxSelect); launchGame(); });
+
+    // ── Launch — opens play_url if defined, else shows stub alert ─────────────
+    function launchGame() {
+      if (GAMES.length === 0) return;
+      const game = GAMES[selectedIndex];
+      console.log(`[LAUNCH] ${game.name} — folder: games/${game._folder}/`);
+      if (game.play_url) {
+        window.open(game.play_url, '_blank');
+      } else {
+        alert(`🕹️  LAUNCH: ${game.name}\n\nAdd a "play_url" field to game_info.json\nto open the game directly.`);
+      }
+    }
+
+    // ── Skin cycling ───────────────────────────────────────────────────────────
+    document.getElementById('chooseSkinButton').addEventListener('click', () => {
+      play(sfxSkin);
+      if (skins[skinIndex]) document.body.classList.remove(skins[skinIndex]);
+      skinIndex = (skinIndex + 1) % skins.length;
+      if (skins[skinIndex]) document.body.classList.add(skins[skinIndex]);
+    });
+
+    // ── Boot ───────────────────────────────────────────────────────────────────
+    loadGames();
+  </script>
 </body>
 </html>
