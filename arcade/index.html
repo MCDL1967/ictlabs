@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>ICTLabs Retro Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
@@ -223,6 +225,9 @@ body::after{
   font-size:clamp(0.42em,0.85vw,0.68em);
   cursor:pointer;letter-spacing:1px;text-transform:uppercase;
   transition:all 0.15s;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;
 }
 .button:hover{background:var(--accent);color:#fff;box-shadow:0 0 10px var(--glow);}
 .button:active{transform:translateY(1px);}
@@ -258,6 +263,146 @@ body::after{
   width:100%;text-transform:uppercase;transition:filter 0.15s;
 }
 .instr-close:hover{filter:brightness(1.2);}
+
+/* ═══════════════════════════════════════════════
+   MOBILE — PORTRAIT
+   Stack: header / right-pane / game-tabs / controls
+═══════════════════════════════════════════════ */
+@media (max-width:767px) and (orientation:portrait){
+
+  body{ height:100dvh; }
+
+  .header{
+    padding:8px 12px;
+    font-size:0.75em;letter-spacing:2px;
+  }
+  .back-arrow{font-size:0.65em;padding:3px 8px;right:10px;}
+
+  /* Main content stacks vertically */
+  .main-content{
+    flex-direction:column;
+    margin:6px 6px 0;
+    border-bottom:none;
+  }
+
+  /* Left pane → horizontal scrollable tab strip */
+  .left-pane{
+    width:100%;min-width:unset;
+    height:auto;flex-shrink:0;
+    border-right:none;
+    border-bottom:2px solid var(--border);
+    overflow-x:auto;overflow-y:hidden;
+    padding:6px 6px;
+    display:flex;flex-direction:row;align-items:center;gap:4px;
+    scrollbar-width:none;
+  }
+  .left-pane::-webkit-scrollbar{display:none;}
+
+  .game-item{
+    flex-shrink:0;
+    border-bottom:none;
+    border:1px solid rgba(255,255,255,0.15);
+    padding:7px 12px;
+    font-size:0.65em;
+    white-space:nowrap;
+  }
+  .game-item.selected{
+    padding-left:12px;
+    border-color:var(--accent);
+  }
+  .game-item.selected::before{content:'▶ ';}
+
+  /* Right pane fills remaining space */
+  .right-pane{
+    flex:1;
+    padding:8px;
+    justify-content:flex-start;
+    overflow:hidden;
+  }
+
+  .game-meta{padding:6px 8px 4px;}
+  .game-meta .title{font-size:1.1em;letter-spacing:2px;margin-bottom:3px;}
+  .game-meta .subtitle{font-size:0.65em;margin-bottom:4px;}
+  .meta-desc{font-size:0.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  .game-preview{
+    width:100%;max-width:unset;
+  }
+
+  /* Controls — two compact rows */
+  .controls{
+    margin:0 6px 6px;
+    padding:6px 8px;
+    flex-direction:column;
+    gap:5px;
+    align-items:stretch;
+  }
+  .btn-group{
+    display:flex;flex-wrap:nowrap;gap:4px;justify-content:center;
+  }
+  .button{
+    flex:1;padding:8px 6px;
+    font-size:0.58em;letter-spacing:0.5px;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   MOBILE — LANDSCAPE
+   Side-by-side (slim list + right pane),
+   controls in single scrollable row
+═══════════════════════════════════════════════ */
+@media (max-width:900px) and (orientation:landscape){
+
+  body{height:100dvh;}
+
+  .header{
+    padding:5px 12px;
+    font-size:0.65em;letter-spacing:2px;
+  }
+  .back-arrow{font-size:0.6em;padding:2px 7px;right:8px;}
+
+  .main-content{
+    flex-direction:row;
+    margin:5px 5px 0;
+  }
+
+  /* Slim vertical list */
+  .left-pane{
+    width:22%;min-width:90px;max-width:130px;
+  }
+  .game-item{
+    font-size:0.55em;padding:7px 6px;
+  }
+
+  .right-pane{padding:6px 8px;gap:5px;}
+
+  .game-meta{padding:4px 8px 2px;}
+  .game-meta .title{font-size:0.95em;letter-spacing:2px;margin-bottom:2px;}
+  .game-meta .subtitle{font-size:0.6em;margin-bottom:2px;}
+  .meta-desc{display:none;}
+
+  /* Controls — single scrollable row */
+  .controls{
+    margin:0 5px 5px;
+    padding:5px 8px;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    gap:6px;
+    justify-content:flex-start;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .controls::-webkit-scrollbar{display:none;}
+  .btn-group{
+    flex-wrap:nowrap;gap:4px;flex-shrink:0;
+  }
+  .button{
+    padding:6px 10px;
+    font-size:0.55em;
+    white-space:nowrap;
+  }
+}
 </style>
 </head>
 <body>
