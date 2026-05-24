@@ -151,12 +151,12 @@ let frameCount=0,animFrame=0;
 let difficulty='intermediate';
 function getDiffSpeeds(){
   // Base speeds scale up with level
-  const lvlBonus=Math.min((level-1)*0.08, 0.8);
+  const lvlBonus=Math.min((level-1)*0.08, 0.6);
   if(difficulty==='beginner')
-    return{pac:1.87+lvlBonus*0.7, ghost:1.36+lvlBonus*0.6};  // −15% base, gentler climb
+    return{pac:1.50+lvlBonus*0.5, ghost:1.15+lvlBonus*0.5};  // -20% from previous
   if(difficulty==='advanced')
-    return{pac:2.53+lvlBonus,     ghost:2.07+lvlBonus};       // +15% base, steeper climb
-  return  {pac:2.2+lvlBonus*0.85, ghost:1.8+lvlBonus*0.75};  // intermediate
+    return{pac:2.02+lvlBonus*0.9, ghost:1.66+lvlBonus*0.9};  // -20% from previous
+  return  {pac:1.76+lvlBonus*0.7, ghost:1.44+lvlBonus*0.6};  // -20% from previous
 }
 // Buffer only used when pac is CHANGING direction (turning at corner)
 function getBuffer(changingDir){
@@ -188,10 +188,10 @@ function initLevel(){
     dead:false,deadTimer:0
   };
   ghosts=[
-    {x:9*CELL+CELL/2, y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[0], scared:false, eaten:false, exitTimer:0,  mode:'scatter'},
-    {x:8*CELL+CELL/2, y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[1], scared:false, eaten:false, exitTimer:30, mode:'scatter'},
-    {x:9*CELL+CELL/2, y:10*CELL+CELL/2, dx:0,dy:0, color:GHOST_COLORS[2], scared:false, eaten:false, exitTimer:60, mode:'scatter'},
-    {x:10*CELL+CELL/2,y:9*CELL+CELL/2,  dx:0,dy:0, color:GHOST_COLORS[3], scared:false, eaten:false, exitTimer:90, mode:'scatter'},
+    {x:9*CELL+CELL/2, y:9*CELL+CELL/2,  dx:1,dy:0, color:GHOST_COLORS[0], scared:false, eaten:false, exitTimer:0,  mode:'scatter'},
+    {x:8*CELL+CELL/2, y:9*CELL+CELL/2,  dx:1,dy:0, color:GHOST_COLORS[1], scared:false, eaten:false, exitTimer:60, mode:'scatter'},
+    {x:9*CELL+CELL/2, y:10*CELL+CELL/2, dx:1,dy:0, color:GHOST_COLORS[2], scared:false, eaten:false, exitTimer:120,mode:'scatter'},
+    {x:10*CELL+CELL/2,y:9*CELL+CELL/2,  dx:1,dy:0, color:GHOST_COLORS[3], scared:false, eaten:false, exitTimer:180,mode:'scatter'},
   ];
   powerTimer=0;
   ghostEatCombo=0;
@@ -290,7 +290,16 @@ function movePac(){
 
 // ── Ghost movement ─────────────────────────────────────
 function moveGhost(g){
-  if(g.exitTimer>0){ g.exitTimer--; return; }
+  // During exitTimer, ghost moves upward out of ghost house
+  if(g.exitTimer>0){
+    g.exitTimer--;
+    // Move ghost up toward exit (row 7, center)
+    const exitX=9*CELL+CELL/2;
+    const exitY=7*CELL+CELL/2;
+    if(Math.abs(g.x-exitX)>2){ g.x+=(exitX-g.x)*0.08; }
+    if(g.y>exitY){ g.y-=1.5; }
+    return;
+  }
 
   const gs=getDiffSpeeds().ghost;
   const speed=(g.scared?gs*0.55:g.eaten?gs*2:gs);

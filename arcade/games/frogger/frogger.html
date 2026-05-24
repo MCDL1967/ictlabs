@@ -135,7 +135,8 @@ function resetFrog(){
     px:6*CELL+CELL/2,  // pixel X center
     py:rowY(0)+CELL/2, // pixel Y center
     dead:false,deadTimer:0,
-    onRider:null  // {dx:pixels_per_frame}
+    onRider:null,  // {dx:pixels_per_frame}
+    landGrace:0    // frames of grace after landing on water
   };
 }
 
@@ -155,6 +156,8 @@ document.addEventListener('keydown',e=>{
   frog.row=nr;frog.col=nc;
   frog.px=nc*CELL+CELL/2;
   frog.py=rowY(nr)+CELL/2;
+  // Grace period when landing on water
+  if(ROW_TYPE[nr]==='water') frog.landGrace=3;
   sfxHop();
   if(m.dr>0)score+=10;
   moveLock=true;
@@ -198,25 +201,28 @@ function update(){
   frog.onRider=null;
 
   // River — must be on a log or turtle
+  // Give 1 frame grace when just landed (landFrame set on hop)
   if(type==='water'&&lane){
-    let riding=false;
-    const totalW=W+(lane.w||CELL)*2;
-    lane.obs.forEach(ob=>{
-      const ox=((ob.x+lane.spd*frameCount*lane.dir)%totalW+totalW)%totalW - lane.w;
-      const lw=lane.w;
-      // Check if frog center is within this obstacle
-      if(frog.px>=ox&&frog.px<=ox+lw){
-        // Turtle dive check
-        if(lane.type==='turtle'){
-          const divePhase=Math.floor(frameCount/100+ob.x/50)%5;
-          if(divePhase<3){riding=true;frog.onRider={dx:lane.spd*lane.dir};}
-          // else turtle is diving — not rideable
-        } else {
-          riding=true;frog.onRider={dx:lane.spd*lane.dir};
+    // Skip drown check for 2 frames after landing to allow position to sync
+    if(frog.landGrace>0){ frog.landGrace--; }
+    else {
+      let riding=false;
+      const totalW=W+(lane.w||CELL)*2;
+      lane.obs.forEach(ob=>{
+        if(riding) return;
+        const ox=((ob.x+lane.spd*frameCount*lane.dir)%totalW+totalW)%totalW - lane.w;
+        const lw=lane.w;
+        if(frog.px>=ox-4&&frog.px<=ox+lw+4){
+          if(lane.type==='turtle'){
+            const divePhase=Math.floor(frameCount/100+ob.x/50)%5;
+            if(divePhase<3){riding=true;frog.onRider={dx:lane.spd*lane.dir};}
+          } else {
+            riding=true;frog.onRider={dx:lane.spd*lane.dir};
+          }
         }
-      }
-    });
-    if(!riding){killFrog('drown');return;}
+      });
+      if(!riding){killFrog('drown');return;}
+    }
   }
 
   // Move with rider

@@ -91,17 +91,17 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 
 const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x000510,0.035);
+scene.fog=new THREE.FogExp2(0x000510,0.015); // less fog = more visibility
 scene.background=new THREE.Color(0x000510);
 
 const camera=new THREE.PerspectiveCamera(65,W/H,0.1,200);
-camera.position.set(0,8,-14);
-camera.lookAt(0,2,20);
+camera.position.set(0,35,-20);
+camera.lookAt(0,0,25);
 
 // ── Lighting ──────────────────────────────────────────────
-const ambLight=new THREE.AmbientLight(0x112233,0.8);
+const ambLight=new THREE.AmbientLight(0x334455,1.8);
 scene.add(ambLight);
-const dirLight=new THREE.DirectionalLight(0x4488ff,1.2);
+const dirLight=new THREE.DirectionalLight(0x8899ff,2.0);
 dirLight.position.set(0,20,10);
 dirLight.castShadow=true;
 scene.add(dirLight);
@@ -127,9 +127,9 @@ const MAT={
   wallTop: new THREE.MeshPhongMaterial({color:0x556655,emissive:0x002200,shininess:60}),
   player:  new THREE.MeshPhongMaterial({color:0x4499ff,emissive:0x112244,shininess:80}),
   cockpit: new THREE.MeshPhongMaterial({color:0x88ddff,emissive:0x224466,shininess:120,transparent:true,opacity:0.85}),
-  enemy:   new THREE.MeshPhongMaterial({color:0xcc2200,emissive:0x440000,shininess:50}),
-  missile: new THREE.MeshPhongMaterial({color:0xff6600,emissive:0x331100,shininess:40}),
-  boss:    new THREE.MeshPhongMaterial({color:0xaa0000,emissive:0x550000,shininess:60}),
+  enemy:   new THREE.MeshPhongMaterial({color:0xff2200,emissive:0xaa1100,shininess:80}),
+  missile: new THREE.MeshPhongMaterial({color:0xff8800,emissive:0xaa4400,shininess:60}),
+  boss:    new THREE.MeshPhongMaterial({color:0xff0044,emissive:0xaa0022,shininess:80}),
   fuel:    new THREE.MeshPhongMaterial({color:0x00aa00,emissive:0x003300,shininess:40}),
   bullet:  new THREE.MeshBasicMaterial({color:0xffff00}),
   ebullet: new THREE.MeshBasicMaterial({color:0xff4444}),
@@ -205,7 +205,7 @@ function makeFighter(){
   const wl=box(1.8,0.1,0.8,MAT.enemy); wl.position.set(-1.6,0,0); g.add(wl);
   const wr=box(1.8,0.1,0.8,MAT.enemy); wr.position.set(1.6,0,0); g.add(wr);
   const nose=cyl(0.05,0.25,0.8,MAT.enemy); nose.rotation.x=Math.PI/2; nose.position.set(0,0,1.2); g.add(nose);
-  const light=new THREE.PointLight(0xff2200,1,4); light.position.set(0,0.5,0); g.add(light);
+  const light=new THREE.PointLight(0xff4400,3,8); light.position.set(0,0.5,0); g.add(light);
   return g;
 }
 
@@ -214,7 +214,7 @@ function makeTurret(){
   const base=box(1.2,0.5,1.2,MAT.wall); base.position.y=0.25; g.add(base);
   const turret=cyl(0.3,0.4,0.6,MAT.enemy); turret.position.y=0.8; g.add(turret);
   const barrel=box(0.15,0.15,1.2,MAT.enemy); barrel.position.set(0,0.8,0.8); g.add(barrel);
-  const light=new THREE.PointLight(0xff4400,0.8,3); light.position.set(0,1,0); g.add(light);
+  const light=new THREE.PointLight(0xff6600,3,8); light.position.set(0,1,0); g.add(light);
   return g;
 }
 
@@ -302,9 +302,9 @@ const keys={};
 let enemies=[],bullets=[],worldZ=0;
 
 function getDiff(){
-  if(difficulty==='beginner')  return{spd:0.06,eSpd:0.04,shootRate:0.5};
-  if(difficulty==='advanced')  return{spd:0.12,eSpd:0.10,shootRate:2.0};
-  return{spd:0.09,eSpd:0.07,shootRate:1.0};
+  if(difficulty==='beginner')  return{spd:0.048,eSpd:0.032,shootRate:0.4};
+  if(difficulty==='advanced')  return{spd:0.096,eSpd:0.080,shootRate:1.6};
+  return{spd:0.072,eSpd:0.056,shootRate:0.8}; // all -20%
 }
 
 // ── Input ─────────────────────────────────────────────────
@@ -373,11 +373,13 @@ function spawnWaveObjects(w){
 
 // ── Shoot ─────────────────────────────────────────────────
 function shoot(){
-  const b=sphere(0.15,MAT.bullet);
+  const b=sphere(0.35,MAT.bullet); // larger bullet
   b.position.copy(playerShip.position);
   b.position.z+=2;
+  // Add point light to bullet
+  const bl=new THREE.PointLight(0xffff00,3,6); b.add(bl);
   scene.add(b);
-  bullets.push({mesh:b,vz:0.5,vy:0,enemy:false,alive:true});
+  bullets.push({mesh:b,vz:0.6,vy:0,enemy:false,alive:true});
   fireCooldown=8;sfxShoot();
 }
 
@@ -434,7 +436,7 @@ function update(){
     e.shootTimer--;
     if(e.shootTimer<=0&&e.mesh.position.z<15&&e.mesh.position.z>-5&&e.type!=='fuel'){
       e.shootTimer=Math.floor((60+Math.random()*60)/d.shootRate);
-      const b=sphere(0.2,MAT.ebullet);
+      const b=sphere(0.4,MAT.ebullet); // larger enemy bullet
       b.position.copy(e.mesh.position);
       const dir=new THREE.Vector3(
         playerShip.position.x-e.mesh.position.x,
@@ -508,10 +510,9 @@ function update(){
     waveComplete();
   }
 
-  // Camera follows player with slight lag
-  camera.position.x+=(playerShip.position.x*0.3-camera.position.x)*0.05;
-  camera.position.y+=(playerShip.position.y*0.4+3-camera.position.y)*0.05;
-  camera.lookAt(playerShip.position.x*0.2,playerShip.position.y*0.3+1,20);
+  // Fixed isometric camera — slight x follow only
+  camera.position.x+=(playerShip.position.x*0.15-camera.position.x)*0.04;
+  camera.lookAt(camera.position.x*0.3,0,25);
 
   // Exhaust flicker
   playerShip.children.forEach(c=>{
