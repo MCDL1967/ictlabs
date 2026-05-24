@@ -1,0 +1,8 @@
+{
+  "name": "GALAGA",
+  "image_desc": "Classic 1981 space shooter. Defend Earth from the Galaga insect fleet — watch out for the tractor beam!",
+  "video_src": "https://www.youtube.com/embed/LiNmjZ9K7b4?autoplay=1&mute=1&controls=0&loop=1&playlist=LiNmjZ9K7b4",
+  "genre": "Space Shooter",
+  "release_year": 1981,
+  "play_url": "games/galaga/galaga.html"
+}
