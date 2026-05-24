@@ -284,9 +284,8 @@
       <button class="button" id="selectButton">⏎ SELECT</button>
     </div>
     <div class="btn-group">
-      <button class="button" onclick="">Trackpad</button>
-      <button class="button" onclick="">Keyboard</button>
-      <button class="button" onclick="">Mouse</button>
+      <button class="button" id="btn1p">1 PLAYER</button>
+      <button class="button" id="btn2p">2 PLAYERS</button>
     </div>
     <div class="btn-group">
       <button class="button" id="chooseSkinButton">🎨 Skin</button>
@@ -382,6 +381,7 @@
       });
 
       showDetails(GAMES[selectedIndex]);
+      update2pButton();
     }
 
     // ── Show right pane details ────────────────────────────────────────────────
@@ -423,29 +423,29 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowUp')   { play(sfxNav);    selectGame(selectedIndex - 1); e.preventDefault(); }
       if (e.key === 'ArrowDown') { play(sfxNav);    selectGame(selectedIndex + 1); e.preventDefault(); }
-      if (e.key === 'Enter')     { play(sfxSelect); launchGame(); e.preventDefault(); }
+      if (e.key === 'Enter')     { play(sfxSelect); launchGame('1p'); e.preventDefault(); }
     });
 
     // ── Button nav ─────────────────────────────────────────────────────────────
     document.getElementById('upButton').addEventListener('click',     () => { play(sfxNav);    selectGame(selectedIndex - 1); });
     document.getElementById('downButton').addEventListener('click',   () => { play(sfxNav);    selectGame(selectedIndex + 1); });
-    document.getElementById('selectButton').addEventListener('click', () => { play(sfxSelect); launchGame(); });
+    document.getElementById('selectButton').addEventListener('click', () => { play(sfxSelect); launchGame('1p'); });
 
-    // ── Launch — loads game inline in right pane ──────────────────
-    function launchGame() {
+    // ── Launch — loads game inline, passes mode via URL param ────
+    function launchGame(mode) {
       if (GAMES.length === 0) return;
       const game = GAMES[selectedIndex];
       if (!game.play_url) return;
 
-      // Switch right pane to full game mode
-      metaBox.style.display      = 'none';
-      previewWrap.style.display  = 'none';
-      emptyState.style.display   = 'none';
+      metaBox.style.display     = 'none';
+      previewWrap.style.display = 'none';
+      emptyState.style.display  = 'none';
 
-      gameFrame.src = game.play_url;
-      gameBarTitle.textContent = game.name;
+      // Append ?mode=1p or ?mode=2p so the game can read it
+      const url = game.play_url + (mode ? '?mode='+mode : '');
+      gameFrame.src = url;
+      gameBarTitle.textContent = game.name + (mode === '2p' ? '  ·  2P' : '');
       gamePane.style.display = 'flex';
-      gamePane.focus();
     }
 
     // ── Exit game — return to preview ─────────────────────────────
@@ -456,12 +456,33 @@
     }
 
     document.getElementById('exitButton').addEventListener('click', exitGame);
-    // ESC key exits game
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && gamePane.style.display !== 'none') {
-        exitGame();
-      }
+      if (e.key === 'Escape' && gamePane.style.display !== 'none') exitGame();
     });
+
+    // ── 1P / 2P buttons ───────────────────────────────────────────
+    document.getElementById('btn1p').addEventListener('click', () => {
+      play(sfxSelect); launchGame('1p');
+    });
+    document.getElementById('btn2p').addEventListener('click', () => {
+      if (GAMES.length === 0) return;
+      const game = GAMES[selectedIndex];
+      if (!game.multiplayer) return; // disabled for single-player games
+      play(sfxSelect); launchGame('2p');
+    });
+
+    // Update 2P button state when game is selected
+    function update2pButton() {
+      const game = GAMES[selectedIndex];
+      const btn2p = document.getElementById('btn2p');
+      if (game && game.multiplayer) {
+        btn2p.style.opacity = '1';
+        btn2p.style.cursor  = 'pointer';
+      } else {
+        btn2p.style.opacity = '0.3';
+        btn2p.style.cursor  = 'not-allowed';
+      }
+    }
 
     // ── Skin cycling ───────────────────────────────────────────────────────────
     document.getElementById('chooseSkinButton').addEventListener('click', () => {

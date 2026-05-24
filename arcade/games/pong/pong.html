@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>PONG</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  height:100vh; overflow:hidden;
+  font-family:'Press Start 2P', cursive;
+}
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+canvas { display:block; image-rendering:pixelated; }
+#ui {
+  color:#fff; text-align:center;
+  margin-bottom:8px; font-size:11px; letter-spacing:1px;
+  display:flex; gap:32px; justify-content:center; align-items:center;
+}
+#ui .sc1 { color:#0ff; }
+#ui .sc2 { color:#f80; }
+#ui .lv  { color:#ff0; }
+#overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.88);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  color:#fff; text-align:center; z-index:10;
+}
+#overlay h1 {
+  font-size:clamp(28px,5vw,52px); color:#fff;
+  text-shadow:0 0 20px #fff; margin-bottom:24px; letter-spacing:6px;
+}
+.menu-btn {
+  background:transparent; border:2px solid #fff; color:#fff;
+  font-family:'Press Start 2P',cursive; font-size:clamp(9px,1.5vw,13px);
+  letter-spacing:2px; padding:14px 40px; cursor:pointer;
+  margin:8px; transition:all 0.15s; display:block; width:220px;
+}
+.menu-btn:hover { background:#fff; color:#000; }
+.menu-sub { font-size:clamp(7px,1.2vw,10px); color:#888; margin-top:20px; line-height:2.2; }
+.menu-sub span { color:#ff0; }
+#msgBox {
+  position:fixed; inset:0; pointer-events:none;
+  display:flex; align-items:center; justify-content:center; z-index:9;
+}
+#msgText {
+  font-family:'Press Start 2P',cursive;
+  font-size:clamp(10px,2vw,18px); color:#ff0;
+  text-shadow:0 0 16px #ff0; letter-spacing:2px;
+  display:none; text-align:center; line-height:1.8;
+  animation:blink .7s step-end infinite;
+}
+@keyframes blink { 50%{opacity:0} }
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <span class="sc1">P1: <b id="s1El">0</b></span>
+  <span class="lv" id="setEl">SET 1</span>
+  <span class="sc2"><b id="s2El">0</b> :P2</span>
+</div>
+<canvas id="c"></canvas>
+<div id="msgBox"><div id="msgText" id="msgText"></div></div>
+
+<div id="overlay">
+  <h1>PONG</h1>
+  <button class="menu-btn" id="btn1p">1 PLAYER</button>
+  <button class="menu-btn" id="btn2p">2 PLAYERS</button>
+  <p class="menu-sub">
+    P1: <span>W / S</span> &nbsp;·&nbsp; P2: <span>↑ / ↓</span><br>
+    First to <span>7</span> wins the set<br>
+    Best of <span>3</span> sets wins the match
+  </p>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  PONG — 1P vs AI / 2P local · ICTLabs Arcade
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const overlay= document.getElementById('overlay');
+const s1El   = document.getElementById('s1El');
+const s2El   = document.getElementById('s2El');
+const setEl  = document.getElementById('setEl');
+const msgText= document.getElementById('msgText');
+
+const W=640, H=480;
+canvas.width=W; canvas.height=H;
+function resize(){
+  const s=Math.min(window.innerWidth/W,(window.innerHeight-48)/H);
+  canvas.style.width=(W*s)+'px'; canvas.style.height=(H*s)+'px';
+}
+resize(); window.addEventListener('resize',resize);
+
+// ── Audio ─────────────────────────────────────────────
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function beep(freq,dur,vol=0.22,type='square'){
+  try{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    o.start();o.stop(AC.currentTime+dur+0.01);
+  }catch(e){}
+}
+// Classic Pong sounds — synthesized to match the original
+function sfxPaddle(){ beep(480,0.045,0.22,'square'); }   // high blip on hit
+function sfxWall(){   beep(240,0.045,0.18,'square'); }   // lower blip on wall
+function sfxScore(){  beep(110,0.35,0.3,'sawtooth'); }   // low buzz on score
+function sfxSetWin(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.13,0.28,'square'),i*110)); }
+function sfxMatchWin(){ [523,659,784,1047,1318,1047,784].forEach((f,i)=>setTimeout(()=>beep(f,0.14,0.3,'square'),i*90)); }
+document.addEventListener('keydown',()=>{ if(AC.state==='suspended') AC.resume(); },{once:false});
+
+// ── Constants ─────────────────────────────────────────
+const PAD_W=10,PAD_H=72,PAD_SPD=5.5;
+const BALL_SZ=10;
+const WIN_PTS=7,WIN_SETS=2;
+const AI_BASE=0.70;
+
+// ── State ─────────────────────────────────────────────
+let mode='1p',gstate='idle';
+let p1={y:H/2-PAD_H/2,score:0,sets:0};
+let p2={y:H/2-PAD_H/2,score:0,sets:0};
+let ball={x:W/2,y:H/2,vx:0,vy:0};
+let set=1;
+const keys={};
+let frameCount=0;
+let savedOverlay='';
+
+// ── Keys ──────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  ['KeyW','KeyS','ArrowUp','ArrowDown','Space'].forEach(k=>{ if(e.code===k) e.preventDefault(); });
+  if(gstate==='setOver') advanceSet();
+});
+document.addEventListener('keyup',e=>{ keys[e.code]=false; });
+
+// ── Menu ──────────────────────────────────────────────
+function bindMenu(){
+  document.getElementById('btn1p').onclick=()=>startGame('1p');
+  document.getElementById('btn2p').onclick=()=>startGame('2p');
+}
+bindMenu();
+
+function startGame(m){
+  mode=m;
+  overlay.style.display='none';
+  p1={y:H/2-PAD_H/2,score:0,sets:0};
+  p2={y:H/2-PAD_H/2,score:0,sets:0};
+  set=1; updateUI(); serveBall(1); gstate='playing';
+}
+
+// ── Ball serve ────────────────────────────────────────
+function serveBall(side){
+  ball.x=W/2; ball.y=H/4+Math.random()*(H/2);
+  const spd=3.8+set*0.35;
+  const ang=(Math.random()*0.5-0.25);
+  ball.vx=(side===1?1:-1)*spd*Math.cos(ang);
+  ball.vy=spd*Math.sin(ang)+(Math.random()*0.8-0.4);
+}
+
+// ── AI ────────────────────────────────────────────────
+function updateAI(){
+  const diff=Math.min(AI_BASE+set*0.05,0.94);
+  const target=ball.y-PAD_H/2;
+  const delta=target-p2.y;
+  const maxMv=PAD_SPD*diff;
+  if(Math.abs(delta)>3) p2.y+=Math.sign(delta)*Math.min(Math.abs(delta),maxMv);
+  p2.y=Math.max(0,Math.min(H-PAD_H,p2.y));
+}
+
+// ── Physics ───────────────────────────────────────────
+function moveBall(){
+  ball.x+=ball.vx; ball.y+=ball.vy;
+  // Top/bottom walls
+  if(ball.y<=0){ball.y=0;ball.vy*=-1;sfxWall();}
+  if(ball.y>=H-BALL_SZ){ball.y=H-BALL_SZ;ball.vy*=-1;sfxWall();}
+  // P1 paddle (left)
+  if(ball.vx<0&&ball.x<=26&&ball.x>=10&&ball.y+BALL_SZ>=p1.y&&ball.y<=p1.y+PAD_H){
+    ball.x=26;
+    const hp=(ball.y+BALL_SZ/2-p1.y)/PAD_H;
+    const ang=(hp-0.5)*1.3;
+    const spd=Math.hypot(ball.vx,ball.vy)*1.06;
+    ball.vx=Math.abs(spd*Math.cos(ang));
+    ball.vy=spd*Math.sin(ang);
+    sfxPaddle();
+  }
+  // P2 paddle (right)
+  if(ball.vx>0&&ball.x+BALL_SZ>=W-26&&ball.x+BALL_SZ<=W-10&&ball.y+BALL_SZ>=p2.y&&ball.y<=p2.y+PAD_H){
+    ball.x=W-26-BALL_SZ;
+    const hp=(ball.y+BALL_SZ/2-p2.y)/PAD_H;
+    const ang=(hp-0.5)*1.3;
+    const spd=Math.hypot(ball.vx,ball.vy)*1.06;
+    ball.vx=-Math.abs(spd*Math.cos(ang));
+    ball.vy=spd*Math.sin(ang);
+    sfxPaddle();
+  }
+  // Score
+  if(ball.x>W){ p2.score++; sfxScore(); updateUI(); checkSet(2); }
+  if(ball.x+BALL_SZ<0){ p1.score++; sfxScore(); updateUI(); checkSet(1); }
+}
+
+function checkSet(scorer){
+  if(p1.score>=WIN_PTS||p2.score>=WIN_PTS){
+    const w=p1.score>p2.score?1:2;
+    if(w===1) p1.sets++; else p2.sets++;
+    p1.score=0; p2.score=0;
+    if(p1.sets>=WIN_SETS||p2.sets>=WIN_SETS){
+      gstate='matchOver';
+      sfxMatchWin();
+      setTimeout(()=>showMatchOver(w),2200);
+    } else {
+      set++; gstate='setOver'; updateUI();
+      sfxSetWin();
+      showMsg(`P${w} WINS SET!\nSPACE TO CONTINUE`);
+    }
+  } else {
+    serveBall(scorer===1?-1:1);
+  }
+}
+
+function advanceSet(){
+  if(gstate==='setOver'){
+    gstate='playing'; hideMsg(); serveBall(1);
+  }
+}
+
+// ── Update ────────────────────────────────────────────
+function update(){
+  frameCount++;
+  // P1
+  if(keys['KeyW']) p1.y=Math.max(0,p1.y-PAD_SPD);
+  if(keys['KeyS']) p1.y=Math.min(H-PAD_H,p1.y+PAD_SPD);
+  // P2 / AI
+  if(mode==='2p'){
+    if(keys['ArrowUp'])   p2.y=Math.max(0,p2.y-PAD_SPD);
+    if(keys['ArrowDown']) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
+  } else {
+    updateAI();
+  }
+  moveBall();
+}
+
+// ── Draw ──────────────────────────────────────────────
+function draw(){
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  // Center dashed line
+  ctx.setLineDash([8,8]);
+  ctx.strokeStyle='rgba(255,255,255,0.18)';
+  ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // P1 paddle — cyan accent
+  ctx.fillStyle='#fff'; fillRoundRect(16,p1.y,PAD_W,PAD_H,3);
+  ctx.fillStyle='#0ff'; ctx.fillRect(16,p1.y,3,PAD_H);
+
+  // P2 paddle — orange accent
+  ctx.fillStyle='#fff'; fillRoundRect(W-PAD_W-16,p2.y,PAD_W,PAD_H,3);
+  ctx.fillStyle='#f80'; ctx.fillRect(W-19,p2.y,3,PAD_H);
+
+  // Ball + glow + trail
+  if(gstate==='playing'||gstate==='setOver'){
+    // trail
+    ctx.fillStyle='rgba(255,255,255,0.12)';
+    ctx.fillRect(ball.x-ball.vx*2,ball.y-ball.vy*2,BALL_SZ,BALL_SZ);
+    ctx.fillStyle='rgba(255,255,255,0.06)';
+    ctx.fillRect(ball.x-ball.vx*4,ball.y-ball.vy*4,BALL_SZ,BALL_SZ);
+    // ball
+    ctx.shadowBlur=14; ctx.shadowColor='#fff';
+    ctx.fillStyle='#fff';
+    ctx.fillRect(ball.x,ball.y,BALL_SZ,BALL_SZ);
+    ctx.shadowBlur=0;
+  }
+
+  // Set pips
+  for(let i=0;i<WIN_SETS;i++){
+    ctx.fillStyle=i<p1.sets?'#0ff':'rgba(0,255,255,0.12)';
+    ctx.fillRect(W/2-28-(i*16),H-14,10,6);
+    ctx.fillStyle=i<p2.sets?'#f80':'rgba(255,136,0,0.12)';
+    ctx.fillRect(W/2+18+(i*16),H-14,10,6);
+  }
+
+  // Mode label
+  ctx.fillStyle='rgba(255,255,255,0.18)';
+  ctx.font='7px "Press Start 2P"';
+  ctx.textAlign='center';
+  ctx.fillText(mode==='1p'?'VS CPU':'2 PLAYERS',W/2,14);
+  ctx.textAlign='left';
+}
+
+function fillRoundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();ctx.fill();
+}
+
+function showMsg(t){
+  msgText.innerHTML=t.replace(/\n/g,'<br>');
+  msgText.style.display='block';
+}
+function hideMsg(){ msgText.style.display='none'; }
+
+function updateUI(){
+  s1El.textContent=p1.score;
+  s2El.textContent=p2.score;
+  setEl.textContent=`SET ${set}  [${p1.sets}-${p2.sets}]`;
+}
+
+function showMatchOver(w){
+  const p1Label=mode==='1p'?'YOU':'P1';
+  const p2Label=mode==='1p'?'CPU':'P2';
+  const winner=w===1?p1Label:p2Label;
+  overlay.innerHTML=`
+    <h1 style="font-size:clamp(16px,3vw,28px);margin-bottom:16px;letter-spacing:3px;">
+      ${winner} WINS!
+    </h1>
+    <p style="font-size:clamp(7px,1.2vw,10px);color:#888;margin-bottom:28px;line-height:2.2;">
+      ${p1Label} ${p1.sets} SETS &nbsp;·&nbsp; ${p2Label} ${p2.sets} SETS
+    </p>
+    <button class="menu-btn" id="btnReplay">PLAY AGAIN</button>
+    <button class="menu-btn" id="btnMenu">MAIN MENU</button>
+  `;
+  overlay.style.display='flex';
+  document.getElementById('btnReplay').onclick=()=>startGame(mode);
+  document.getElementById('btnMenu').onclick=()=>{
+    overlay.innerHTML=savedOverlay;
+    overlay.style.display='flex';
+    bindMenu();
+    gstate='idle';
+  };
+}
+
+// ── Loop ──────────────────────────────────────────────
+function loop(){
+  requestAnimationFrame(loop);
+  if(gstate==='playing') update();
+  draw();
+}
+
+// ── Boot ──────────────────────────────────────────────
+savedOverlay=overlay.innerHTML;
+loop();
+// Auto-start if mode passed via URL param from console
+const urlMode = new URLSearchParams(window.location.search).get('mode');
+if (urlMode === '1p' || urlMode === '2p') startGame(urlMode);
+</script>
+</body>
+</html>
