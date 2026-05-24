@@ -12,7 +12,7 @@ canvas{display:block;image-rendering:pixelated;}
 #ui .sc{color:#ff0;} #ui .hi{color:#f80;} #ui .lv{color:#0cf;} #ui .lf{color:#f44;} #ui .fu{color:#0f0;}
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;z-index:10;}
 #overlay h1{font-size:clamp(28px,5vw,56px);color:#ff0;text-shadow:0 0 24px #ff0;margin-bottom:8px;letter-spacing:6px;}
-#overlay .sub{font-size:clamp(8px,1.2vw,12px);color:rgba(255,255,255,0.5);margin-bottom:24px;letter-spacing:2px;line-height:2;}
+.sub{font-size:clamp(8px,1.2vw,12px);color:rgba(255,255,255,0.5);margin-bottom:24px;letter-spacing:2px;line-height:2.2;}
 .start-btn{background:transparent;border:2px solid #ff0;color:#ff0;font-family:'Audiowide',sans-serif;font-size:clamp(10px,1.5vw,13px);letter-spacing:2px;padding:13px 48px;cursor:pointer;transition:all 0.15s;}
 .start-btn:hover{background:#ff0;color:#000;}
 #msg{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(14px,2.5vw,22px);color:#ff0;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:1.8;}
@@ -31,14 +31,16 @@ canvas{display:block;image-rendering:pixelated;}
 <div id="msg"></div>
 <div id="overlay">
   <h1>ZAXXON</h1>
-  <p class="sub">Isometric space fortress assault<br>↑↓ Altitude &nbsp;·&nbsp; ←→ Strafe &nbsp;·&nbsp; Space Fire<br>Destroy turrets · Collect fuel · Reach the robot</p>
+  <p class="sub">Diagonal space fortress assault<br>↑↓ Altitude &nbsp;·&nbsp; ←→ Strafe &nbsp;·&nbsp; Space Fire<br>Shadow shows your altitude · Watch the fuel!</p>
   <button class="start-btn" id="startBtn">START GAME</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  ZAXXON — Isometric shooter · ICTLabs Arcade
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  ZAXXON — Diagonal pseudo-3D · ICTLabs Arcade
+//  Approach: top-down diagonal scroll (NE→SW),
+//  altitude shown by vertical position + shadow offset
+// ═══════════════════════════════════════════════════════
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay');
@@ -58,28 +60,45 @@ function sfxShoot(){tone(880,0.06,0.15);}
 function sfxBoom(f=200){try{const b=AC.createBuffer(1,AC.sampleRate*.25,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,.5);const s=AC.createBufferSource(),g=AC.createGain(),fl=AC.createBiquadFilter();s.buffer=b;fl.type='bandpass';fl.frequency.value=f;fl.Q.value=.8;s.connect(fl);fl.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.4,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.25);s.start();s.stop(AC.currentTime+.26);}catch(e){}}
 function sfxDie(){[440,330,220,110].forEach((f,i)=>setTimeout(()=>tone(f,.15,.3,'sawtooth'),i*90));}
 function sfxFuel(){[660,880].forEach((f,i)=>setTimeout(()=>tone(f,.08,.2),i*80));}
-function sfxWave(){[523,659,784,1047,784,659].forEach((f,i)=>setTimeout(()=>tone(f,.1,.25),i*80));}
+function sfxWave(){[523,659,784,1047,784].forEach((f,i)=>setTimeout(()=>tone(f,.1,.25),i*80));}
 document.addEventListener('keydown',()=>{if(AC.state==='suspended')AC.resume();},{once:false});
 
-// ── Iso projection ───────────────────────────────
-// Player moves in world space: wx=strafe, wz=altitude
-// Enemies are placed ahead and scroll toward player (wDepth decreases)
-const CX=W/2, CY=H*0.45;
-const TW=40, TH=20;
-function iso(wx,depth,wz){
-  return{
-    sx: CX+(wx-depth)*(TW/2),
-    sy: CY+(wx+depth)*(TH/2)-wz*TH
-  };
+// ── World → Screen projection ─────────────────────
+// World: x=strafe (0..WORLD_W), y=scroll depth, z=altitude (0..MAX_ALT)
+// Screen: diagonal scroll — world y increases as terrain scrolls toward player
+// Screen X = world_x * CELL + world_y * DIAG_X (diagonal offset)
+// Screen Y = world_y * DIAG_Y - world_z * ALT_SCALE (altitude raises object up)
+const WORLD_W=12;
+const CELL=48;
+const DIAG_X=0.5;  // diagonal X skew per world-y unit
+const DIAG_Y=0.6;  // diagonal Y advance per world-y unit
+const ALT_SCALE=18; // pixels per altitude unit
+const MAX_ALT=8, MIN_ALT=0;
+const GROUND_Y=H*0.82; // screen Y where ground level (z=0) at scroll=0
+
+function toScreen(wx,wy,wz){
+  const sx = wx*CELL + wy*CELL*DIAG_X;
+  const sy = GROUND_Y - wy*CELL*DIAG_Y - wz*ALT_SCALE;
+  return{sx,sy};
+}
+
+// Shadow: same as toScreen but wz=0
+function toShadow(wx,wy,wz){
+  const sx = wx*CELL + wy*CELL*DIAG_X;
+  const sy = GROUND_Y - wy*CELL*DIAG_Y;
+  return{sx,sy};
 }
 
 // ── Constants ────────────────────────────────────
-const WORLD_W=7;
-const MAX_ALT=8,MIN_ALT=1;
-const SCROLL=0.06;
+const SCROLL_SPD=0.9; // pixels per frame (ground tile advance)
+const PLAYER_SPD_X=0.06;
+const PLAYER_SPD_Z=0.05;
 const MAX_FUEL=100;
+
+// ── State ────────────────────────────────────────
 let score,hiScore=0,lives,wave,fuel;
 let player,bullets,enemies,walls,fuelTanks,explosions;
+let scrollOffset=0; // how far ground has scrolled (in world-y units)
 let gstate='idle',frameCount=0,fireCooldown=0;
 const keys={};
 
@@ -90,35 +109,40 @@ function startGame(){
 }
 
 function initWave(){
-  player={wx:WORLD_W/2,wz:4,invincible:120,dead:false,deadTimer:0};
+  scrollOffset=0;
+  // Player fixed at screen bottom-left area, world x=4, z=4
+  player={wx:4,wz:4,dead:false,deadTimer:0,invincible:120};
   bullets=[];explosions=[];
   enemies=buildEnemies(wave);
   walls=buildWalls(wave);
-  fuelTanks=buildFuel();
+  fuelTanks=buildFuel(wave);
   updateUI();
 }
 
-// Enemies placed at positive depth values ahead of player
-// depth decreases as world scrolls — when depth < 0 they're behind
+// Objects are placed at world_y values (how far ahead they are)
+// They scroll toward the player as scrollOffset increases
+// Effective world_y on screen = placed_y - scrollOffset
+// When effective_y < -1, object has passed the player
+
 function buildEnemies(w){
   const list=[];
-  const count=5+w*2;
+  const count=6+w*2;
   for(let i=0;i<count;i++){
     list.push({
-      wx:0.5+Math.random()*(WORLD_W-1),
-      depth:8+i*3.5+Math.random()*2,
-      wz:2+Math.floor(Math.random()*6),
+      wx:1+Math.random()*(WORLD_W-2),
+      placed_y:8+i*3+Math.random()*2,
+      wz:2+Math.floor(Math.random()*5),
       type:Math.random()<0.35?'missile':'turret',
       alive:true,
-      shootTimer:80+Math.random()*80,
-      vx:(Math.random()-0.5)*0.02,
+      shootTimer:100+Math.random()*100,
+      vwx:(Math.random()-0.5)*0.015,
     });
   }
-  // Boss at end
+  // Boss
   list.push({
-    wx:WORLD_W/2,depth:8+count*3.5+15,
+    wx:WORLD_W/2,placed_y:8+count*3+20,
     wz:4,type:'boss',alive:true,
-    shootTimer:60,vx:0.03,
+    shootTimer:60,vwx:0.025,
     hp:3+w,maxHp:3+w
   });
   return list;
@@ -126,22 +150,23 @@ function buildEnemies(w){
 
 function buildWalls(w){
   const list=[];
-  for(let i=0;i<3+w;i++){
-    const depth=12+i*14;
-    const gap=1+Math.floor(Math.random()*(WORLD_W-2));
+  for(let i=0;i<4+w;i++){
+    const py=12+i*15;
+    const gap=1+Math.floor(Math.random()*(WORLD_W-3));
+    const gapW=2;
     for(let x=0;x<WORLD_W;x++){
-      if(x<gap||x>gap+1){
-        list.push({wx:x,depth,height:2+Math.floor(Math.random()*3),alive:true});
+      if(x<gap||x>=gap+gapW){
+        list.push({wx:x,placed_y:py,height:2+Math.floor(Math.random()*4),alive:true});
       }
     }
   }
   return list;
 }
 
-function buildFuel(){
-  return Array.from({length:4},(_,i)=>({
-    wx:0.5+Math.random()*(WORLD_W-1),
-    depth:6+i*10+Math.random()*4,
+function buildFuel(w){
+  return Array.from({length:5},(_,i)=>({
+    wx:1+Math.random()*(WORLD_W-2),
+    placed_y:7+i*9+Math.random()*4,
     collected:false
   }));
 }
@@ -152,13 +177,20 @@ document.addEventListener('keydown',e=>{
   ['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k=>{if(e.code===k)e.preventDefault();});
   if(gstate==='idle'&&e.code==='Space'){startGame();return;}
   if(gstate==='dead_wait'&&e.code==='Space'){respawn();return;}
-  if(gstate==='playing'&&e.code==='Space'&&fireCooldown<=0){shoot();}
+  if(gstate==='playing'&&e.code==='Space'&&fireCooldown<=0)shoot();
 });
 document.addEventListener('keyup',e=>{keys[e.code]=false;});
 document.getElementById('startBtn').onclick=startGame;
 
 function shoot(){
-  bullets.push({wx:player.wx,depth:player.depth||0,wz:player.wz,alive:true,age:0,enemy:false});
+  // Bullet travels in +y direction (forward/away) and forward diagonally
+  bullets.push({
+    wx:player.wx,
+    placed_y:scrollOffset+2, // starts just ahead of player
+    wz:player.wz,
+    alive:true,age:0,enemy:false,
+    speed:0.18
+  });
   fireCooldown=10;sfxShoot();
 }
 
@@ -170,107 +202,105 @@ function update(){
   if(player.dead){player.deadTimer--;if(player.deadTimer<=0)killPlayer2();return;}
   if(player.invincible>0)player.invincible--;
 
-  // Player input
-  const spd=0.07;
-  if(keys['ArrowLeft']||keys['KeyA']) player.wx=Math.max(0.3,player.wx-spd);
-  if(keys['ArrowRight']||keys['KeyD']) player.wx=Math.min(WORLD_W-0.3,player.wx+spd);
-  if(keys['ArrowUp']||keys['KeyW'])   player.wz=Math.min(MAX_ALT,player.wz+spd*0.6);
-  if(keys['ArrowDown']||keys['KeyS']) player.wz=Math.max(MIN_ALT,player.wz-spd*0.6);
-  if(keys['Space']&&fireCooldown<=0)  shoot();
+  // Input
+  const spd=PLAYER_SPD_X;
+  if(keys['ArrowLeft']||keys['KeyA'])  player.wx=Math.max(0.5,player.wx-spd);
+  if(keys['ArrowRight']||keys['KeyD']) player.wx=Math.min(WORLD_W-0.5,player.wx+spd);
+  if(keys['ArrowUp']||keys['KeyW'])    player.wz=Math.min(MAX_ALT,player.wz+PLAYER_SPD_Z);
+  if(keys['ArrowDown']||keys['KeyS'])  player.wz=Math.max(MIN_ALT,player.wz-PLAYER_SPD_Z);
+  if(keys['Space']&&fireCooldown<=0)   shoot();
 
-  // Fuel
-  fuel=Math.max(0,fuel-0.02*(1+wave*0.05));
+  // Scroll world
+  scrollOffset+=SCROLL_SPD*(1+wave*0.08)/CELL;
+
+  // Fuel drain
+  fuel=Math.max(0,fuel-0.018*(1+wave*0.04));
   if(fuel<=0){player.dead=true;player.deadTimer=60;sfxDie();}
 
-  // Scroll — all objects' depth decreases toward player
-  const scrollSpd=SCROLL*(1+wave*0.08);
-  enemies.forEach(e=>{if(e.alive)e.depth-=scrollSpd;});
-  walls.forEach(w=>{if(w.alive)w.depth-=scrollSpd;});
-  fuelTanks.forEach(f=>{if(!f.collected)f.depth-=scrollSpd;});
-
-  // Enemy lateral movement
-  enemies.forEach(e=>{
-    if(!e.alive)return;
-    if(e.type==='missile'||e.type==='boss'){
-      e.wx+=e.vx;
-      if(e.wx<0.3||e.wx>WORLD_W-0.3)e.vx*=-1;
-    }
-    // Enemy shoot
-    e.shootTimer--;
-    if(e.shootTimer<=0&&e.type!=='boss'){
-      e.shootTimer=60+Math.random()*80;
-      bullets.push({wx:e.wx,depth:e.depth,wz:e.wz,alive:true,age:0,enemy:true,
-        vwx:(player.wx-e.wx)*0.02, vdepth:SCROLL*2, vwz:(player.wz-e.wz)*0.015});
-    }
-    if(e.type==='boss'&&e.shootTimer<=0){
-      e.shootTimer=45+Math.random()*30;
-      bullets.push({wx:e.wx,depth:e.depth,wz:e.wz,alive:true,age:0,enemy:true,
-        vwx:0,vdepth:SCROLL*2.5,vwz:0});
-    }
-    // Out of range — remove
-    if(e.depth<-5)e.alive=false;
-  });
+  // Player effective world y is always ~2 units ahead of scroll origin
+  const playerEffY=2; // player is always at this effective y on screen
 
   // Move player bullets forward
   for(let i=bullets.length-1;i>=0;i--){
     const b=bullets[i];
-    if(!b.enemy){
-      b.depth+=0.3;b.age++;
-      if(b.age>80){bullets.splice(i,1);continue;}
-      // Hit enemy
+    if(b.enemy){
+      // Enemy bullets scroll with world + move toward player
+      b.placed_y-=b.speed;
+      b.wx+=b.vwx||0;
+      b.wz+=b.vwz||0;
+      b.age++;
+      if(b.age>90||b.placed_y<scrollOffset-1){bullets.splice(i,1);continue;}
+      // Hit player
+      if(!player.dead&&player.invincible<=0){
+        const eff_y=b.placed_y-scrollOffset;
+        if(Math.abs(eff_y-playerEffY)<0.9&&Math.abs(b.wx-player.wx)<0.9&&Math.abs(b.wz-player.wz)<1.0){
+          player.dead=true;player.deadTimer=60;sfxDie();bullets.splice(i,1);
+        }
+      }
+    } else {
+      b.placed_y+=b.speed;
+      b.age++;
+      if(b.age>100){bullets.splice(i,1);continue;}
+      // Hit enemies
       let hit=false;
       enemies.forEach(e=>{
         if(!e.alive||!b.alive||hit)return;
-        const d=Math.hypot(b.wx-e.wx,b.depth-e.depth)*1.2+Math.abs(b.wz-e.wz)*0.5;
-        if(d<1.0){
+        const eff_y=e.placed_y-scrollOffset;
+        const b_eff_y=b.placed_y-scrollOffset;
+        if(Math.abs(b.wx-e.wx)<1.1&&Math.abs(b_eff_y-eff_y)<1.0&&Math.abs(b.wz-e.wz)<1.2){
           hit=true;b.alive=false;
           if(e.type==='boss'){
-            e.hp--;spawnBoom(e.wx,e.depth,e.wz);sfxBoom(400);
-            if(e.hp<=0){e.alive=false;score+=2000;sfxBoom(250);setTimeout(waveComplete,1500);}
-          }else{
-            e.alive=false;
-            score+=(e.type==='missile'?150:100);
-            spawnBoom(e.wx,e.depth,e.wz);sfxBoom(e.type==='missile'?300:200);
+            e.hp--;spawnBoom(e.wx,e.placed_y,e.wz);sfxBoom(400);
+            if(e.hp<=0){e.alive=false;score+=2000;sfxBoom(250);setTimeout(waveComplete,1800);}
+          } else {
+            e.alive=false;score+=e.type==='missile'?150:100;
+            spawnBoom(e.wx,e.placed_y,e.wz);sfxBoom(e.type==='missile'?300:200);
           }
           updateUI();
         }
       });
-      // Hit wall
+      // Hit walls
       walls.forEach(w=>{
         if(!w.alive||!b.alive)return;
-        if(Math.abs(b.wx-w.wx)<0.7&&Math.abs(b.depth-w.depth)<0.4&&b.wz<w.height){
+        const eff_y=w.placed_y-scrollOffset;
+        const b_eff_y=b.placed_y-scrollOffset;
+        if(Math.abs(b.wx-w.wx)<0.8&&Math.abs(b_eff_y-eff_y)<0.6&&b.wz<w.height+0.3){
           b.alive=false;w.alive=false;
-          spawnBoom(w.wx,w.depth,w.height/2);sfxBoom(150);score+=50;updateUI();
+          spawnBoom(w.wx,w.placed_y,w.height/2);sfxBoom(150);score+=50;updateUI();
         }
       });
-      if(!b.alive){bullets.splice(i,1);}
-    } else {
-      // Enemy bullets move toward where player was
-      b.depth-=b.vdepth||SCROLL*2;
-      if(b.vwx)b.wx+=b.vwx;
-      if(b.vwz)b.wz+=b.vwz;
-      b.age++;
-      if(b.age>70){bullets.splice(i,1);continue;}
-      // Hit player
-      if(!player.dead&&player.invincible<=0){
-        const d=Math.hypot(b.wx-player.wx)+Math.abs(b.wz-player.wz)*0.5+Math.abs(b.depth)*0.3;
-        if(d<1.2){player.dead=true;player.deadTimer=60;sfxDie();bullets.splice(i,1);}
-      }
+      if(!b.alive)bullets.splice(i,1);
     }
   }
 
-  // Wall collision
+  // Enemy movement + shooting
+  enemies.forEach(e=>{
+    if(!e.alive)return;
+    const eff_y=e.placed_y-scrollOffset;
+    // Lateral movement
+    if(e.type==='missile'||e.type==='boss'){e.wx+=e.vwx;if(e.wx<0.5||e.wx>WORLD_W-0.5)e.vwx*=-1;}
+    // Shoot
+    e.shootTimer--;
+    if(e.shootTimer<=0&&eff_y>0&&eff_y<12){
+      e.shootTimer=60+Math.random()*80;
+      const dvwx=(player.wx-e.wx)*0.02;
+      const dvwz=(player.wz-e.wz)*0.015;
+      bullets.push({wx:e.wx,placed_y:e.placed_y,wz:e.wz,alive:true,age:0,enemy:true,speed:0.12,vwx:dvwx,vwz:dvwz});
+    }
+    // Collide with player
+    if(!player.dead&&player.invincible<=0){
+      if(Math.abs(eff_y-playerEffY)<0.9&&Math.abs(e.wx-player.wx)<0.9&&Math.abs(e.wz-player.wz)<1.0){
+        player.dead=true;player.deadTimer=60;sfxDie();
+      }
+    }
+  });
+
+  // Wall collision with player
   if(!player.dead&&player.invincible<=0){
     walls.forEach(w=>{
       if(!w.alive)return;
-      if(Math.abs(player.wx-w.wx)<0.7&&Math.abs(w.depth)<0.6&&player.wz<w.height){
-        player.dead=true;player.deadTimer=60;sfxDie();
-      }
-    });
-    // Enemy collision
-    enemies.forEach(e=>{
-      if(!e.alive)return;
-      if(Math.abs(e.wx-player.wx)<0.8&&Math.abs(e.depth)<0.8&&Math.abs(e.wz-player.wz)<0.8){
+      const eff_y=w.placed_y-scrollOffset;
+      if(Math.abs(eff_y-playerEffY)<0.6&&Math.abs(w.wx-player.wx)<0.9&&player.wz<w.height){
         player.dead=true;player.deadTimer=60;sfxDie();
       }
     });
@@ -279,184 +309,229 @@ function update(){
   // Fuel collect
   fuelTanks.forEach(f=>{
     if(f.collected)return;
-    if(Math.abs(f.wx-player.wx)<0.8&&Math.abs(f.depth)<0.8&&player.wz<2.5){
+    const eff_y=f.placed_y-scrollOffset;
+    if(Math.abs(eff_y-playerEffY)<0.8&&Math.abs(f.wx-player.wx)<0.8&&player.wz<1.5){
       f.collected=true;fuel=Math.min(MAX_FUEL,fuel+30);sfxFuel();updateUI();
     }
   });
 
   // Explosions
   for(let i=explosions.length-1;i>=0;i--){
-    explosions[i].life--;
-    explosions[i].wx+=explosions[i].vx;
-    explosions[i].wz+=explosions[i].vz;
-    if(explosions[i].life<=0)explosions.splice(i,1);
+    const ex=explosions[i];
+    ex.life--;ex.wx+=ex.vwx;ex.wz+=ex.vwz;
+    if(ex.life<=0)explosions.splice(i,1);
   }
 
   updateUI();
 }
 
-function spawnBoom(wx,depth,wz){
-  for(let i=0;i<6;i++){
-    explosions.push({
-      wx:wx+(Math.random()-.5)*.4,
-      depth:depth+(Math.random()-.5)*.4,
-      wz:wz+(Math.random()-.5)*.4,
-      vx:(Math.random()-.5)*.03,
-      vz:Math.random()*.03,
-      life:15+Math.random()*15,
-      maxLife:30,
-      hue:20+Math.random()*30
-    });
+function spawnBoom(wx,placed_y,wz){
+  for(let i=0;i<8;i++){
+    explosions.push({wx:wx+(Math.random()-.5)*.5,placed_y:placed_y+(Math.random()-.5)*.3,wz:wz+(Math.random()-.5)*.4,vwx:(Math.random()-.5)*.02,vwz:Math.random()*.02,life:20+Math.random()*15,maxLife:35,hue:15+Math.random()*30});
   }
 }
 
 function killPlayer2(){lives--;updateUI();if(lives<=0){gameOver();return;}gstate='dead_wait';showMsg('SHIP DESTROYED\nSPACE TO CONTINUE');}
-function respawn(){hideMsg();player.wx=WORLD_W/2;player.wz=4;player.dead=false;player.deadTimer=0;player.invincible=180;fuel=Math.min(MAX_FUEL,fuel+20);gstate='playing';}
-function waveComplete(){wave++;sfxWave();showMsg(`WAVE ${wave-1} CLEAR!\nPREPARING WAVE ${wave}...`);setTimeout(()=>{initWave();hideMsg();},2500);}
+function respawn(){hideMsg();player.wx=4;player.wz=4;player.dead=false;player.deadTimer=0;player.invincible=180;fuel=Math.min(MAX_FUEL,fuel+20);gstate='playing';}
+function waveComplete(){wave++;sfxWave();showMsg(`WAVE ${wave-1} CLEAR!`);setTimeout(()=>{initWave();hideMsg();},2500);}
 
 function gameOver(){
   gstate='gameover';if(score>hiScore)hiScore=score;updateUI();
-  overlay.innerHTML=`<h1 style="font-size:clamp(22px,4vw,44px);color:#f44;text-shadow:0 0 20px #f44;margin-bottom:16px;">GAME OVER</h1><p style="font-size:clamp(8px,1.2vw,12px);color:#aaa;margin-bottom:24px;letter-spacing:2px;">SCORE: ${score} &nbsp;·&nbsp; HI: ${hiScore}</p><button class="start-btn" id="retryBtn" style="border-color:#f44;color:#f44;">PLAY AGAIN</button>`;
+  overlay.innerHTML=`<h1 style="font-size:clamp(22px,4vw,44px);color:#f44;text-shadow:0 0 20px #f44;margin-bottom:16px;">GAME OVER</h1><p style="font-size:clamp(8px,1.2vw,12px);color:#aaa;margin-bottom:24px;letter-spacing:2px;">SCORE: ${score} · HI: ${hiScore}</p><button class="start-btn" id="retryBtn" style="border-color:#f44;color:#f44;">PLAY AGAIN</button>`;
   overlay.style.display='flex';
   document.getElementById('retryBtn').onclick=()=>{lives=3;wave=1;score=0;fuel=MAX_FUEL;initWave();updateUI();overlay.style.display='none';gstate='playing';};
 }
 
 // ── Draw ─────────────────────────────────────────
 function draw(){
-  // Sky
-  const grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'#000010');grad.addColorStop(1,'#000c20');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  // Space background
+  ctx.fillStyle='#000008';ctx.fillRect(0,0,W,H);
 
-  // Stars
-  ctx.fillStyle='rgba(255,255,255,0.5)';
-  for(let i=0;i<80;i++){ctx.fillRect((i*173+frameCount*.15)%W,(i*97)%H,1,1);}
+  // Stars (parallax)
+  ctx.fillStyle='rgba(255,255,255,0.55)';
+  for(let i=0;i<100;i++){ctx.fillRect((i*173+frameCount*.2)%W,(i*97)%H,1,1);}
 
-  // Ground tiles
-  for(let gx=-1;gx<=WORLD_W+1;gx++){
-    for(let d=-1;d<=10;d++){
-      const p=iso(gx,d,0);
-      if(p.sy<-10||p.sy>H+10)continue;
-      const checker=(gx+Math.floor(d))%2;
-      ctx.fillStyle=checker?'#0a1a0a':'#050f05';
-      ctx.beginPath();
-      const a=iso(gx,d,0),b=iso(gx+1,d,0),c=iso(gx+1,d+1,0),e=iso(gx,d+1,0);
-      ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.lineTo(c.sx,c.sy);ctx.lineTo(e.sx,e.sy);
-      ctx.closePath();ctx.fill();
+  // ── Ground tiles — diagonal scroll ──
+  // Tiles drawn at screen positions based on scrollOffset
+  // A tile at world_y=py appears at effective_y = py - scrollOffset
+  // We draw tiles for a range of effective_y values
+  const startTile=Math.floor(scrollOffset)-2;
+  const endTile=startTile+20;
+
+  for(let ty=startTile;ty<endTile;ty++){
+    for(let tx=-1;tx<=WORLD_W;tx++){
+      const eff_y=ty-scrollOffset;
+      // Screen position of tile corner
+      const sx=tx*CELL+eff_y*CELL*DIAG_X;
+      const sy=GROUND_Y-eff_y*CELL*DIAG_Y;
+      if(sy>H+CELL||sy<-CELL)continue;
+
+      // Diamond tile
+      const tl={x:sx,          y:sy};
+      const tr={x:sx+CELL,     y:sy};
+      const br={x:sx+CELL+CELL*DIAG_X, y:sy-CELL*DIAG_Y};
+      const bl={x:sx+CELL*DIAG_X,      y:sy-CELL*DIAG_Y};
+
+      const checker=(tx+ty)%2;
+      ctx.fillStyle=checker?'#0a1a08':'#061208';
+      ctx.beginPath();ctx.moveTo(tl.x,tl.y);ctx.lineTo(tr.x,tr.y);ctx.lineTo(br.x,br.y);ctx.lineTo(bl.x,bl.y);ctx.closePath();ctx.fill();
+      // Grid lines
+      ctx.strokeStyle='rgba(0,80,20,0.3)';ctx.lineWidth=0.5;ctx.stroke();
     }
   }
 
-  // Collect draw items sorted by depth (furthest first = largest depth)
+  // ── Collect draw items, sort by effective_y descending (furthest first) ──
+  const playerEffY=2;
   const items=[];
 
-  walls.forEach(w=>{if(w.alive&&w.depth>-2&&w.depth<12)items.push({t:'wall',o:w,d:w.depth});});
-  fuelTanks.forEach(f=>{if(!f.collected&&f.depth>-2&&f.depth<12)items.push({t:'fuel',o:f,d:f.depth});});
-  enemies.forEach(e=>{if(e.alive&&e.depth>-3&&e.depth<12)items.push({t:'enemy',o:e,d:e.depth});});
-  bullets.forEach(b=>{items.push({t:'bullet',o:b,d:b.depth});});
+  walls.forEach(w=>{
+    if(!w.alive)return;
+    const eff_y=w.placed_y-scrollOffset;
+    if(eff_y>-1&&eff_y<14)items.push({t:'wall',o:w,eff_y});
+  });
+  fuelTanks.forEach(f=>{
+    if(f.collected)return;
+    const eff_y=f.placed_y-scrollOffset;
+    if(eff_y>-1&&eff_y<14)items.push({t:'fuel',o:f,eff_y});
+  });
+  enemies.forEach(e=>{
+    if(!e.alive)return;
+    const eff_y=e.placed_y-scrollOffset;
+    if(eff_y>-2&&eff_y<14)items.push({t:'enemy',o:e,eff_y});
+  });
+  bullets.forEach(b=>{
+    const eff_y=b.placed_y-scrollOffset;
+    items.push({t:'bullet',o:b,eff_y});
+  });
+  // Player at fixed effective_y
   if(!player.dead||(player.dead&&Math.floor(frameCount/6)%2===0))
-    items.push({t:'player',o:player,d:0});
-  explosions.forEach(ex=>{items.push({t:'boom',o:ex,d:ex.depth});});
+    items.push({t:'player',o:player,eff_y:playerEffY});
+  explosions.forEach(ex=>{
+    const eff_y=ex.placed_y-scrollOffset;
+    items.push({t:'boom',o:ex,eff_y});
+  });
 
-  items.sort((a,b)=>b.d-a.d);
+  // Sort: larger eff_y = further away = draw first
+  items.sort((a,b)=>b.eff_y-a.eff_y);
 
-  items.forEach(({t,o})=>{
+  items.forEach(({t,o,eff_y})=>{
     if(t==='wall'){
-      isoBox(o.wx,o.depth,0,0.85,0.25,o.height,'#445544','#223322','#334433');
-      if(Math.floor(frameCount/15)%2===0){
-        const {sx,sy}=iso(o.wx+.4,o.depth+.1,o.height);
-        ctx.fillStyle='#f00';ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);ctx.fill();
+      const {sx,sy}=toScreen(o.wx,eff_y,0);
+      const sh=o.height*ALT_SCALE;
+      // Wall column
+      ctx.fillStyle='#3a5a3a';
+      ctx.fillRect(sx-CELL/2+2,sy-sh,CELL-4,sh);
+      // Top cap
+      ctx.fillStyle='#5a8a5a';
+      ctx.fillRect(sx-CELL/2+2,sy-sh-4,CELL-4,6);
+      // Warning beacon
+      if(Math.floor(frameCount/12)%2===0){
+        ctx.fillStyle='#f00';ctx.shadowBlur=8;ctx.shadowColor='#f00';
+        ctx.beginPath();ctx.arc(sx,sy-sh-8,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
       }
     }
+
     if(t==='fuel'){
-      isoBox(o.wx-.25,o.depth-.1,0,.5,.2,.5,'#00aa00','#005500','#007700');
-      const {sx,sy}=iso(o.wx,o.depth,.7);
-      ctx.fillStyle='#0f0';ctx.font='7px Audiowide';ctx.textAlign='center';ctx.fillText('FUEL',sx,sy-2);
+      const {sx,sy}=toScreen(o.wx,eff_y,0);
+      ctx.fillStyle='#0a0';ctx.fillRect(sx-12,sy-18,24,18);
+      ctx.fillStyle='#0f0';ctx.fillRect(sx-10,sy-16,20,14);
+      ctx.fillStyle='#0f0';ctx.font='7px Audiowide';ctx.textAlign='center';ctx.fillText('FUEL',sx,sy-20);
     }
+
     if(t==='enemy'){
-      const {sx,sy}=iso(o.wx,o.depth,o.wz);
+      const {sx,sy}=toScreen(o.wx,eff_y,o.wz);
+      const {sx:gsx,sy:gsy}=toShadow(o.wx,eff_y,o.wz);
+      // Shadow on ground
+      ctx.fillStyle='rgba(0,0,0,0.4)';ctx.beginPath();ctx.ellipse(gsx,gsy,14,5,0,0,Math.PI*2);ctx.fill();
+
       if(o.type==='turret'){
-        isoBox(o.wx-.25,o.depth-.1,o.wz-.4,.5,.2,.4,'#888','#444','#666');
-        ctx.fillStyle='#aaa';ctx.fillRect(sx-3,sy-12,6,13);
-        ctx.fillStyle='rgba(255,180,0,0.4)';ctx.beginPath();ctx.arc(sx,sy-14,4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#888';ctx.fillRect(sx-10,sy-4,20,12);
+        ctx.fillStyle='#aaa';ctx.fillRect(sx-3,sy-18,6,16);
+        ctx.fillStyle='rgba(255,180,0,0.5)';ctx.beginPath();ctx.arc(sx,sy-20,5,0,Math.PI*2);ctx.fill();
       }
       if(o.type==='missile'){
-        ctx.fillStyle='#f80';ctx.shadowBlur=8;ctx.shadowColor='#f80';
-        ctx.fillRect(sx-4,sy-8,8,14);
-        ctx.fillStyle='#ff0';ctx.beginPath();ctx.moveTo(sx,sy-12);ctx.lineTo(sx-4,sy-8);ctx.lineTo(sx+4,sy-8);ctx.closePath();ctx.fill();
+        ctx.shadowBlur=8;ctx.shadowColor='#f80';
+        ctx.fillStyle='#f80';ctx.fillRect(sx-4,sy-14,8,18);
+        ctx.fillStyle='#ff0';ctx.beginPath();ctx.moveTo(sx,sy-18);ctx.lineTo(sx-5,sy-12);ctx.lineTo(sx+5,sy-12);ctx.closePath();ctx.fill();
         ctx.shadowBlur=0;
       }
       if(o.type==='boss'){
         ctx.shadowBlur=16;ctx.shadowColor='#f00';
-        ctx.fillStyle='#cc0000';ctx.fillRect(sx-14,sy-18,28,22);
-        ctx.fillStyle='#aa0000';ctx.fillRect(sx-8,sy-28,16,12);
-        ctx.fillStyle='#ff0';ctx.fillRect(sx-6,sy-25,4,4);ctx.fillRect(sx+2,sy-25,4,4);
-        ctx.fillStyle='#880000';ctx.fillRect(sx-22,sy-16,10,7);ctx.fillRect(sx+12,sy-16,10,7);
-        // HP bar
-        ctx.fillStyle='#440000';ctx.fillRect(sx-14,sy-36,28,4);
-        ctx.fillStyle='#f00';ctx.fillRect(sx-14,sy-36,(o.hp/o.maxHp)*28,4);
+        ctx.fillStyle='#cc0000';ctx.fillRect(sx-18,sy-22,36,28);
+        ctx.fillStyle='#aa0000';ctx.fillRect(sx-10,sy-34,20,14);
+        ctx.fillStyle='#ff0';ctx.fillRect(sx-7,sy-30,5,5);ctx.fillRect(sx+2,sy-30,5,5);
+        ctx.fillStyle='#880000';ctx.fillRect(sx-28,sy-20,12,9);ctx.fillRect(sx+16,sy-20,12,9);
+        ctx.fillStyle='#440000';ctx.fillRect(sx-18,sy-42,36,5);
+        ctx.fillStyle='#f00';ctx.fillRect(sx-18,sy-42,(o.hp/o.maxHp)*36,5);
         ctx.shadowBlur=0;
       }
     }
+
     if(t==='bullet'){
-      const {sx,sy}=iso(o.wx,o.depth,o.wz);
+      const {sx,sy}=toScreen(o.wx,eff_y,o.wz);
       ctx.shadowBlur=6;
       if(o.enemy){ctx.fillStyle='#f44';ctx.shadowColor='#f44';}
       else{ctx.fillStyle='#ff0';ctx.shadowColor='#ff0';}
-      ctx.fillRect(sx-2,sy-6,4,10);
-      ctx.shadowBlur=0;
+      ctx.fillRect(sx-2,sy-8,4,12);ctx.shadowBlur=0;
     }
+
     if(t==='player'){
-      const {sx,sy}=iso(o.wx,0,o.wz);
+      const {sx,sy}=toScreen(o.wx,eff_y,o.wz);
+      const {sx:gsx,sy:gsy}=toShadow(o.wx,eff_y,o.wz);
+      // Shadow — shows altitude
+      const altFrac=o.wz/MAX_ALT;
+      const shadowSize=18-altFrac*8;
+      ctx.fillStyle=`rgba(0,150,255,${0.3-altFrac*0.2})`;
+      ctx.beginPath();ctx.ellipse(gsx,gsy,shadowSize,shadowSize*0.4,0,0,Math.PI*2);ctx.fill();
+      // Altitude line from shadow to ship
+      if(o.wz>0.5){
+        ctx.strokeStyle='rgba(0,180,255,0.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(gsx,gsy);ctx.lineTo(sx,sy+12);ctx.stroke();ctx.setLineDash([]);
+      }
+      // Ship
       const flash=o.invincible>0&&Math.floor(frameCount/6)%2===0;
       if(!flash){
         ctx.shadowBlur=14;ctx.shadowColor='#4af';
         ctx.fillStyle='#4af';
-        ctx.beginPath();ctx.moveTo(sx,sy-14);ctx.lineTo(sx-10,sy+4);ctx.lineTo(sx-5,sy+2);ctx.lineTo(sx,sy+6);ctx.lineTo(sx+5,sy+2);ctx.lineTo(sx+10,sy+4);ctx.closePath();ctx.fill();
-        ctx.fillStyle='#88ddff';ctx.beginPath();ctx.arc(sx,sy-4,4,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=`rgba(100,200,255,${.5+Math.sin(frameCount*.3)*.2})`;
-        ctx.beginPath();ctx.arc(sx,sy+8,3,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();
+        // Diagonal fighter shape
+        ctx.moveTo(sx,sy-16);      // nose
+        ctx.lineTo(sx+14,sy+4);    // right wing
+        ctx.lineTo(sx+6,sy+2);
+        ctx.lineTo(sx,sy+8);       // tail
+        ctx.lineTo(sx-6,sy+2);
+        ctx.lineTo(sx-14,sy+4);    // left wing
+        ctx.closePath();ctx.fill();
+        ctx.fillStyle='#88ddff';ctx.beginPath();ctx.arc(sx,sy-4,5,0,Math.PI*2);ctx.fill();
+        const engineGlow=0.4+Math.sin(frameCount*.4)*.15;
+        ctx.fillStyle=`rgba(100,200,255,${engineGlow})`;ctx.beginPath();ctx.arc(sx,sy+10,4,0,Math.PI*2);ctx.fill();
         ctx.shadowBlur=0;
-        // Shadow on ground
-        const {sx:gsx,sy:gsy}=iso(o.wx,0,0);
-        ctx.fillStyle='rgba(0,150,255,0.15)';
-        ctx.beginPath();ctx.ellipse(gsx,gsy+4,8,4,0,0,Math.PI*2);ctx.fill();
       }
     }
+
     if(t==='boom'){
-      const {sx,sy}=iso(o.wx,o.depth,o.wz);
+      const {sx,sy}=toScreen(o.wx,eff_y,o.wz);
       const alpha=o.life/o.maxLife;
       ctx.globalAlpha=alpha;
       ctx.fillStyle=`hsl(${o.hue},100%,${50+alpha*30}%)`;
-      ctx.beginPath();ctx.arc(sx,sy,3+(1-alpha)*6,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(sx,sy,3+(1-alpha)*7,0,Math.PI*2);ctx.fill();
       ctx.globalAlpha=1;
     }
   });
 
-  // HUD — altitude meter
-  const mx=W-20,my=70,mh=110;
-  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(mx-2,my-2,12,mh+4);
-  ctx.strokeStyle='#0ff';ctx.lineWidth=1;ctx.strokeRect(mx-2,my-2,12,mh+4);
-  const af=((player.wz-MIN_ALT)/(MAX_ALT-MIN_ALT))*mh;
-  ctx.fillStyle='#0ff';ctx.fillRect(mx,my+mh-af,8,af);
-  ctx.fillStyle='#0ff';ctx.font='7px Audiowide';ctx.textAlign='center';ctx.fillText('ALT',mx+4,my-6);
-
-  // Fuel meter
-  const fmy=my+mh+20;
-  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(mx-2,fmy-2,12,mh+4);
-  ctx.strokeStyle='#0f0';ctx.lineWidth=1;ctx.strokeRect(mx-2,fmy-2,12,mh+4);
-  const ff=(fuel/MAX_FUEL)*mh;
-  ctx.fillStyle=fuel<25?'#f44':'#0f0';ctx.fillRect(mx,fmy+mh-ff,8,ff);
-  ctx.fillStyle='#0f0';ctx.font='7px Audiowide';ctx.textAlign='center';ctx.fillText('FUEL',mx+4,fmy-6);
+  // ── HUD: altitude meter ──
+  drawMeter(W-22,60,100,'ALT','#0ff',player.wz/MAX_ALT);
+  drawMeter(W-22,180,100,'FUEL','#0f0',fuel/MAX_FUEL,fuel<25);
 
   ctx.textAlign='left';
 }
 
-function isoBox(wx,depth,wz,w,d,h,top,left,right){
-  const p=iso(wx,depth,wz+h),q=iso(wx+w,depth,wz+h),g2=iso(wx+w,depth+d,wz+h),f=iso(wx,depth+d,wz+h);
-  const a=iso(wx,depth,wz),e=iso(wx,depth+d,wz),c=iso(wx+w,depth+d,wz);
-  ctx.fillStyle=top;ctx.beginPath();ctx.moveTo(p.sx,p.sy);ctx.lineTo(q.sx,q.sy);ctx.lineTo(g2.sx,g2.sy);ctx.lineTo(f.sx,f.sy);ctx.closePath();ctx.fill();
-  ctx.fillStyle=left;ctx.beginPath();ctx.moveTo(p.sx,p.sy);ctx.lineTo(a.sx,a.sy);ctx.lineTo(e.sx,e.sy);ctx.lineTo(f.sx,f.sy);ctx.closePath();ctx.fill();
-  ctx.fillStyle=right;ctx.beginPath();ctx.moveTo(f.sx,f.sy);ctx.lineTo(e.sx,e.sy);ctx.lineTo(c.sx,c.sy);ctx.lineTo(g2.sx,g2.sy);ctx.closePath();ctx.fill();
+function drawMeter(x,y,h,label,color,frac,warn=false){
+  ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(x-2,y-2,14,h+4);
+  ctx.strokeStyle=color;ctx.lineWidth=1;ctx.strokeRect(x-2,y-2,14,h+4);
+  ctx.fillStyle=warn?'#f44':color;
+  ctx.fillRect(x,y+h-frac*h,10,frac*h);
+  ctx.fillStyle=color;ctx.font='7px Audiowide';ctx.textAlign='center';ctx.fillText(label,x+5,y-6);
 }
 
 function showMsg(t){msgEl.innerHTML=t.replace(/\n/g,'<br>');msgEl.style.display='block';}
