@@ -201,28 +201,28 @@ scene.add(exhaustGroup);
 // ── Enemy factories ───────────────────────────────────────
 function makeFighter(){
   const g=new THREE.Group();
-  const body=box(1.5,0.4,2,MAT.enemy); body.castShadow=true; g.add(body);
-  const wl=box(1.8,0.1,0.8,MAT.enemy); wl.position.set(-1.6,0,0); g.add(wl);
-  const wr=box(1.8,0.1,0.8,MAT.enemy); wr.position.set(1.6,0,0); g.add(wr);
-  const nose=cyl(0.05,0.25,0.8,MAT.enemy); nose.rotation.x=Math.PI/2; nose.position.set(0,0,1.2); g.add(nose);
+  const body=box(2.5,0.7,3,MAT.enemy); body.castShadow=true; g.add(body);
+  const wl=box(3,0.15,1.2,MAT.enemy); wl.position.set(-2.5,0,0); g.add(wl);
+  const wr=box(3,0.15,1.2,MAT.enemy); wr.position.set(2.5,0,0); g.add(wr);
+  const nose=cyl(0.08,0.4,1.2,MAT.enemy); nose.rotation.x=Math.PI/2; nose.position.set(0,0,1.8); g.add(nose);
   const light=new THREE.PointLight(0xff4400,3,8); light.position.set(0,0.5,0); g.add(light);
   return g;
 }
 
 function makeTurret(){
   const g=new THREE.Group();
-  const base=box(1.2,0.5,1.2,MAT.wall); base.position.y=0.25; g.add(base);
-  const turret=cyl(0.3,0.4,0.6,MAT.enemy); turret.position.y=0.8; g.add(turret);
-  const barrel=box(0.15,0.15,1.2,MAT.enemy); barrel.position.set(0,0.8,0.8); g.add(barrel);
+  const base=box(2,0.8,2,MAT.wall); base.position.y=0.4; g.add(base);
+  const turret=cyl(0.5,0.6,0.9,MAT.enemy); turret.position.y=1.2; g.add(turret);
+  const barrel=box(0.2,0.2,1.8,MAT.enemy); barrel.position.set(0,1.2,1.2); g.add(barrel);
   const light=new THREE.PointLight(0xff6600,3,8); light.position.set(0,1,0); g.add(light);
   return g;
 }
 
 function makeFuelTank(){
   const g=new THREE.Group();
-  const tank=cyl(0.4,0.4,0.8,MAT.fuel); tank.rotation.z=Math.PI/2; tank.position.y=0.4; g.add(tank);
-  const cap1=sphere(0.4,MAT.fuel); cap1.position.set(-0.4,0.4,0); g.add(cap1);
-  const cap2=sphere(0.4,MAT.fuel); cap2.position.set(0.4,0.4,0); g.add(cap2);
+  const tank=cyl(0.7,0.7,1.4,MAT.fuel); tank.rotation.z=Math.PI/2; tank.position.y=0.7; g.add(tank);
+  const cap1=sphere(0.7,MAT.fuel); cap1.position.set(-0.7,0.7,0); g.add(cap1);
+  const cap2=sphere(0.7,MAT.fuel); cap2.position.set(0.7,0.7,0); g.add(cap2);
   const light=new THREE.PointLight(0x00ff00,1,4); light.position.set(0,1,0); g.add(light);
   return g;
 }
@@ -392,8 +392,8 @@ function update(){
   const moveSpd=0.12;
 
   // Player input
-  if(keys['ArrowLeft']||keys['KeyA'])  playerX=Math.max(-9,playerX-moveSpd);
-  if(keys['ArrowRight']||keys['KeyD']) playerX=Math.min(9,playerX+moveSpd);
+  if(keys['ArrowRight']||keys['KeyD']) playerX=Math.max(-9,playerX-moveSpd);
+  if(keys['ArrowLeft']||keys['KeyA'])  playerX=Math.min(9,playerX+moveSpd);
   if(keys['ArrowUp']||keys['KeyW'])    playerAlt=Math.min(MAX_ALT,playerAlt+moveSpd*0.7);
   if(keys['ArrowDown']||keys['KeyS'])  playerAlt=Math.max(MIN_ALT,playerAlt-moveSpd*0.7);
   if(keys['Space']&&fireCooldown<=0)   shoot();
@@ -435,14 +435,16 @@ function update(){
     // Enemy shoot
     e.shootTimer--;
     if(e.shootTimer<=0&&e.mesh.position.z<15&&e.mesh.position.z>-5&&e.type!=='fuel'){
-      e.shootTimer=Math.floor((60+Math.random()*60)/d.shootRate);
+      e.shootTimer=Math.floor((120+Math.random()*120)/d.shootRate);
       const b=sphere(0.4,MAT.ebullet); // larger enemy bullet
       b.position.copy(e.mesh.position);
+      // Reduced accuracy — aim at player with significant spread
+      const spread=1.5;
       const dir=new THREE.Vector3(
-        playerShip.position.x-e.mesh.position.x,
-        playerShip.position.y-e.mesh.position.y,
+        playerShip.position.x-e.mesh.position.x+(Math.random()-0.5)*spread,
+        playerShip.position.y-e.mesh.position.y+(Math.random()-0.5)*spread,
         playerShip.position.z-e.mesh.position.z
-      ).normalize().multiplyScalar(0.25);
+      ).normalize().multiplyScalar(0.18);
       scene.add(b);
       bullets.push({mesh:b,vz:dir.z,vx:dir.x,vy:dir.y,enemy:true,alive:true});
     }

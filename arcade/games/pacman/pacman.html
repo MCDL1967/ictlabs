@@ -151,16 +151,19 @@ let frameCount=0,animFrame=0;
 let difficulty='intermediate';
 function getDiffSpeeds(){
   // Base speeds scale up with level
-  const lvlBonus=Math.min((level-1)*0.08, 0.6);
+  const lvlBonus=Math.min((level-1)*0.05, 0.4);
   if(difficulty==='beginner')
-    return{pac:1.50+lvlBonus*0.5, ghost:1.15+lvlBonus*0.5};  // -20% from previous
+    return{pac:1.0+lvlBonus*0.4, ghost:0.8+lvlBonus*0.3};
   if(difficulty==='advanced')
-    return{pac:2.02+lvlBonus*0.9, ghost:1.66+lvlBonus*0.9};  // -20% from previous
-  return  {pac:1.76+lvlBonus*0.7, ghost:1.44+lvlBonus*0.6};  // -20% from previous
+    return{pac:1.6+lvlBonus*0.8, ghost:1.3+lvlBonus*0.7};
+  return  {pac:1.2+lvlBonus*0.5, ghost:1.0+lvlBonus*0.4};
 }
 // Buffer only used when pac is CHANGING direction (turning at corner)
 function getBuffer(changingDir){
-  return (difficulty==='beginner'&&changingDir) ? 5 : 0;
+  if(!changingDir) return 0;
+  if(difficulty==='beginner') return 8;
+  if(difficulty==='intermediate') return 5;
+  return 3; // advanced
 }
 
 const PAC_SPEED=2.2;  // overridden per difficulty at runtime

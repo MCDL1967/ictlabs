@@ -656,21 +656,23 @@ function drawStars(){
 
 // ── Formation update ───────────────────────────────────────────
 function updateFormation(){
+  const d=getDiff();
+
   // Fly enemies into formation
   if(state==='forming'){
     formationTimer++;
-    if(formationTimer%8===0 && formIdx<formQueue.length){
+    if(formationTimer%12===0 && formIdx<formQueue.length){
       const e=enemies[formQueue[formIdx]];
       e._path = formPath(e, formIdx);
       e._pt = 0;
       formIdx++;
       sfx('enemy_arrive');
     }
-    // move forming enemies along path
+    // move forming enemies along path — SLOW fly-in
     enemies.forEach(e=>{
       if(!e.alive||!e.forming) return;
       if(!e._path){ e.x=e.tx; e.y=e.ty; return; }
-      e._pt = Math.min(e._pt+0.04, 1);
+      e._pt = Math.min(e._pt+0.012, 1); // was 0.04 — 3x slower
       const idx = Math.floor(e._pt*(e._path.length-1));
       e.x = e._path[idx].x;
       e.y = e._path[idx].y;
@@ -694,28 +696,29 @@ function updateFormation(){
     e.x = e.tx + sway;
     e.y = e.ty;
 
-    // shoot timer
+    // shoot timer — much longer intervals
     e.shootTimer--;
     if(e.shootTimer<=0){
-      e.shootTimer = (80-stage*3)+Math.random()*120;
-      if(!player.dead && Math.random()<0.3) enemyShoot(e); // -20% chance
+      e.shootTimer = Math.floor((120+Math.random()*180)/d.shootRate);
+      if(!player.dead && Math.random()<0.25) enemyShoot(e);
     }
     if(e.blinkTimer>0) e.blinkTimer--;
   });
 
-  // Trigger dives
+  // Trigger dives — much less frequent
   diveTimer--;
   if(diveTimer<=0){
-    diveTimer = Math.max(20, 80-stage*5) + Math.random()*60;
+    diveTimer = Math.max(90, 200-stage*8) + Math.random()*80;
     const candidates = enemies.filter(e=>e.alive&&!e.diveState&&!e.forming);
     if(candidates.length){
-      let group = 1 + (Math.random()<0.4?1:0);
-      for(let g=0;g<group;g++){
-        const pick = candidates[Math.floor(Math.random()*candidates.length)];
-        if(!pick.diveState){
-          pick.diveState={path:makeDivePath(pick,player.x), t:0, speed:0.008+stage*0.0005};
-          pick.startX=pick.tx; pick.startY=pick.ty;
-        }
+      const pick = candidates[Math.floor(Math.random()*candidates.length)];
+      if(!pick.diveState){
+        pick.diveState={
+          path:makeDivePath(pick,player.x),
+          t:0,
+          speed: d.diveSpd * (0.004 + stage*0.0002) // much slower dive
+        };
+        pick.startX=pick.tx; pick.startY=pick.ty;
       }
     }
   }
@@ -728,11 +731,11 @@ function updateDive(e){
   e.x = ds.path[idx].x;
   e.y = ds.path[idx].y;
 
-  // shoot mid-dive
+  // shoot mid-dive — less frequent
   e.shootTimer--;
   if(e.shootTimer<=0){
     const d=getDiff();
-    e.shootTimer=(25+Math.random()*40)/d.shootRate;
+    e.shootTimer=Math.floor((60+Math.random()*80)/d.shootRate);
     if(!player.dead) enemyShoot(e);
   }
 
