@@ -124,6 +124,7 @@
       position: relative;
       gap: 12px;
       transition: background-color 0.4s;
+      overflow: hidden;
     }
 
     .game-meta {
@@ -265,6 +266,14 @@
         <div class="big">🕹️</div>
         <div>SELECT A GAME<br>TO GET STARTED</div>
       </div>
+      <!-- GAME MODE — full pane inline play -->
+      <div id="gamePane" style="display:none;position:absolute;inset:0;flex-direction:column;background:#000;">
+        <div id="gameBar" style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:#000;border-bottom:1px solid var(--border);flex-shrink:0;">
+          <span id="gameBarTitle" style="font-family:var(--font);font-size:0.55em;color:var(--accent);letter-spacing:2px;"></span>
+          <button id="exitButton" style="background:var(--accent);color:var(--text-inv);border:none;font-family:var(--font);font-size:0.5em;letter-spacing:2px;padding:5px 12px;cursor:pointer;">✕ EXIT</button>
+        </div>
+        <iframe id="gameFrame" src="about:blank" style="flex:1;border:none;width:100%;display:block;" allow="autoplay" allowfullscreen></iframe>
+      </div>
     </div>
   </div>
 
@@ -307,6 +316,9 @@
     const loadingInd     = document.getElementById('loadingIndicator');
     const noVideoMsg     = document.getElementById('noVideoMsg');
     const emptyState     = document.getElementById('emptyState');
+    const gamePane       = document.getElementById('gamePane');
+    const gameFrame      = document.getElementById('gameFrame');
+    const gameBarTitle   = document.getElementById('gameBarTitle');
     const sfxSelect      = document.getElementById('selectSound');
     const sfxNav         = document.getElementById('navigateSound');
     const sfxSkin        = document.getElementById('skinSound');
@@ -419,17 +431,37 @@
     document.getElementById('downButton').addEventListener('click',   () => { play(sfxNav);    selectGame(selectedIndex + 1); });
     document.getElementById('selectButton').addEventListener('click', () => { play(sfxSelect); launchGame(); });
 
-    // ── Launch — opens play_url if defined, else shows stub alert ─────────────
+    // ── Launch — loads game inline in right pane ──────────────────
     function launchGame() {
       if (GAMES.length === 0) return;
       const game = GAMES[selectedIndex];
-      console.log(`[LAUNCH] ${game.name} — folder: games/${game._folder}/`);
-      if (game.play_url) {
-        window.open(game.play_url, '_blank');
-      } else {
-        alert(`🕹️  LAUNCH: ${game.name}\n\nAdd a "play_url" field to game_info.json\nto open the game directly.`);
-      }
+      if (!game.play_url) return;
+
+      // Switch right pane to full game mode
+      metaBox.style.display      = 'none';
+      previewWrap.style.display  = 'none';
+      emptyState.style.display   = 'none';
+
+      gameFrame.src = game.play_url;
+      gameBarTitle.textContent = game.name;
+      gamePane.style.display = 'flex';
+      gamePane.focus();
     }
+
+    // ── Exit game — return to preview ─────────────────────────────
+    function exitGame() {
+      gamePane.style.display = 'none';
+      gameFrame.src = 'about:blank';
+      showDetails(GAMES[selectedIndex]);
+    }
+
+    document.getElementById('exitButton').addEventListener('click', exitGame);
+    // ESC key exits game
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && gamePane.style.display !== 'none') {
+        exitGame();
+      }
+    });
 
     // ── Skin cycling ───────────────────────────────────────────────────────────
     document.getElementById('chooseSkinButton').addEventListener('click', () => {
