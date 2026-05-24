@@ -526,6 +526,10 @@ function update(){
   updateExplosions();
   updateHUD();
   updateUI();
+  // Update altitude marker position
+  if(altMarker){
+    altMarker.position.set(10, (playerAlt-MIN_ALT)/(MAX_ALT-MIN_ALT)*10, 0);
+  }
 }
 
 function updateHUD(){
@@ -533,6 +537,32 @@ function updateHUD(){
   fuelFill.style.height=fuel+'%';
   fuelFill.style.background=fuel<25?'#f44':'#0f0';
 }
+
+// Altitude marker — vertical bar on right edge of battlefield
+let altMarker=null;
+let altMarkerFill=null;
+function makeAltMarker(){
+  // 3D vertical bar on right edge of ground
+  const barGeo=new THREE.BoxGeometry(0.3,10,0.3);
+  const barMat=new THREE.MeshBasicMaterial({color:0x004400,transparent:true,opacity:0.6});
+  const bar=new THREE.Mesh(barGeo,barMat);
+  bar.position.set(10,5,0); scene.add(bar);
+  // Glowing indicator cube that moves up/down
+  const indGeo=new THREE.BoxGeometry(0.6,0.4,0.6);
+  const indMat=new THREE.MeshBasicMaterial({color:0x00ff44});
+  altMarker=new THREE.Mesh(indGeo,indMat);
+  const light=new THREE.PointLight(0x00ff44,2,3);
+  altMarker.add(light);
+  scene.add(altMarker);
+  // Label bar ticks
+  for(let i=0;i<=4;i++){
+    const tickGeo=new THREE.BoxGeometry(0.5,0.08,0.08);
+    const tick=new THREE.Mesh(tickGeo,new THREE.MeshBasicMaterial({color:0x006622}));
+    tick.position.set(10.3,i*2.5,0);
+    scene.add(tick);
+  }
+}
+makeAltMarker();
 
 function killPlayer(){
   if(gstate!=='playing')return;

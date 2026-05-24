@@ -296,70 +296,73 @@ function moveGhost(g){
   // During exitTimer, ghost moves upward out of ghost house
   if(g.exitTimer>0){
     g.exitTimer--;
-    // Move ghost up toward exit (row 7, center)
     const exitX=9*CELL+CELL/2;
     const exitY=7*CELL+CELL/2;
-    if(Math.abs(g.x-exitX)>2){ g.x+=(exitX-g.x)*0.08; }
-    if(g.y>exitY){ g.y-=1.5; }
+    if(Math.abs(g.x-exitX)>2) g.x+=(exitX-g.x)*0.1;
+    if(g.y>exitY) g.y-=1.5; else g.y=exitY;
     return;
   }
 
   const gs=getDiffSpeeds().ghost;
-  const speed=(g.scared?gs*0.55:g.eaten?gs*2:gs);
+  const speed=g.scared?gs*0.5:g.eaten?gs*2:gs;
   const DIRS4=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
-  const r=CELL/2-3;
+  const r=CELL/2-4;
 
-  function ghostWall(x,y){
-    const pts=[{x:x+r,y:y},{x:x-r,y:y},{x:x,y:y+r},{x:x,y:y-r}];
-    for(const p of pts){ if(cellAt(p.x,p.y)===1) return true; }
-    return false;
+  function blocked(x,y){
+    return cellAt(x-r,y)===1||cellAt(x+r,y)===1||
+           cellAt(x,y-r)===1||cellAt(x,y+r)===1;
   }
 
-  // Snap to cell center when close enough
-  const cellCx=Math.floor(g.x/CELL)*CELL+CELL/2;
-  const cellCy=Math.floor(g.y/CELL)*CELL+CELL/2;
-  const atCenter=Math.abs(g.x-cellCx)<speed+1&&Math.abs(g.y-cellCy)<speed+1;
+  // Are we at a cell center? Use generous threshold so we never miss it
+  const cx=Math.round(g.x/CELL)*CELL+CELL/2;
+  const cy=Math.round(g.y/CELL)*CELL+CELL/2;
+  const snapThresh=speed+2;
+  const atCenter=Math.abs(g.x-cx)<snapThresh&&Math.abs(g.y-cy)<snapThresh;
 
   if(atCenter){
-    g.x=cellCx; g.y=cellCy;
-    // Get valid directions — no U-turn unless forced
-    let candidates=DIRS4.filter(d=>{
-      const tx=g.x+d.dx*CELL, ty=g.y+d.dy*CELL;
-      return !ghostWall(tx,ty)&&!(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy));
+    // Snap exactly
+    g.x=cx; g.y=cy;
+
+    // Find valid directions — prefer not reversing
+    const valid=DIRS4.filter(d=>{
+      if(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy)) return false; // no U-turn
+      return !blocked(g.x+d.dx*CELL, g.y+d.dy*CELL);
     });
-    // Corner trap — allow U-turn
-    if(candidates.length===0){
-      candidates=DIRS4.filter(d=>!ghostWall(g.x+d.dx*CELL,g.y+d.dy*CELL));
+
+    // If dead-end, allow U-turn
+    const dirs=valid.length>0 ? valid :
+      DIRS4.filter(d=>!blocked(g.x+d.dx*CELL, g.y+d.dy*CELL));
+
+    if(dirs.length===0) return; // fully trapped — shouldn't happen
+
+    let pick;
+    if(g.scared||g.eaten){
+      pick=dirs[Math.floor(Math.random()*dirs.length)];
+    } else {
+      // Chase pac, mild randomness to prevent perfect lock
+      const sorted=[...dirs].sort((a,b)=>{
+        const da=Math.hypot(g.x+a.dx*CELL-pac.x, g.y+a.dy*CELL-pac.y);
+        const db=Math.hypot(g.x+b.dx*CELL-pac.x, g.y+b.dy*CELL-pac.y);
+        return (da-db)+(Math.random()-0.5)*CELL*1.2;
+      });
+      pick=sorted[0];
     }
-    if(candidates.length>0){
-      let pick;
-      if(g.scared||g.eaten){
-        pick=candidates[Math.floor(Math.random()*candidates.length)];
-      } else {
-        candidates.sort((a,b)=>{
-          const da=Math.hypot(g.x+a.dx*CELL-pac.x, g.y+a.dy*CELL-pac.y);
-          const db=Math.hypot(g.x+b.dx*CELL-pac.x, g.y+b.dy*CELL-pac.y);
-          return (da-db)+(Math.random()-0.5)*CELL*1.5;
-        });
-        pick=candidates[0];
-      }
-      g.dx=pick.dx; g.dy=pick.dy;
-    }
+    g.dx=pick.dx; g.dy=pick.dy;
   }
 
-  // Move
-  if(g.dx!==0||g.dy!==0){
-    const nx=g.x+g.dx*speed, ny=g.y+g.dy*speed;
-    if(!ghostWall(nx,ny)){ g.x=nx; g.y=ny; }
-    else { g.x=cellCx; g.y=cellCy; g.dx=0; g.dy=0; }
+  // Move — if blocked ahead, stop and wait for next center snap
+  const nx=g.x+g.dx*speed, ny=g.y+g.dy*speed;
+  if(!blocked(nx,ny)){
+    g.x=nx; g.y=ny;
   } else {
-    const any=DIRS4.filter(d=>!ghostWall(g.x+d.dx*CELL,g.y+d.dy*CELL));
-    if(any.length>0){ const p=any[Math.floor(Math.random()*any.length)]; g.dx=p.dx; g.dy=p.dy; }
+    // Hit wall — snap back to center and clear direction
+    g.x=cx; g.y=cy; g.dx=0; g.dy=0;
   }
 
-  if(g.x<-CELL) g.x=W+CELL; if(g.x>W+CELL) g.x=-CELL;
+  // Tunnel wrap
+  if(g.x<-CELL) g.x=W+CELL;
+  if(g.x>W+CELL) g.x=-CELL;
 }
-
 
 function checkCollisions(){
   ghosts.forEach(g=>{

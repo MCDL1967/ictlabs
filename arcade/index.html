@@ -265,55 +265,71 @@ body::after{
 .instr-close:hover{filter:brightness(1.2);}
 
 /* TOUCH OVERLAY — only visible on touch devices */
-#touchOverlay{
+/* TOUCH PANEL — slides in from right side */
+#touchToggle{
   display:none;
-  position:fixed;bottom:0;left:0;right:0;
-  height:160px;z-index:50;
-  pointer-events:none;
-  justify-content:space-between;
-  align-items:flex-end;
-  padding:12px 20px 16px;
-}
-#dpad{
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  pointer-events:all;
-}
-.dpad-row{display:flex;align-items:center;gap:2px;}
-.dpad-center{width:44px;height:44px;background:rgba(0,0,0,0.3);}
-.dpad-btn{
-  width:44px;height:44px;
-  background:rgba(0,0,0,0.55);
+  position:fixed;right:0;top:50%;transform:translateY(-50%);
+  z-index:60;
+  background:var(--bg-dark);
   border:1px solid var(--border);
-  color:var(--text);font-size:18px;
+  border-right:none;
+  padding:8px 6px;
+  cursor:pointer;
+  font-family:var(--font);font-size:10px;letter-spacing:1px;
+  color:var(--text);writing-mode:vertical-rl;
+  text-orientation:mixed;
+  border-radius:4px 0 0 4px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#touchToggle:active{background:var(--accent);}
+
+#touchPanel{
+  position:fixed;right:-200px;top:0;bottom:0;
+  width:190px;z-index:55;
+  background:rgba(0,0,0,0.92);
+  border-left:2px solid var(--border);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;padding:16px 12px;
+  transition:right 0.25s ease;
+  pointer-events:none;
+}
+#touchPanel.open{right:0;pointer-events:all;}
+
+#dpad{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.dpad-row{display:flex;align-items:center;gap:2px;}
+.dpad-center{width:44px;height:44px;}
+.dpad-btn{
+  width:48px;height:48px;
+  background:rgba(0,0,0,0.7);
+  border:1px solid var(--border);
+  color:var(--text);font-size:20px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;border-radius:6px;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;user-select:none;
 }
 .dpad-btn:active{background:var(--accent);}
-#actionBtns{
-  display:flex;flex-direction:column;gap:8px;
-  pointer-events:all;align-items:center;
-}
+
+#actionBtns{display:flex;gap:10px;align-items:center;}
 .action-btn{
-  width:60px;height:60px;border-radius:50%;
-  background:rgba(0,0,0,0.55);
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(0,0,0,0.7);
   border:2px solid var(--border);
-  color:var(--text);font-size:20px;
+  color:var(--text);font-size:18px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;user-select:none;
-  font-family:var(--font);letter-spacing:1px;
+  font-family:var(--font);font-size:11px;letter-spacing:1px;
 }
 .action-btn:active{background:var(--accent);}
-.action-btn.secondary{width:48px;height:48px;font-size:13px;}
+.action-btn.fire{font-size:20px;}
 
-/* Show touch overlay on touch devices */
+/* Show on touch devices only */
 @media (pointer:coarse){
-  #touchOverlay{ display:flex; }
-  /* Add bottom padding so content isn't hidden under overlay */
-  body{ padding-bottom:160px; }
+  #touchToggle{display:flex;}
 }
 
 /* Keyboard shortcut hints on buttons */
@@ -516,8 +532,11 @@ body::after{
   </div>
 </div>
 
-<!-- TOUCH OVERLAY CONTROLS -->
-<div id="touchOverlay">
+<!-- TOUCH PANEL TOGGLE -->
+<button id="touchToggle">🕹 CTRL</button>
+
+<!-- TOUCH PANEL — slides in from right -->
+<div id="touchPanel">
   <div id="dpad">
     <button class="dpad-btn" id="dUp">▲</button>
     <div class="dpad-row">
@@ -528,8 +547,8 @@ body::after{
     <button class="dpad-btn" id="dDown">▼</button>
   </div>
   <div id="actionBtns">
-    <button class="action-btn" id="aFire">🔥</button>
-    <button class="action-btn secondary" id="aSelect">OK</button>
+    <button class="action-btn fire" id="aFire">🔥</button>
+    <button class="action-btn" id="aSelect">OK</button>
   </div>
 </div>
 
@@ -704,17 +723,27 @@ document.getElementById('upButton').addEventListener('click',()=>{ sfxNav(); sel
 document.getElementById('downButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex+1); });
 document.getElementById('selectButton').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
 
-// ── Touch overlay wiring ──────────────────────────────────
+// ── Touch panel ───────────────────────────────────────────
 function setupTouchOverlay(){
-  const overlay=document.getElementById('touchOverlay');
-  if(!overlay) return;
+  const panel=document.getElementById('touchPanel');
+  const toggle=document.getElementById('touchToggle');
+  if(!panel||!toggle) return;
 
-  // D-pad sends key events to the game iframe when active, else navigates console
+  let panelOpen=false;
+  toggle.addEventListener('click',()=>{
+    panelOpen=!panelOpen;
+    panel.classList.toggle('open',panelOpen);
+    toggle.textContent=panelOpen?'✕ CLOSE':'🕹 CTRL';
+  });
+
+  // Close panel when game launches
+  const origLaunch=launchGame;
+
   function sendKey(key){
     if(gamePane.style.display!=='none'){
       try{
-        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}));
-        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',  {key,bubbles:true,cancelable:true}));
+        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key,code:key,bubbles:true,cancelable:true}));
+        setTimeout(()=>gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',{key,code:key,bubbles:true,cancelable:true})),80);
       }catch(e){}
     } else {
       if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
@@ -722,49 +751,45 @@ function setupTouchOverlay(){
     }
   }
 
-  // Hold support for d-pad
   let holdInterval=null;
-  function startHold(key){
-    sendKey(key);
-    holdInterval=setInterval(()=>sendKey(key),120);
-  }
-  function stopHold(){
-    clearInterval(holdInterval);holdInterval=null;
-  }
+  function startHold(key){ sendKey(key); holdInterval=setInterval(()=>sendKey(key),120); }
+  function stopHold(){ clearInterval(holdInterval); holdInterval=null; }
 
-  function addDpadBtn(id,key){
+  function addDpad(id,key){
     const btn=document.getElementById(id);
+    if(!btn)return;
     btn.addEventListener('touchstart',e=>{ e.preventDefault(); startHold(key); },{passive:false});
     btn.addEventListener('touchend',  e=>{ e.preventDefault(); stopHold(); },{passive:false});
+    btn.addEventListener('touchcancel',()=>stopHold());
   }
-  addDpadBtn('dUp',   'ArrowUp');
-  addDpadBtn('dDown', 'ArrowDown');
-  addDpadBtn('dLeft', 'ArrowLeft');
-  addDpadBtn('dRight','ArrowRight');
+  addDpad('dUp','ArrowUp'); addDpad('dDown','ArrowDown');
+  addDpad('dLeft','ArrowLeft'); addDpad('dRight','ArrowRight');
 
-  // Fire button — sends Space
-  document.getElementById('aFire').addEventListener('touchstart',e=>{
-    e.preventDefault();
-    if(gamePane.style.display!=='none'){
-      try{
-        gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
-        setTimeout(()=>gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',{key:' ',code:'Space',bubbles:true,cancelable:true})),80);
-      }catch(e){}
-    } else {
-      sfxSelect(); launchGame('1p');
-    }
-  },{passive:false});
+  const fireBtn=document.getElementById('aFire');
+  if(fireBtn){
+    fireBtn.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      if(gamePane.style.display!=='none'){
+        try{
+          gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
+          setTimeout(()=>gameFrame.contentWindow.dispatchEvent(new KeyboardEvent('keyup',{key:' ',code:'Space',bubbles:true,cancelable:true})),80);
+        }catch(e){}
+      } else { sfxSelect(); launchGame('1p'); }
+    },{passive:false});
+  }
 
-  // OK button — exits game or selects
-  document.getElementById('aSelect').addEventListener('touchstart',e=>{
-    e.preventDefault();
-    if(gamePane.style.display!=='none') exitGame();
-    else { sfxSelect(); launchGame('1p'); }
-  },{passive:false});
+  const okBtn=document.getElementById('aSelect');
+  if(okBtn){
+    okBtn.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      if(gamePane.style.display!=='none') exitGame();
+      else { sfxSelect(); launchGame('1p'); }
+    },{passive:false});
+  }
 
-  // Hide overlay when hardware keyboard used
+  // Hide panel when keyboard used
   document.addEventListener('keydown',()=>{
-    overlay.style.display='none';
+    if(panelOpen){ panelOpen=false; panel.classList.remove('open'); toggle.textContent='🕹 CTRL'; }
   },{once:true});
 }
 setupTouchOverlay();

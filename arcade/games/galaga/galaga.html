@@ -84,7 +84,8 @@ const ENEMY_COLS = 10, ENEMY_ROWS = 5;
 const FORMATION_X = 40, FORMATION_Y = 60, CELL_W = 36, CELL_H = 36;
 const PLAYER_SPD  = 4.5;
 const BULLET_SPD  = 8;
-const ENEMY_BULLET_SPD = 2.8; // -20%
+const ENEMY_BULLET_SPD = 2.2; // base speed
+function enemyBulletSpd(){ return Math.min(2.8, ENEMY_BULLET_SPD*(0.9+stage*0.015)); } // very gentle scaling, hard cap
 const MAX_PLAYER_BULLETS = 2;
 const STAR_COUNT = 90;
 
@@ -596,7 +597,7 @@ function tryPlayerShoot(){
 }
 
 function enemyShoot(e){
-  enemyBullets.push({x:e.x, y:e.y+16, vy:ENEMY_BULLET_SPD*(0.8+stage*0.05)});
+  enemyBullets.push({x:e.x, y:e.y+16, vy:enemyBulletSpd()});
   sfx('enemy_shoot');
 }
 

@@ -103,6 +103,7 @@ function startGame(){
 function startLevel(){
   lanes=makeLanes(level);
   homesReached=new Set();
+  frameCount=0; // reset before resetFrog so obstacle positions are clean
   resetFrog();
   timeLeft=Math.max(15,30-level*2);
   if(timerInterval)clearInterval(timerInterval);
@@ -112,10 +113,11 @@ function startLevel(){
     if(timeLeft<=0){sfxTimeout();killFrog('time');}
     updateUI();
   },1000);
-  frameCount=0;updateUI();
+  updateUI();
 }
 
 function resetFrog(){
+  // Frog spawns at bottom safe zone — row 0, col 6, always safe
   frog={col:6,row:0,px:6*CELL+CELL/2,py:rowY(0)+CELL/2,dead:false,deadTimer:0,onRider:null};
 }
 
