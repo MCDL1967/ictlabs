@@ -109,7 +109,7 @@ nav.scrolled .nav-logo img{ height:108px; }
 
 .eyebrow{
   position:relative;z-index:1;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;
   letter-spacing:6px;text-transform:uppercase;
   color:var(--blue-glow);margin-bottom:28px;
   opacity:0;animation:fadeUp 0.7s 0.2s forwards;
@@ -139,9 +139,9 @@ nav.scrolled .nav-logo img{ height:108px; }
   display:block;
   color:var(--blue-glow);
   filter:
-    drop-shadow(0 0 10px rgba(59,130,246,1))
-    drop-shadow(0 0 24px rgba(37,99,235,0.7))
-    drop-shadow(0 0 48px rgba(26,79,214,0.35));
+    drop-shadow(0 0 5px rgba(59,130,246,0.5))
+    drop-shadow(0 0 12px rgba(37,99,235,0.35))
+    drop-shadow(0 0 24px rgba(26,79,214,0.18));
 }
 
 .hero-sub{
@@ -194,7 +194,7 @@ nav.scrolled .nav-logo img{ height:108px; }
 .stat-number{
   font-family:'Barlow Condensed',sans-serif;font-size:clamp(32px,3.5vw,52px);
   font-weight:700;letter-spacing:2px;color:var(--blue-glow);line-height:1;margin-bottom:7px;
-  filter:drop-shadow(0 0 10px rgba(59,130,246,0.6));
+  filter:drop-shadow(0 0 5px rgba(59,130,246,0.3));
 }
 .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;line-height:1.5;}
 
@@ -224,8 +224,8 @@ section{position:relative;z-index:1;}
 .prod-card{background:var(--black);padding:36px 28px;position:relative;overflow:hidden;transition:background 0.3s;}
 .prod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);}
 .prod-card:hover{background:rgba(26,79,214,0.05);}
-.prod-num{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--blue-dim);margin-bottom:16px;}
-.prod-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:4px;filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));}
+.prod-num{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6b8ccc;margin-bottom:16px;}
+.prod-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:4px;filter:drop-shadow(0 0 4px rgba(59,130,246,0.2));}
 .prod-layer{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:16px;}
 .prod-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
 .prod-feat{list-style:none;}
@@ -343,8 +343,8 @@ html[lang="en"] [data-en]{display:revert;}
     <a href="#why" class="hide-mobile" data-en>Why ICTLabs</a>
     <a href="#approach" class="hide-mobile" data-es>Enfoque</a>
     <a href="#approach" class="hide-mobile" data-en>Approach</a>
-    <a href="#gateway" class="nav-cta" data-es>Área de Clientes</a>
-    <a href="#gateway" class="nav-cta" data-en>Client Access</a>
+    <a href="#gateway" class="nav-cta" data-es>Área de Pruebas</a>
+    <a href="#gateway" class="nav-cta" data-en>Test Area</a>
     <div class="lang-toggle">
       <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
       <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
@@ -372,8 +372,8 @@ html[lang="en"] [data-en]{display:revert;}
     <div class="div-line"></div>
   </div>
   <div class="hero-actions">
-    <a href="#gateway" class="btn-primary" data-es>Entrar al Área de Clientes</a>
-    <a href="#gateway" class="btn-primary" data-en>Enter Client Area</a>
+    <a href="#gateway" class="btn-primary" data-es>Entrar al Área de Pruebas</a>
+    <a href="#gateway" class="btn-primary" data-en>Enter Test Area</a>
     <a href="#solutions" class="btn-secondary" data-es>Nuestras Soluciones</a>
     <a href="#solutions" class="btn-secondary" data-en>Our Solutions</a>
   </div>
@@ -454,8 +454,8 @@ html[lang="en"] [data-en]{display:revert;}
     <p class="sec-body" data-en>We don't build AI models. We implement proven models in real casino operations — fast, focused, tied to measurable KPIs.</p>
     <div class="prod-grid reveal">
       <div class="prod-card">
-        <div class="prod-num" data-es>01 · Frente de Casa</div>
-        <div class="prod-num" data-en>01 · Front of House</div>
+        <div class="prod-num" data-es>01 · Atención al Cliente</div>
+        <div class="prod-num" data-en>01 · Customer Service</div>
         <div class="prod-name">SOL</div>
         <div class="prod-layer" data-es>Concierge IA · WhatsApp · 24/7</div>
         <div class="prod-layer" data-en>AI Guest Concierge · WhatsApp · 24/7</div>
@@ -469,8 +469,8 @@ html[lang="en"] [data-en]{display:revert;}
         </ul>
       </div>
       <div class="prod-card">
-        <div class="prod-num" data-es>02 · Back of House</div>
-        <div class="prod-num" data-en>02 · Back of House</div>
+        <div class="prod-num" data-es>02 · Atención al Cliente Interno</div>
+        <div class="prod-num" data-en>02 · Internal Customer Service</div>
         <div class="prod-name" data-es>OPS IA</div>
         <div class="prod-name" data-en>OPS IA</div>
         <div class="prod-layer" data-es>Reportes · KPIs · Cumplimiento</div>
@@ -485,8 +485,8 @@ html[lang="en"] [data-en]{display:revert;}
         </ul>
       </div>
       <div class="prod-card">
-        <div class="prod-num" data-es>03 · Capa de Inteligencia</div>
-        <div class="prod-num" data-en>03 · Intelligence Layer</div>
+        <div class="prod-num" data-es>03 · Capacitación</div>
+        <div class="prod-num" data-en>03 · Training</div>
         <div class="prod-name" data-es>CONOCIMIENTO IA</div>
         <div class="prod-name" data-en>KNOWLEDGE IA</div>
         <div class="prod-layer" data-es>Agentes · Búsqueda · Decisiones</div>
@@ -593,23 +593,23 @@ html[lang="en"] [data-en]{display:revert;}
     <p class="gw-sub" data-es>La velocidad de ejecución define la ventaja.<br>La ventaja es de quien implementa primero.</p>
     <p class="gw-sub" data-en>The speed of execution defines the advantage.<br>The advantage belongs to whoever moves first.</p>
     <div class="gw-box reveal">
-      <div class="gw-lbl" data-es>Área Privada de Clientes</div>
-      <div class="gw-lbl" data-en>Private Client Area</div>
+      <div class="gw-lbl" data-es>Área de Pruebas</div>
+      <div class="gw-lbl" data-en>Test Area</div>
       <div class="gw-title" data-es>ACCEDER A APLICACIONES ICTLABS</div>
       <div class="gw-title" data-en>ACCESS ICTLABS APPLICATIONS</div>
-      <p class="gw-sub2" data-es>Ingresa tus datos para acceder a herramientas y dashboards de clientes.</p>
-      <p class="gw-sub2" data-en>Enter your details to access our client tools and project dashboards.</p>
+      <p class="gw-sub2" data-es>Déjanos tus datos si quieres — o entra directo.</p>
+      <p class="gw-sub2" data-en>Leave your details if you'd like — or go straight in.</p>
       <form class="gw-form" onsubmit="handleAccess(event)">
-        <input class="gw-input" type="text"  id="g-name"  data-placeholder-es="Nombre Completo"    data-placeholder-en="Full Name"      required/>
-        <input class="gw-input" type="email" id="g-email" data-placeholder-es="Correo Electrónico" data-placeholder-en="Email Address"   required/>
-        <input class="gw-input" type="tel"   id="g-phone" data-placeholder-es="Teléfono"           data-placeholder-en="Phone Number"/>
+        <input class="gw-input" type="text"  id="g-name"  data-placeholder-es="Nombre (opcional)"        data-placeholder-en="Name (optional)"/>
+        <input class="gw-input" type="email" id="g-email" data-placeholder-es="Correo (opcional)"        data-placeholder-en="Email (optional)"/>
+        <input class="gw-input" type="tel"   id="g-phone" data-placeholder-es="Teléfono (opcional)"      data-placeholder-en="Phone (optional)"/>
         <button class="gw-btn" type="submit">
-          <span data-es>ENTRAR AL ÁREA DE CLIENTES →</span>
-          <span data-en>ENTER CLIENT AREA →</span>
+          <span data-es>ENTRAR →</span>
+          <span data-en>ENTER →</span>
         </button>
       </form>
-      <p class="gw-disc" data-es>Tu información es privada y se usa únicamente para gestión de acceso.</p>
-      <p class="gw-disc" data-en>Your information is kept private and used solely for access management.</p>
+      <p class="gw-disc" data-es>Tus datos son opcionales y se usan únicamente para mejorar el servicio.</p>
+      <p class="gw-disc" data-en>Your details are optional and used only to improve service.</p>
     </div>
     <p class="gw-alt">
       <span data-es>O &nbsp;<a href="mailto:marcelo@gransolux.com">CONTÁCTANOS DIRECTAMENTE</a></span>
