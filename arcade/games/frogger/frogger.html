@@ -126,7 +126,10 @@ const MOVES={ArrowUp:{dr:1},ArrowDown:{dr:-1},ArrowLeft:{dc:-1},ArrowRight:{dc:1
              KeyW:{dr:1},KeyS:{dr:-1},KeyA:{dc:-1},KeyD:{dc:1}};
 document.addEventListener('keydown',e=>{
   if(gstate==='idle'&&e.code==='Space'){startGame();return;}
-  if(gstate==='dead_wait'&&e.code==='Space'){resetFrog();gstate='playing';hideMsg();return;}
+  if(gstate==='dead_wait'&&e.code==='Space'){
+    timeLeft=Math.max(15,30-level*2); // reset timer on respawn
+    resetFrog();gstate='playing';hideMsg();return;
+  }
   if(gstate!=='playing'||moveLock||frog.dead)return;
   const m=MOVES[e.code];if(!m)return;
   e.preventDefault();
@@ -150,7 +153,10 @@ function checkLanding(){
         clearInterval(timerInterval);gstate='levelup';
         showMsg(`LEVEL ${level} CLEAR!`);sfxLevel();
         setTimeout(()=>{level++;startLevel();hideMsg();gstate='playing';},2000);
-      } else {resetFrog();}
+      } else {
+        timeLeft=Math.max(15,30-level*2); // reset timer for next frog
+        resetFrog();
+      }
     } else {killFrog('squash');}
   }
 }
