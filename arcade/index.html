@@ -534,6 +534,40 @@ body::after{
     white-space:nowrap;
   }
 }
+
+
+/* === ICTLabs Micro Deck Patch v3: minimal geometry-safe control deck === */
+.back-arrow{
+  min-width:52px!important;min-height:34px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  font-size:0.9em!important;color:#dbeaff!important;opacity:1!important;
+  border-color:rgba(47,107,255,.95)!important;
+  box-shadow:0 0 12px rgba(47,107,255,.55), inset 0 0 10px rgba(47,107,255,.12)!important;
+}
+#touchToggle{
+  position:static!important;display:none;z-index:auto!important;
+  border-radius:0!important;padding:7px 14px!important;
+  background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+#touchToggle::first-letter{color:var(--accent)}
+.secondary-deck{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%;gap:6px!important;}
+.secondary-deck .button,#touchToggle{min-width:0!important;width:100%!important;justify-content:center!important;align-items:center!important;text-align:center!important;}
+#spaceBtn{min-width:128px;text-align:center;}
+.action-btn.fire{font-size:25px!important;color:#ff3b20!important;text-shadow:0 0 10px #ff3b20,0 0 16px #fff600;}
+#dpad{position:relative;border:2px solid rgba(255,43,20,.9);border-radius:999px;padding:12px;box-shadow:0 0 12px rgba(255,43,20,.45), inset 0 0 16px rgba(47,107,255,.08);touch-action:none;}
+#dpad::after{content:'';position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%);border:2px solid #ff2b14;border-radius:999px;box-shadow:0 0 8px rgba(255,43,20,.55);pointer-events:none;}
+#dpad .dpad-center{pointer-events:none;}
+@media (pointer:coarse){#touchToggle{display:flex!important;}}
+@media (max-width:767px) and (orientation:portrait){
+  .controls{margin-bottom:max(10px, env(safe-area-inset-bottom, 10px))!important;}
+  .secondary-deck{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+  .secondary-deck .button,#touchToggle{min-height:58px!important;padding:7px 3px!important;font-size:0.52em!important;letter-spacing:.45px!important;}
+}
+@media (max-width:900px) and (orientation:landscape){
+  .secondary-deck{display:flex!important;width:auto;}
+  #touchToggle{min-width:98px!important;}
+}
+
 </style>
 </head>
 <body>
@@ -585,15 +619,13 @@ body::after{
     <button class="button" id="btn1p">1 Player<span class="shortcut">press 1</span></button>
     <button class="button" id="btn2p">2 Players<span class="shortcut">press 2</span></button>
   </div>
-  <div class="btn-group">
+  <div class="btn-group secondary-deck">
+    <button class="button" id="instrButton">❓ How To Play<span class="shortcut">press H</span></button>
     <button class="button" id="skinButton">🎨 Skin</button>
     <button class="button" id="saveSkinButton">💾 Save</button>
-    <button class="button" id="instrButton">❓ How To Play<span class="shortcut">press H</span></button>
+    <button class="button" id="touchToggle">◎ Controls</button>
   </div>
 </div>
-
-<!-- TOUCH TOGGLE TAB -->
-<button id="touchToggle">CONTROLS</button>
 
 <!-- TOUCH PANEL
      Portrait:  slides up from bottom — d-pad LEFT, actions RIGHT
@@ -608,9 +640,9 @@ body::after{
     </div>
     <button class="dpad-btn" id="dDown">▼</button>
   </div>
-  <button id="spaceBtn">SPACE</button>
+  <button id="spaceBtn">CONTINUE</button>
   <div id="actionBtns">
-    <button class="action-btn fire" id="aFire">🔥</button>
+    <button class="action-btn fire" id="aFire">✸</button>
     <button class="action-btn" id="aSelect">ESC</button>
   </div>
 </div>
@@ -801,7 +833,7 @@ function setupTouchOverlay(){
 
   let open=false;
   function openPanel(){ open=true;  panel.classList.add('open');    toggle.textContent='CLOSE'; }
-  function closePanel(){ open=false; panel.classList.remove('open'); toggle.textContent='CONTROLS'; }
+  function closePanel(){ open=false; panel.classList.remove('open'); toggle.textContent='◎ Controls'; }
   window.closeTouchPanel=closePanel;
 
   toggle.addEventListener('touchstart',e=>{ e.preventDefault(); open?closePanel():openPanel(); },{passive:false});
@@ -830,6 +862,35 @@ function setupTouchOverlay(){
   let held=null;
   function startHold(key){ fire(key); held=setInterval(()=>fire(key),130); }
   function stopHold(){ clearInterval(held); held=null; }
+
+  // Pressure-pad joystick mode: thumb displacement determines directions.
+  const dpad=document.getElementById('dpad');
+  const activeDirs={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};
+  let joyPointer=null;
+  function setDir(key,on){
+    if(activeDirs[key]===on)return;
+    activeDirs[key]=on;
+    if(on) startHold(key); else { if(Object.values(activeDirs).every(v=>!v)) stopHold(); }
+  }
+  function releaseJoy(){ Object.keys(activeDirs).forEach(k=>activeDirs[k]=false); stopHold(); joyPointer=null; }
+  function updateJoy(x,y){
+    if(!dpad)return;
+    const r=dpad.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const dx=x-cx, dy=y-cy;
+    const th=Math.max(14,r.width*.14);
+    const absX=Math.abs(dx), absY=Math.abs(dy);
+    const dominantX=absX>th, dominantY=absY>th;
+    releaseJoy();
+    if(dominantX && absX>=absY*.55) setDir(dx<0?'ArrowLeft':'ArrowRight',true);
+    if(dominantY && absY>=absX*.55) setDir(dy<0?'ArrowUp':'ArrowDown',true);
+  }
+  if(dpad){
+    dpad.addEventListener('pointerdown',e=>{e.preventDefault();joyPointer=e.pointerId;dpad.setPointerCapture&&dpad.setPointerCapture(joyPointer);updateJoy(e.clientX,e.clientY);},{passive:false});
+    dpad.addEventListener('pointermove',e=>{if(e.pointerId!==joyPointer)return;e.preventDefault();updateJoy(e.clientX,e.clientY);},{passive:false});
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>dpad.addEventListener(ev,e=>{if(joyPointer!==null&&e.pointerId!==joyPointer)return;releaseJoy();},{passive:false}));
+  }
+
 
   ['dUp','dDown','dLeft','dRight'].forEach((id,i)=>{
     const key=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'][i];
