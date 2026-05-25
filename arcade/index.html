@@ -585,6 +585,44 @@ body::after{
 }
 
 </style>
+<style>
+
+/* ICTLabs Retro Console — V4.1 Stabilization Patch */
+#backBtn,.back-btn,.back-button,.home-back,a[aria-label*="back" i],button[aria-label*="back" i]{
+  min-width:52px!important;min-height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  color:#e8f4ff!important;border:1.5px solid #2f6bff!important;box-shadow:0 0 12px rgba(47,107,255,.55),inset 0 0 10px rgba(47,107,255,.12)!important;
+  opacity:1!important;font-size:19px!important;text-shadow:0 0 8px rgba(232,244,255,.75)!important;
+}
+@media (max-width:1024px),(pointer:coarse){
+  #touchToggle,.touch-toggle,.controls-toggle,[data-role="controls-toggle"]{opacity:1!important;pointer-events:auto!important;filter:none!important;visibility:visible!important}
+}
+@media (min-width:1025px) and (pointer:fine){
+  #touchToggle,.touch-toggle,.controls-toggle,[data-role="controls-toggle"]{opacity:.35!important;pointer-events:none!important;filter:grayscale(1)!important}
+  .ict-v41-overlay{display:none!important}
+}
+.ict-v41-overlay{
+  position:fixed;left:12px;right:12px;bottom:max(8px,env(safe-area-inset-bottom));z-index:9999;
+  border:2px solid #2f6bff;border-radius:24px;background:linear-gradient(180deg,rgba(4,10,24,.96),rgba(0,0,0,.95));
+  box-shadow:0 0 22px rgba(47,107,255,.5),inset 0 0 24px rgba(47,107,255,.12);
+  min-height:188px;display:grid;grid-template-columns:1.05fr .9fr .56fr;grid-template-areas:"joy continue action";
+  gap:14px;align-items:center;padding:15px;transform:translateX(110%);transition:transform .22s ease-out;box-sizing:border-box;touch-action:none;
+}
+.ict-v41-overlay.show{transform:translateX(0)}
+.ict-v41-joy{grid-area:joy;width:min(34vw,172px);height:min(34vw,172px);max-width:172px;max-height:172px;min-width:130px;min-height:130px;border:3px solid #2f6bff;border-radius:50%;margin:auto;position:relative;box-shadow:0 0 18px rgba(47,107,255,.72),inset 0 0 16px rgba(47,107,255,.18);background:radial-gradient(circle at center,rgba(47,107,255,.16),rgba(0,0,0,.8) 62%)}
+.ict-v41-joy:before{content:"";position:absolute;inset:32%;border:3px solid #2f6bff;border-radius:50%;box-shadow:0 0 14px rgba(47,107,255,.8)}
+.ict-v41-joy-dot{position:absolute;left:50%;top:50%;width:12px;height:12px;border-radius:50%;background:#dcecff;transform:translate(-50%,-50%);box-shadow:0 0 10px rgba(255,255,255,.9);pointer-events:none}
+.ict-v41-joy span{position:absolute;color:#f2f7ff;font-size:22px;text-shadow:0 0 10px rgba(255,255,255,.8);pointer-events:none}
+.ict-v41-joy .up{top:11%;left:50%;transform:translateX(-50%)}.ict-v41-joy .down{bottom:11%;left:50%;transform:translateX(-50%)}.ict-v41-joy .left{left:11%;top:50%;transform:translateY(-50%)}.ict-v41-joy .right{right:11%;top:50%;transform:translateY(-50%)}
+.ict-v41-continue-wrap{grid-area:continue;display:flex;align-items:center;justify-content:center}
+.ict-v41-continue{width:min(30vw,190px);min-width:132px;height:64px;border:3px solid #ffff25;border-radius:16px;background:rgba(255,255,37,.07);color:#ffff25;font-family:'Audiowide',sans-serif;letter-spacing:2px;font-size:clamp(12px,2.5vw,16px);box-shadow:0 0 18px rgba(255,255,37,.62),inset 0 0 14px rgba(255,255,37,.12)}
+.ict-v41-actions{grid-area:action;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding-right:4px}
+.ict-v41-fire,.ict-v41-esc,.ict-v41-close{border:2px solid #2f6bff;background:rgba(0,0,0,.62);color:#fff;font-family:'Audiowide',sans-serif;box-shadow:0 0 14px rgba(47,107,255,.55),inset 0 0 10px rgba(47,107,255,.12);display:flex;align-items:center;justify-content:center}
+.ict-v41-fire{width:64px;height:64px;border-radius:50%}.ict-v41-fire svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:2.4;filter:drop-shadow(0 0 5px rgba(255,255,255,.75))}
+.ict-v41-esc{width:70px;height:56px;border-radius:50%;font-size:15px;letter-spacing:1px}.ict-v41-close{width:92px;height:40px;border-radius:18px;font-size:12px;letter-spacing:1px}
+@media(max-width:520px){.ict-v41-overlay{left:8px;right:8px;min-height:180px;grid-template-columns:1.08fr .88fr .52fr;gap:8px;padding:13px 10px 12px}.ict-v41-joy{width:154px;height:154px;min-width:136px;min-height:136px}.ict-v41-continue{width:146px;height:58px;font-size:12px}.ict-v41-actions{gap:8px;padding-right:0}.ict-v41-fire{width:58px;height:58px}.ict-v41-esc{width:64px;height:52px}.ict-v41-close{width:86px;height:38px}}
+@media(min-width:700px) and (max-width:1024px){.ict-v41-overlay{min-height:178px;grid-template-columns:1.05fr 1fr .52fr;padding:16px 22px}.ict-v41-joy{width:168px;height:168px}.ict-v41-continue{width:190px;height:64px}.ict-v41-actions{padding-right:16px}}
+
+</style>
 </head>
 <body>
 
@@ -1058,5 +1096,52 @@ instrModal.addEventListener('click',e=>{ if(e.target===instrModal) instrModal.st
 // ── Boot ──────────────────────────────────────────────────
 loadGames();
 </script>
+
+<script>
+(function(){
+ const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
+ ready(function(){
+  const isTouch=()=>matchMedia('(max-width:1024px), (pointer:coarse)').matches;
+  const norm=el=>(el&&(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase())||'';
+  const all=()=>Array.from(document.querySelectorAll('button,a,[role="button"],.btn,.button,div,span')).filter(el=>norm(el));
+
+  Array.from(document.querySelectorAll('a,button')).forEach(el=>{const t=norm(el),a=(el.getAttribute('aria-label')||'').toUpperCase();if(t==='←'||t==='↵'||a.includes('BACK')||a.includes('HOME'))el.classList.add('back-btn')});
+
+  let controls=document.getElementById('touchToggle')||document.querySelector('.touch-toggle,.controls-toggle,[data-role="controls-toggle"]')||all().find(el=>norm(el).includes('CONTROL'));
+  if(controls){controls.id=controls.id||'touchToggle';controls.classList.add('controls-toggle');controls.style.visibility='';}
+
+  let deck=document.getElementById('ictV41Overlay');
+  if(!deck){
+   deck=document.createElement('div');deck.id='ictV41Overlay';deck.className='ict-v41-overlay';
+   deck.innerHTML='<div class="ict-v41-joy" id="ictV41Joy"><span class="up">▲</span><span class="down">▼</span><span class="left">◀</span><span class="right">▶</span><div class="ict-v41-joy-dot"></div></div><div class="ict-v41-continue-wrap"><button class="ict-v41-continue" id="ictV41Continue" type="button">CONTINUE</button></div><div class="ict-v41-actions"><button class="ict-v41-fire" id="ictV41Fire" type="button" aria-label="Fire"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/></svg></button><button class="ict-v41-esc" id="ictV41Esc" type="button">ESC</button><button class="ict-v41-close" id="ictV41Close" type="button">CLOSE</button></div>';
+   document.body.appendChild(deck);
+  }
+
+  Array.from(document.querySelectorAll('.touch-controls,#touchControls,.mobile-controls,#mobileControls')).forEach(el=>{if(el!==deck&&(norm(el).includes('CONTINUE')||norm(el).includes('SPACE')))el.style.display='none'});
+
+  function send(type,code,key){const ev=new KeyboardEvent(type,{code,key,bubbles:true,cancelable:true});document.dispatchEvent(ev);window.dispatchEvent(ev);const f=document.querySelector('iframe');try{if(f&&f.contentWindow){f.contentWindow.dispatchEvent(ev);f.contentWindow.document.dispatchEvent(ev)}}catch(e){}}
+  function tap(code,key,ms=72){send('keydown',code,key);setTimeout(()=>send('keyup',code,key),ms)}
+  function show(){if(isTouch())deck.classList.add('show')}
+  function hide(){deck.classList.remove('show');releaseDirs();stopFire();tap('Escape','Escape',80)}
+  if(controls){controls.addEventListener('click',e=>{if(!isTouch())return;e.preventDefault();e.stopPropagation();show()},true)}
+  document.getElementById('ictV41Continue').addEventListener('click',()=>tap('Space',' '));
+  document.getElementById('ictV41Close').addEventListener('click',hide);
+  document.getElementById('ictV41Esc').addEventListener('click',hide);
+
+  let fireTimer=null;function fireOnce(){tap('Space',' ');tap('KeyX','x')}function startFire(e){e.preventDefault();fireOnce();stopFire();fireTimer=setInterval(fireOnce,130)}function stopFire(){if(fireTimer){clearInterval(fireTimer);fireTimer=null}send('keyup','Space',' ');send('keyup','KeyX','x')}
+  const fire=document.getElementById('ictV41Fire');fire.addEventListener('pointerdown',startFire);['pointerup','pointercancel','pointerleave'].forEach(ev=>fire.addEventListener(ev,stopFire));
+
+  const joy=document.getElementById('ictV41Joy');const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};let pid=null;
+  function setDir(code,on){if(active[code]===on)return;active[code]=on;send(on?'keydown':'keyup',code,code)}
+  function releaseDirs(){Object.keys(active).forEach(k=>setDir(k,false));pid=null}
+  function update(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=x-cx,dy=y-cy,rad=r.width/2,mag=Math.hypot(dx,dy),dead=rad*.20;if(mag<dead){setDir('ArrowLeft',false);setDir('ArrowRight',false);setDir('ArrowUp',false);setDir('ArrowDown',false);return}const nx=dx/rad,ny=dy/rad,th=.24;setDir('ArrowLeft',nx<-th);setDir('ArrowRight',nx>th);setDir('ArrowUp',ny<-th);setDir('ArrowDown',ny>th)}
+  joy.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;joy.setPointerCapture&&joy.setPointerCapture(pid);update(e.clientX,e.clientY)});
+  joy.addEventListener('pointermove',e=>{if(pid!==e.pointerId)return;e.preventDefault();update(e.clientX,e.clientY)});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>joy.addEventListener(ev,e=>{if(pid!==null&&e.pointerId!==pid)return;releaseDirs()}));
+  addEventListener('resize',()=>{if(!isTouch())deck.classList.remove('show')});
+ });
+})();
+</script>
+
 </body>
 </html>
