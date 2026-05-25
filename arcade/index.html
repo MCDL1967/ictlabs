@@ -66,12 +66,14 @@ body::after{
 }
 .back-arrow{
   position:absolute;right:16px;top:50%;transform:translateY(-50%);
-  font-family:var(--font);font-size:0.55em;letter-spacing:2px;
-  color:var(--text);text-decoration:none;opacity:0.6;
-  transition:all 0.2s;padding:4px 10px;
-  border:1px solid var(--border);text-transform:uppercase;
+  font-family:var(--font);font-size:0.78em;letter-spacing:2px;
+  color:#dcecff;text-decoration:none;opacity:0.95;
+  transition:all 0.2s;padding:7px 13px;
+  border:1.5px solid var(--border);text-transform:uppercase;
+  min-width:42px;min-height:34px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(37,99,235,0.12);
 }
-.back-arrow:hover{opacity:1;background:var(--accent);color:var(--bg-dark);}
+.back-arrow:hover{opacity:1;background:var(--accent);color:#fff;}
 
 /* GAME META — prominent, centered above preview */
 .game-meta{
@@ -210,11 +212,18 @@ body::after{
   padding:8px 16px;
   border-top:2px solid var(--border);
   box-shadow:0 -2px 20px var(--glow);
-  display:flex;justify-content:space-between;
-  align-items:center;flex-wrap:wrap;gap:6px;
+  display:grid;
+  grid-template-columns:minmax(150px,28%) 1fr;
+  grid-template-areas:'nav play' 'nav aux';
+  align-items:center;gap:6px 14px;
   flex-shrink:0;transition:all 0.4s;
 }
 .btn-group{display:flex;flex-wrap:wrap;gap:4px;}
+.nav-controls{grid-area:nav;justify-content:center;align-self:center;}
+.play-controls{grid-area:play;justify-content:center;align-self:center;}
+.aux-controls{grid-area:aux;justify-content:flex-end;align-self:center;}
+.button.dimmed{opacity:0.35;cursor:not-allowed;filter:saturate(0.45);}
+.button.dimmed:hover{background:transparent;color:var(--text);box-shadow:none;}
 
 .button{
   background:transparent;
@@ -264,14 +273,9 @@ body::after{
 }
 .instr-close:hover{filter:brightness(1.2);}
 
-/* TOUCH OVERLAY — only visible on touch devices */
-/* TOUCH CONTROLS ─────────────────────────────────────────────
-   Portrait:  panel slides up from bottom
-   Landscape: panel slides in from right side
-   Toggle button always visible on touch devices
+/* TOUCH OVERLAY — summoned only on touch devices
+   V4: bottom-docked, right-to-left slide, never affects game real estate.
 ──────────────────────────────────────────────────────────── */
-
-/* Toggle tab */
 #touchToggle{
   display:none;
   position:fixed;z-index:120;
@@ -289,76 +293,95 @@ body::after{
   backdrop-filter:blur(8px);
 }
 #touchToggle:active{background:var(--accent);color:#fff;transform:scale(0.97);}
+#touchToggle.dimmed{opacity:.35;cursor:not-allowed;}
 
-/* Panel base */
 #touchPanel{
   position:fixed;z-index:110;
+  left:10px;right:10px;bottom:max(10px, env(safe-area-inset-bottom, 10px));
+  min-height:clamp(150px,22vh,210px);
   background:linear-gradient(180deg,rgba(5,8,15,0.94),rgba(0,0,0,0.98));
   border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:18px;padding:14px 18px max(18px, env(safe-area-inset-bottom, 18px));
-  transition:transform 0.22s ease, box-shadow 0.22s ease;
-  left:10px;right:10px;bottom:10px;
-  transform:translateY(calc(100% + 24px));
-  flex-direction:row;
   border-top:2px solid var(--accent);
   border-radius:18px;
   box-shadow:0 0 28px rgba(0,0,0,0.8),0 0 26px var(--glow);
   backdrop-filter:blur(10px);
+  display:grid;
+  grid-template-columns:minmax(142px,1fr) minmax(118px,.7fr) minmax(82px,.48fr);
+  grid-template-areas:'dpad continue actions';
+  align-items:center;
+  gap:14px;
+  padding:14px 16px max(16px, env(safe-area-inset-bottom, 16px));
+  transform:translateX(calc(100% + 28px));
+  transition:transform 0.24s ease, box-shadow 0.22s ease;
+  touch-action:none;
 }
-#touchPanel.open{ transform:translateY(0); }
+#touchPanel.open{transform:translateX(0);}
 
-/* Landscape overrides */
-@media (orientation:landscape){
-  #touchToggle{
-    bottom:50%;transform:translateY(50%);
-    right:10px;
-    writing-mode:vertical-rl;
-    border-radius:999px;
-    padding:12px 7px;
-  }
-  #touchPanel{
-    top:10px;bottom:10px;right:10px;left:auto;
-    width:176px;
-    transform:translateX(calc(100% + 24px));
-    flex-direction:column;
-    border-left:2px solid var(--accent);
-    border-top:1px solid var(--border);
-  }
-  #touchPanel.open{ transform:translateX(0); }
+#dpad{
+  grid-area:dpad;
+  width:clamp(136px,30vw,178px);
+  height:clamp(136px,30vw,178px);
+  justify-self:center;
+  align-self:center;
+  position:relative;
+  display:block;
+  border:3px solid var(--accent);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(37,99,235,.18),rgba(5,8,15,.9) 44%,rgba(0,0,0,.96));
+  box-shadow:0 0 16px var(--glow), inset 0 0 20px rgba(37,99,235,.18);
 }
-
-/* D-pad */
-#dpad{ display:flex;flex-direction:column;align-items:center;gap:2px; }
-.dpad-row{display:flex;align-items:center;gap:2px;}
-.dpad-center{width:42px;height:42px;}
+#dpad::before{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:42%;height:42%;border:3px solid var(--accent);border-radius:50%;
+  box-shadow:0 0 12px var(--glow), inset 0 0 12px rgba(37,99,235,.18);
+}
+#dpad::after{
+  content:'●';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  color:#dcecff;font-size:18px;text-shadow:0 0 10px var(--accent);opacity:.9;
+}
+.dpad-row{display:contents;}
+.dpad-center{display:none;}
 .dpad-btn{
-  width:50px;height:50px;
-  background:rgba(18,22,32,0.92);
-  border:1px solid var(--border);
-  color:var(--text);font-size:20px;
+  position:absolute;
+  width:38px;height:38px;
+  background:transparent;
+  border:none;
+  color:#dcecff;font-size:20px;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border-radius:8px;
+  cursor:pointer;border-radius:50%;
   -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;user-select:none;
+  touch-action:none;user-select:none;
+  text-shadow:0 0 8px var(--accent);
+  z-index:2;
 }
-.dpad-btn:active{background:var(--accent);color:#000;}
+#dUp{left:50%;top:8px;transform:translateX(-50%);}
+#dDown{left:50%;bottom:8px;transform:translateX(-50%);}
+#dLeft{left:10px;top:50%;transform:translateY(-50%);}
+#dRight{right:10px;top:50%;transform:translateY(-50%);}
+.dpad-btn:active{background:rgba(37,99,235,.18);color:#fff;}
 
-/* Space bar button — center of panel */
 #spaceBtn{
+  grid-area:continue;
+  justify-self:center;
+  align-self:center;
+  width:min(100%,190px);
+  min-height:70px;
   background:rgba(30,30,30,0.9);
   border:2px solid #ff0;color:#ff0;
   font-family:var(--font);font-size:11px;letter-spacing:2px;
-  padding:10px 20px;border-radius:8px;
+  padding:10px 16px;border-radius:10px;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;user-select:none;
-  flex-shrink:0;
+  box-shadow:0 0 14px rgba(255,255,0,.38), inset 0 0 12px rgba(255,255,0,.08);
 }
 #spaceBtn:active{background:#ff0;color:#000;}
 
-/* Action buttons */
-#actionBtns{display:flex;flex-direction:column;gap:10px;align-items:center;}
+#actionBtns{
+  grid-area:actions;
+  display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;
+  justify-self:center;align-self:center;
+}
 .action-btn{
   width:62px;height:62px;border-radius:50%;
   background:rgba(18,22,32,0.92);
@@ -369,19 +392,32 @@ body::after{
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;user-select:none;
   font-family:var(--font);font-size:12px;letter-spacing:1px;
+  box-shadow:0 0 12px var(--glow);
 }
-.action-btn.fire{font-size:22px;}
-.action-btn.start-btn-touch{
-  width:58px;height:36px;border-radius:8px;
-  font-size:9px;letter-spacing:1px;
-  border-color:#0f0;color:#0f0;
+.action-btn.fire{font-size:26px;}
+.action-btn:active{background:var(--accent);color:#fff;}
+
+@media (pointer:coarse){#touchToggle{display:flex;align-items:center;justify-content:center;}}
+@media (pointer:fine){#touchToggle{display:none!important;}#touchPanel{display:none!important;}}
+
+@media (max-width:767px) and (orientation:portrait){
+  #touchPanel{
+    min-height:clamp(128px,18vh,166px);
+    grid-template-columns:minmax(112px,.9fr) minmax(84px,.62fr) minmax(68px,.42fr);
+    gap:8px;
+    padding:12px 12px max(12px, env(safe-area-inset-bottom,12px));
+  }
+  #dpad{width:clamp(112px,32vw,138px);height:clamp(112px,32vw,138px);}
+  #spaceBtn{width:min(100%,152px);min-height:56px;font-size:9px;padding:8px 10px;}
+  .action-btn{width:54px;height:54px;}
+  .action-btn.fire{font-size:23px;}
+  #actionBtns{gap:9px;transform:translateX(-6px);}
 }
 
-/* Only show on touch devices */
-@media (pointer:coarse){
-  #touchToggle{display:flex;align-items:center;justify-content:center;}
+@media (min-width:768px) and (pointer:coarse){
+  #touchPanel{min-height:190px;grid-template-columns:minmax(170px,1fr) minmax(150px,.72fr) minmax(90px,.45fr);}
+  #spaceBtn{align-self:center;transform:translateY(2px);}
 }
-
 /* Keyboard shortcut hints on buttons */
 /* Keyboard shortcut hints on buttons */
 .button .shortcut{
@@ -534,6 +570,20 @@ body::after{
     white-space:nowrap;
   }
 }
+
+/* V4 responsive console deck zoning */
+@media (max-width:767px) and (orientation:portrait){
+  .controls{grid-template-columns:1fr;grid-template-areas:'nav' 'play' 'aux';align-items:stretch;}
+  .nav-controls,.play-controls,.aux-controls{justify-content:center;}
+  .aux-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;}
+}
+@media (max-width:900px) and (orientation:landscape){
+  .controls{grid-template-columns:minmax(90px,22%) 1fr;grid-template-areas:'nav play' 'nav aux';overflow:visible;}
+  .nav-controls{justify-content:center;}
+  .play-controls{justify-content:center;}
+  .aux-controls{justify-content:flex-end;}
+}
+
 </style>
 </head>
 <body>
@@ -576,19 +626,20 @@ body::after{
 </div>
 
 <div class="controls">
-  <div class="btn-group">
+  <div class="btn-group nav-controls">
     <button class="button" id="upButton">▲ Up</button>
     <button class="button" id="downButton">▼ Down</button>
     <button class="button" id="selectButton">⏎ Select</button>
   </div>
-  <div class="btn-group">
+  <div class="btn-group play-controls">
     <button class="button" id="btn1p">1 Player<span class="shortcut">press 1</span></button>
     <button class="button" id="btn2p">2 Players<span class="shortcut">press 2</span></button>
   </div>
-  <div class="btn-group">
+  <div class="btn-group aux-controls">
+    <button class="button" id="instrButton">❓ Help<span class="shortcut">press H</span></button>
     <button class="button" id="skinButton">🎨 Skin</button>
     <button class="button" id="saveSkinButton">💾 Save</button>
-    <button class="button" id="instrButton">❓ How To Play<span class="shortcut">press H</span></button>
+    <button class="button dimmed" id="desktopControlsButton" aria-disabled="true">Controls</button>
   </div>
 </div>
 
@@ -596,8 +647,7 @@ body::after{
 <button id="touchToggle">CONTROLS</button>
 
 <!-- TOUCH PANEL
-     Portrait:  slides up from bottom — d-pad LEFT, actions RIGHT
-     Landscape: slides in from right — d-pad TOP, actions BOTTOM -->
+     V4: bottom-docked touch overlay, slides in from right, never affects game real estate. -->
 <div id="touchPanel">
   <div id="dpad">
     <button class="dpad-btn" id="dUp">▲</button>
@@ -608,9 +658,9 @@ body::after{
     </div>
     <button class="dpad-btn" id="dDown">▼</button>
   </div>
-  <button id="spaceBtn">SPACE</button>
+  <button id="spaceBtn">CONTINUE</button>
   <div id="actionBtns">
-    <button class="action-btn fire" id="aFire">🔥</button>
+    <button class="action-btn fire" id="aFire">✸</button>
     <button class="action-btn" id="aSelect">ESC</button>
   </div>
 </div>
@@ -799,79 +849,115 @@ function setupTouchOverlay(){
   const toggle=document.getElementById('touchToggle');
   if(!panel||!toggle)return;
 
+  const isTouch = matchMedia('(pointer: coarse)').matches;
   let open=false;
-  function openPanel(){ open=true;  panel.classList.add('open');    toggle.textContent='CLOSE'; }
-  function closePanel(){ open=false; panel.classList.remove('open'); toggle.textContent='CONTROLS'; }
+
+  function openPanel(){
+    if(!isTouch) return;
+    open=true;
+    panel.classList.add('open');
+    toggle.textContent='CLOSE';
+  }
+  function closePanel(){
+    open=false;
+    panel.classList.remove('open');
+    toggle.textContent='CONTROLS';
+    releaseDirections();
+  }
   window.closeTouchPanel=closePanel;
 
   toggle.addEventListener('touchstart',e=>{ e.preventDefault(); open?closePanel():openPanel(); },{passive:false});
   toggle.addEventListener('click',()=>{ open?closePanel():openPanel(); });
 
-  // Send key to game iframe via postMessage (works across origin boundaries)
-  function fire(key){
+  function sendKey(type,key){
+    const code = key===' ' ? 'Space' : key;
     if(gamePane.style.display!=='none'){
-      // postMessage approach — games listen for this
-      try{ gameFrame.contentWindow.postMessage({type:'key',key},'*'); }catch(ex){}
-      // Also try direct dispatch as fallback
+      try{ gameFrame.contentWindow.postMessage({type:'key',event:type,key,code},'*'); }catch(ex){}
       try{
-        const code=key==='ArrowUp'?'ArrowUp':key==='ArrowDown'?'ArrowDown':
-                   key==='ArrowLeft'?'ArrowLeft':key==='ArrowRight'?'ArrowRight':'Space';
-        const ev=new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true,view:gameFrame.contentWindow});
+        const ev=new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true,view:gameFrame.contentWindow});
         gameFrame.contentDocument&&gameFrame.contentDocument.dispatchEvent(ev);
       }catch(ex){}
-    } else {
-      if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
-      if(key==='ArrowDown') { sfxNav(); selectGame(selectedIndex+1); }
-      if(key===' ')         { sfxSelect(); launchGame('1p'); }
+    }else{
+      if(type==='keydown'){
+        if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
+        if(key==='ArrowDown') { sfxNav(); selectGame(selectedIndex+1); }
+        if(key===' ')         { sfxSelect(); launchGame('1p'); }
+      }
     }
   }
+  function tap(key,ms=80){ sendKey('keydown',key); setTimeout(()=>sendKey('keyup',key),ms); }
 
-  // D-pad with hold repeat
-  let held=null;
-  function startHold(key){ fire(key); held=setInterval(()=>fire(key),130); }
-  function stopHold(){ clearInterval(held); held=null; }
+  const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};
+  let joyPointer=null;
+  function setDir(key,on){
+    if(active[key]===on)return;
+    active[key]=on;
+    sendKey(on?'keydown':'keyup',key);
+  }
+  function releaseDirections(){
+    Object.keys(active).forEach(k=>setDir(k,false));
+    joyPointer=null;
+  }
+  function updateJoystick(clientX,clientY){
+    const r=dpad.getBoundingClientRect();
+    const cx=r.left+r.width/2;
+    const cy=r.top+r.height/2; // true joystick center = visual inner circle center
+    const dx=clientX-cx;
+    const dy=clientY-cy;
+    const threshold=r.width*0.13;
+    setDir('ArrowLeft', dx < -threshold);
+    setDir('ArrowRight',dx > threshold);
+    setDir('ArrowUp',   dy < -threshold);
+    setDir('ArrowDown', dy > threshold);
+  }
 
-  ['dUp','dDown','dLeft','dRight'].forEach((id,i)=>{
-    const key=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'][i];
-    const btn=document.getElementById(id);
-    if(!btn)return;
-    btn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); startHold(key); },{passive:false});
-    btn.addEventListener('touchend',  e=>{ e.stopPropagation(); e.preventDefault(); stopHold(); },{passive:false});
-    btn.addEventListener('touchcancel',()=>stopHold());
-  });
+  const dpad=document.getElementById('dpad');
+  if(dpad){
+    dpad.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      joyPointer=e.pointerId;
+      dpad.setPointerCapture&&dpad.setPointerCapture(joyPointer);
+      updateJoystick(e.clientX,e.clientY);
+    });
+    dpad.addEventListener('pointermove',e=>{
+      if(joyPointer!==e.pointerId)return;
+      e.preventDefault();
+      updateJoystick(e.clientX,e.clientY);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+      dpad.addEventListener(ev,e=>{
+        if(joyPointer!==null&&e.pointerId!==joyPointer)return;
+        releaseDirections();
+      });
+    });
+  }
 
-  // Space button — sends Space to game or console
   const spaceBtn=document.getElementById('spaceBtn');
   if(spaceBtn){
-    spaceBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
-    spaceBtn.addEventListener('click',()=>fire(' '));
+    spaceBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); tap(' '); },{passive:false});
+    spaceBtn.addEventListener('click',()=>tap(' '));
   }
 
-  // Fire
   const fireBtn=document.getElementById('aFire');
   if(fireBtn){
-    fireBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
+    fireBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); tap(' '); },{passive:false});
+    fireBtn.addEventListener('click',()=>tap(' '));
   }
 
-  // CONTINUE button — always visible, sends Space
-  const contBtn=document.getElementById('aContinue');
-  if(contBtn){
-    contBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
-    contBtn.addEventListener('click',()=>fire(' '));
-  }
-
-  // ESC / OK
   const escBtn=document.getElementById('aSelect');
   if(escBtn){
     escBtn.addEventListener('touchstart',e=>{
       e.stopPropagation(); e.preventDefault();
+      if(open){ closePanel(); return; }
       if(gamePane.style.display!=='none') exitGame();
       else { sfxSelect(); launchGame('1p'); }
     },{passive:false});
+    escBtn.addEventListener('click',()=>{
+      if(open){ closePanel(); return; }
+      if(gamePane.style.display!=='none') exitGame();
+      else { sfxSelect(); launchGame('1p'); }
+    });
   }
-
-  // Hide panel when hardware keyboard used
-  document.addEventListener('keydown',()=>closePanel(),{once:true});
 }
 setupTouchOverlay();
 
