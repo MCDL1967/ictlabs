@@ -21,6 +21,22 @@ canvas{display:block;}
 .pts span{color:#ff0;}
 #msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(14px,2.5vw,22px);color:#ff0;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:1.8;}
 @keyframes blink{50%{opacity:0}}
+
+#tapBtn{
+  display:none;
+  position:fixed;bottom:30%;left:50%;transform:translateX(-50%);
+  z-index:10;
+  background:rgba(0,0,0,0.85);
+  border:2px solid #ff0;color:#ff0;
+  font-family:'Audiowide',sans-serif;
+  font-size:clamp(11px,2vw,15px);
+  letter-spacing:2px;padding:14px 36px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+@media (pointer:coarse){
+  #tapBtn{ display:block; }
+}
 </style>
 </head>
 <body>
@@ -45,6 +61,7 @@ canvas{display:block;}
     Arrow keys or WASD to move
   </div>
 </div>
+<button id="tapBtn">▶ TAP TO CONTINUE</button>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -189,12 +206,12 @@ function stepPac(){
     pac.wantDx=0;pac.wantDy=0;
   }
   // Move in current direction
-  const nc=pac.col+pac.dx,nr=pac.row+pac.dy;
+  let nc=pac.col+pac.dx, nr=pac.row+pac.dy;
+  // Apply tunnel wrap BEFORE wall check
+  if(nc<0)nc=COLS-1;
+  if(nc>=COLS)nc=0;
   if(!isWall(nc,nr)){
     pac.col=nc;pac.row=nr;
-    // Tunnel wrap
-    if(pac.col<0)pac.col=COLS-1;
-    if(pac.col>=COLS)pac.col=0;
   }
 
   // Eat
@@ -214,27 +231,36 @@ function stepGhost(g){
   // Exit delay — ghost floats upward out of house
   if(g.exitDelay>0){
     g.exitDelay--;
-    // Move pixel position upward toward exit row 7
     const targetPy=7*CELL+CELL/2;
     const targetPx=9*CELL+CELL/2;
-    if(g.py>targetPy) g.py-=1;
-    if(Math.abs(g.px-targetPx)>1) g.px+=(targetPx-g.px)*0.1;
+    if(g.py>targetPy) g.py=Math.max(targetPy,g.py-1.5);
+    if(Math.abs(g.px-targetPx)>1) g.px+=(targetPx-g.px)*0.12;
     if(g.py<=targetPy&&Math.abs(g.px-targetPx)<2){
-      g.px=targetPx;g.py=targetPy;
-      g.col=9;g.row=7;
+      g.px=targetPx;g.py=targetPy;g.col=9;g.row=7;
     }
     return;
   }
 
-  // Sync pixel position to grid
-  const ghostFrames=g.scared?Math.floor(d.ghostFrames*2):g.eaten?Math.floor(d.ghostFrames*0.5):d.ghostFrames;
+  // Smooth pixel interpolation toward target cell every frame
+  const targetPx=g.col*CELL+CELL/2;
+  const targetPy=g.row*CELL+CELL/2;
+  const ghostFrames=g.scared?Math.floor(d.ghostFrames*2):g.eaten?Math.max(2,Math.floor(d.ghostFrames*0.4)):d.ghostFrames;
+  // Interpolation speed: move 1/ghostFrames of distance per frame
+  const lerpSpd=CELL/ghostFrames;
+  if(Math.abs(g.px-targetPx)>0.5) g.px+=Math.sign(targetPx-g.px)*Math.min(lerpSpd,Math.abs(targetPx-g.px));
+  else g.px=targetPx;
+  if(Math.abs(g.py-targetPy)>0.5) g.py+=Math.sign(targetPy-g.py)*Math.min(lerpSpd,Math.abs(targetPy-g.py));
+  else g.py=targetPy;
+
+  // Pick next cell when we've arrived at current target
+  const arrived=Math.abs(g.px-targetPx)<0.5&&Math.abs(g.py-targetPy)<0.5;
+  if(!arrived) return;
+
   g.moveTimer++;
-  if(g.moveTimer<ghostFrames) return;
+  if(g.moveTimer<1) return; // always pick next direction immediately on arrival
   g.moveTimer=0;
 
   const DIRS4=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
-
-  // Valid moves — no U-turn unless forced
   let valid=DIRS4.filter(d=>
     !(d.dx===-g.dx&&d.dy===-g.dy&&(g.dx||g.dy))&&
     !isWall(g.col+d.dx,g.row+d.dy)
@@ -242,12 +268,10 @@ function stepGhost(g){
   if(!valid.length) valid=DIRS4.filter(d=>!isWall(g.col+d.dx,g.row+d.dy));
   if(!valid.length) return;
 
-  // Pick direction
   let pick;
   if(g.scared){
     pick=valid[Math.floor(Math.random()*valid.length)];
   } else {
-    // Chase pac with some randomness
     valid.sort((a,b)=>{
       const da=Math.hypot((g.col+a.dx)-pac.col,(g.row+a.dy)-pac.row);
       const db=Math.hypot((g.col+b.dx)-pac.col,(g.row+b.dy)-pac.row);
@@ -261,9 +285,6 @@ function stepGhost(g){
   // Tunnel wrap
   if(g.col<0)g.col=COLS-1;
   if(g.col>=COLS)g.col=0;
-  // Sync pixel pos
-  g.px=g.col*CELL+CELL/2;
-  g.py=g.row*CELL+CELL/2;
 }
 
 // ── Collision ──────────────────────────────────────────────────
@@ -451,6 +472,15 @@ window.addEventListener('message',function(e){
              key==='ArrowLeft'?'ArrowLeft':key==='ArrowRight'?'ArrowRight':'Space';
   document.dispatchEvent(new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true}));
   setTimeout(()=>document.dispatchEvent(new KeyboardEvent('keyup',{key,code,bubbles:true,cancelable:true})),80);
+
+// Mobile tap-to-continue button
+document.getElementById('tapBtn').addEventListener('touchstart',function(e){
+  e.preventDefault();
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
+},{passive:false});
+document.getElementById('tapBtn').addEventListener('click',function(){
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
+});
 });
 
 const urlMode=new URLSearchParams(window.location.search).get('mode');
