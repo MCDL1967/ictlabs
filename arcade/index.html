@@ -534,6 +534,27 @@ body::after{
     white-space:nowrap;
   }
 }
+
+/* ICTLabs Control Deck Patch v2 */
+:root{--ict-blue:#2f6bff;--ict-cyan:#8ffcff;}
+.site-back-btn{min-width:52px!important;min-height:38px!important;border:1.5px solid var(--ict-blue)!important;color:#dcecff!important;opacity:1!important;font-size:20px!important;box-shadow:0 0 10px rgba(47,107,255,.35)!important}
+.ict-action-deck{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;align-items:stretch!important}
+.ict-action-deck>*{min-width:0!important}
+.ict-action-deck .ict-deck-btn{width:100%!important;min-height:72px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;text-align:center!important;margin:0!important;position:relative!important;transform:none!important;inset:auto!important}
+.ict-controls-toggle{border:1.5px solid var(--ict-blue)!important;box-shadow:0 0 14px rgba(47,107,255,.45),inset 0 0 14px rgba(47,107,255,.15)!important;color:#eaf6ff!important;letter-spacing:2px!important}
+.ict-controls-toggle::before{content:"◎";color:var(--ict-cyan);margin-right:7px;text-shadow:0 0 8px var(--ict-cyan)}
+.ict-controller-overlay{position:fixed!important;left:12px!important;right:12px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;z-index:9999!important;border:2px solid var(--ict-blue)!important;border-radius:26px!important;background:linear-gradient(180deg,rgba(4,12,30,.96),rgba(0,0,0,.94))!important;box-shadow:0 0 24px rgba(47,107,255,.55),inset 0 0 28px rgba(47,107,255,.12)!important;padding:18px 16px 16px!important;display:grid!important;grid-template-columns:1.25fr .9fr .75fr!important;grid-template-areas:"stick continue action";gap:16px!important;align-items:center!important;touch-action:none!important}
+.ict-controller-hidden{display:none!important}
+.ict-joy-zone{grid-area:stick;width:min(38vw,178px);height:min(38vw,178px);border:3px solid #ff2b14;border-radius:999px;position:relative;margin:auto;box-shadow:0 0 12px rgba(255,43,20,.55),inset 0 0 24px rgba(47,107,255,.1);background:radial-gradient(circle at center,rgba(255,43,20,.18),rgba(3,7,18,.92) 38%,rgba(0,0,0,.88))}
+.ict-joy-zone::before{content:"";position:absolute;inset:34%;border:3px solid #ff2b14;border-radius:999px;box-shadow:0 0 10px rgba(255,43,20,.5)}
+.ict-joy-knob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin-left:-23px;margin-top:-23px;border:2px solid var(--ict-blue);border-radius:16px;background:rgba(10,18,38,.95);box-shadow:0 0 14px rgba(143,252,255,.28);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;transition:transform .07s linear;pointer-events:none}
+.ict-joy-hint span{position:absolute;color:#fff;opacity:.9;font-size:20px;text-shadow:0 0 8px rgba(143,252,255,.6);pointer-events:none}
+.ict-joy-hint .up{left:50%;top:9px;transform:translateX(-50%)}.ict-joy-hint .down{left:50%;bottom:9px;transform:translateX(-50%)}.ict-joy-hint .left{left:12px;top:50%;transform:translateY(-50%)}.ict-joy-hint .right{right:12px;top:50%;transform:translateY(-50%)}
+.ict-continue-wrap{grid-area:continue;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0}.ict-continue-btn{width:100%;max-width:210px;min-height:72px;border:3px solid #fff600!important;border-radius:16px!important;background:rgba(255,255,0,.08)!important;color:#fff600!important;font-family:'Audiowide',sans-serif!important;font-size:clamp(13px,3vw,18px)!important;letter-spacing:2px!important;text-align:center;box-shadow:0 0 14px rgba(255,246,0,.65),inset 0 0 18px rgba(255,246,0,.12)!important}.ict-continue-label{margin-top:8px;color:#ff331f;font-size:22px;text-shadow:0 0 8px #ff331f}
+.ict-action-stack{grid-area:action;display:grid;gap:12px;justify-items:center}.ict-fire-btn,.ict-esc-btn,.ict-close-btn{font-family:'Audiowide',sans-serif!important;border:2px solid var(--ict-blue)!important;background:rgba(0,0,0,.62)!important;color:#fff!important;box-shadow:0 0 12px rgba(47,107,255,.42)!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}.ict-fire-btn{width:78px!important;height:78px!important;border-radius:999px!important;font-size:29px!important}.ict-fire-btn::before{content:"✸";color:#ff3b21;text-shadow:0 0 12px #ff3b21,0 0 20px #fff600;line-height:1}.ict-fire-btn>*{display:none!important}.ict-esc-btn{width:86px!important;height:64px!important;border-radius:999px!important;font-size:17px!important;letter-spacing:2px!important}.ict-close-btn{width:110px!important;min-height:48px!important;border-radius:22px!important;font-size:13px!important;letter-spacing:2px!important}
+@media(max-width:760px){body{padding-bottom:max(10px,env(safe-area-inset-bottom))!important}.bottom-panel,.controls-panel,.button-panel,#controls,#buttonPanel{margin-bottom:max(8px,env(safe-area-inset-bottom))!important}.ict-action-deck{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}.ict-action-deck .ict-deck-btn{min-height:68px!important;font-size:clamp(10px,2.6vw,14px)!important;padding:8px 4px!important}}
+@media(max-width:430px){.ict-controller-overlay{left:8px!important;right:8px!important;padding:14px 10px 12px!important;grid-template-columns:1.1fr .9fr .68fr!important;gap:10px!important}.ict-joy-zone{width:158px;height:158px}.ict-fire-btn{width:66px!important;height:66px!important}.ict-esc-btn{width:74px!important;height:58px!important}.ict-close-btn{width:90px!important;min-height:42px!important}}
+
 </style>
 </head>
 <body>
@@ -972,5 +993,53 @@ instrModal.addEventListener('click',e=>{ if(e.target===instrModal) instrModal.st
 // ── Boot ──────────────────────────────────────────────────
 loadGames();
 </script>
+
+<script>
+(function(){
+ const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
+ ready(function(){
+  const norm=el=>(el&&(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase())||'';
+  const all=()=>Array.from(document.querySelectorAll('button,a,[role="button"],.btn,.button,div,span')).filter(el=>norm(el));
+  const find=parts=>all().find(el=>parts.every(p=>norm(el).includes(p)));
+  const how=find(['HOW','PLAY']), skin=find(['SKIN']), save=find(['SAVE']);
+  let controls=find(['CONTROLS']);
+  if(how&&skin&&save){
+   const parent=how.parentElement;
+   parent.classList.add('ict-action-deck');
+   [how,skin,save].forEach(b=>b.classList.add('ict-deck-btn'));
+   if(!controls){controls=document.createElement('button');controls.type='button';controls.textContent='CONTROLS';controls.className='ict-deck-btn ict-controls-toggle';}
+   else{controls.classList.add('ict-deck-btn','ict-controls-toggle');}
+   [how,skin,save,controls].forEach(el=>parent.appendChild(el));
+  }
+  Array.from(document.querySelectorAll('a,button')).forEach(el=>{
+   const t=norm(el), aria=(el.getAttribute('aria-label')||'').toUpperCase();
+   if(t==='←'||t==='↵'||aria.includes('BACK')||aria.includes('HOME')) el.classList.add('site-back-btn');
+  });
+  function send(type,code,key){const e=new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true});document.dispatchEvent(e);const f=document.querySelector('iframe');try{if(f&&f.contentWindow)f.contentWindow.document.dispatchEvent(e)}catch(x){}}
+  function tap(code,key,ms=70){send('keydown',code,key);setTimeout(()=>send('keyup',code,key),ms)}
+  let overlay=document.querySelector('.ict-controller-overlay');
+  if(!overlay){
+   overlay=document.createElement('div');
+   overlay.className='ict-controller-overlay ict-controller-hidden';
+   overlay.innerHTML='<div class="ict-joy-zone" aria-label="Directional pressure pad"><div class="ict-joy-hint"><span class="up">▲</span><span class="down">▼</span><span class="left">◀</span><span class="right">▶</span></div><div class="ict-joy-knob">●</div></div><div class="ict-continue-wrap"><button class="ict-continue-btn" type="button">CONTINUE</button><div class="ict-continue-label">↓</div></div><div class="ict-action-stack"><button class="ict-fire-btn" type="button" aria-label="Fire"></button><button class="ict-esc-btn" type="button">ESC</button><button class="ict-close-btn" type="button">CLOSE</button></div>';
+   document.body.appendChild(overlay);
+  }
+  Array.from(document.querySelectorAll('[class*="controller"],[id*="controller"],[class*="overlay"],[id*="overlay"]')).forEach(el=>{if(el!==overlay&&!overlay.contains(el)&&norm(el).includes('SPACE')&&norm(el).includes('ESC'))el.style.display='none'});
+  const show=()=>overlay.classList.remove('ict-controller-hidden'), hide=()=>{overlay.classList.add('ict-controller-hidden');release()};
+  if(controls)controls.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();show()});
+  overlay.querySelector('.ict-close-btn')?.addEventListener('click',hide);
+  overlay.querySelector('.ict-continue-btn')?.addEventListener('click',()=>tap('Space',' '));
+  overlay.querySelector('.ict-fire-btn')?.addEventListener('click',()=>tap('KeyX','x'));
+  overlay.querySelector('.ict-esc-btn')?.addEventListener('click',()=>tap('Escape','Escape'));
+  const zone=overlay.querySelector('.ict-joy-zone'), knob=overlay.querySelector('.ict-joy-knob');
+  const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};let pid=null;
+  function setDir(code,on){if(active[code]===on)return;active[code]=on;send(on?'keydown':'keyup',code,code)}
+  function release(){Object.keys(active).forEach(k=>setDir(k,false));if(knob)knob.style.transform='translate(0,0)';pid=null}
+  function update(x,y){const r=zone.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=x-cx,dy=y-cy;const max=r.width*.36,mag=Math.hypot(dx,dy);if(mag>max){dx=dx/mag*max;dy=dy/mag*max}if(knob)knob.style.transform=`translate(${dx}px,${dy}px)`;const th=r.width*.115;setDir('ArrowLeft',dx<-th);setDir('ArrowRight',dx>th);setDir('ArrowUp',dy<-th);setDir('ArrowDown',dy>th)}
+  if(zone){zone.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;zone.setPointerCapture?.(pid);update(e.clientX,e.clientY)});zone.addEventListener('pointermove',e=>{if(pid!==e.pointerId)return;e.preventDefault();update(e.clientX,e.clientY)});['pointerup','pointercancel','pointerleave'].forEach(ev=>zone.addEventListener(ev,e=>{if(pid!==null&&e.pointerId!==pid)return;release()}))}
+ });
+})();
+</script>
+
 </body>
 </html>
