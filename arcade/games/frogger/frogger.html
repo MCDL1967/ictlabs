@@ -18,19 +18,6 @@ canvas{display:block;image-rendering:pixelated;}
 #msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(12px,2.5vw,20px);color:#ff0;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:1.8;}
 @keyframes blink{50%{opacity:0}}
 
-#tapBtn{
-  display:none;
-  position:fixed;bottom:30%;left:50%;transform:translateX(-50%);
-  z-index:10;
-  background:rgba(0,0,0,0.85);
-  border:2px solid #ff0;color:#ff0;
-  font-family:'Audiowide',sans-serif;
-  font-size:clamp(11px,2vw,15px);
-  letter-spacing:2px;padding:14px 36px;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-}
-/* tapBtn shown via JS touch detection */
 </style>
 </head>
 <body>
@@ -48,8 +35,6 @@ canvas{display:block;image-rendering:pixelated;}
   <p class="sub">Get all frogs safely home<br>↑↓←→ or WASD to hop<br>Avoid cars · Ride logs & turtles · Don't drown!</p>
   <button class="start-btn" id="startBtn">START GAME</button>
 </div>
-<button id="tapBtn">▶ TAP TO CONTINUE</button>
-
 <script>
 const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay');
@@ -371,17 +356,6 @@ window.addEventListener("message",function(e){
 });
 gstate='idle';updateUI();loop();
 
-// Mobile tap-to-continue button — show on touch devices
-if('ontouchstart' in window || navigator.maxTouchPoints > 0){
-  document.getElementById('tapBtn').style.display='block';
-}
-document.getElementById('tapBtn').addEventListener('touchstart',function(e){
-  e.preventDefault();
-  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
-},{passive:false});
-document.getElementById('tapBtn').addEventListener('click',function(){
-  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
-});
 const urlMode=new URLSearchParams(window.location.search).get('mode');
 if(urlMode)startGame();
 </script>

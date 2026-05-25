@@ -54,19 +54,6 @@ canvas { display:block; image-rendering:pixelated; }
 }
 @keyframes blink { 50%{opacity:0} }
 
-#tapBtn{
-  display:none;
-  position:fixed;bottom:30%;left:50%;transform:translateX(-50%);
-  z-index:10;
-  background:rgba(0,0,0,0.85);
-  border:2px solid #ff0;color:#ff0;
-  font-family:'Audiowide',sans-serif;
-  font-size:clamp(11px,2vw,15px);
-  letter-spacing:2px;padding:14px 36px;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-}
-/* tapBtn shown via JS touch detection */
 </style>
 </head>
 <body>
@@ -89,8 +76,6 @@ canvas { display:block; image-rendering:pixelated; }
     First to <span>7</span> wins the set &nbsp;·&nbsp; Best of <span>3</span> sets
   </p>
 </div>
-<button id="tapBtn">▶ TAP TO CONTINUE</button>
-
 <script>
 // ═══════════════════════════════════════════════════════
 //  PONG — 1P vs AI / 2P local · ICTLabs Arcade

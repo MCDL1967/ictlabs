@@ -22,19 +22,6 @@ canvas{display:block;}
 #msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(14px,2.5vw,22px);color:#ff0;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:1.8;}
 @keyframes blink{50%{opacity:0}}
 
-#tapBtn{
-  display:none;
-  position:fixed;bottom:30%;left:50%;transform:translateX(-50%);
-  z-index:10;
-  background:rgba(0,0,0,0.85);
-  border:2px solid #ff0;color:#ff0;
-  font-family:'Audiowide',sans-serif;
-  font-size:clamp(11px,2vw,15px);
-  letter-spacing:2px;padding:14px 36px;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-}
-/* tapBtn shown via JS touch detection */
 </style>
 </head>
 <body>
@@ -59,8 +46,6 @@ canvas{display:block;}
     Arrow keys or WASD to move
   </div>
 </div>
-<button id="tapBtn">▶ TAP TO CONTINUE</button>
-
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  PAC-MAN — Grid-based rewrite · ICTLabs Arcade
@@ -278,10 +263,13 @@ function stepPac(){
   }
   // Move in current direction
   let nc=pac.col+pac.dx, nr=pac.row+pac.dy;
+  const wrapped=(nc<0||nc>=COLS);
   if(nc<0)nc=COLS-1;
   if(nc>=COLS)nc=0;
   if(!isWall(nc,nr)){
     pac.col=nc;pac.row=nr;
+    // Teleport px instantly on tunnel wrap — no cross-screen slide
+    if(wrapped){ pac.px=pac.col*CELL+CELL/2; pac.py=pac.row*CELL+CELL/2; }
   }
 
   // Eat
@@ -548,17 +536,6 @@ window.addEventListener('message',function(e){
   document.dispatchEvent(new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true}));
   setTimeout(()=>document.dispatchEvent(new KeyboardEvent('keyup',{key,code,bubbles:true,cancelable:true})),80);
 
-// Mobile tap-to-continue button — show on touch devices
-if('ontouchstart' in window || navigator.maxTouchPoints > 0){
-  document.getElementById('tapBtn').style.display='block';
-}
-document.getElementById('tapBtn').addEventListener('touchstart',function(e){
-  e.preventDefault();
-  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
-},{passive:false});
-document.getElementById('tapBtn').addEventListener('click',function(){
-  document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
-});
 });
 
 const urlMode=new URLSearchParams(window.location.search).get('mode');
