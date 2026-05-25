@@ -40,9 +40,7 @@ body{background:#000;display:flex;flex-direction:column;align-items:center;justi
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
 }
-@media (pointer:coarse){
-  #tapBtn{ display:block; }
-}
+/* tapBtn shown via JS touch detection */
 </style>
 </head>
 <body>
@@ -656,7 +654,10 @@ window.addEventListener("message",function(e){
 updateUI();
 loop();
 
-// Mobile tap-to-continue button
+// Mobile tap-to-continue button — show on touch devices
+if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+  document.getElementById('tapBtn').style.display='block';
+}
 document.getElementById('tapBtn').addEventListener('touchstart',function(e){
   e.preventDefault();
   document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));

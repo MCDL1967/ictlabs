@@ -344,6 +344,19 @@ body::after{
 }
 .dpad-btn:active{background:var(--accent);color:#000;}
 
+/* Space bar button — center of panel */
+#spaceBtn{
+  background:rgba(30,30,30,0.9);
+  border:2px solid #ff0;color:#ff0;
+  font-family:var(--font);font-size:11px;letter-spacing:2px;
+  padding:10px 20px;border-radius:8px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;user-select:none;
+  flex-shrink:0;
+}
+#spaceBtn:active{background:#ff0;color:#000;}
+
 /* Action buttons */
 #actionBtns{display:flex;flex-direction:column;gap:10px;align-items:center;}
 .action-btn{
@@ -358,7 +371,11 @@ body::after{
   font-family:var(--font);font-size:12px;letter-spacing:1px;
 }
 .action-btn.fire{font-size:22px;}
-.action-btn:active{background:var(--accent);color:#000;}
+.action-btn.start-btn-touch{
+  width:58px;height:36px;border-radius:8px;
+  font-size:9px;letter-spacing:1px;
+  border-color:#0f0;color:#0f0;
+}
 
 /* Only show on touch devices */
 @media (pointer:coarse){
@@ -588,6 +605,7 @@ body::after{
     </div>
     <button class="dpad-btn" id="dDown">▼</button>
   </div>
+  <button id="spaceBtn">SPACE</button>
   <div id="actionBtns">
     <button class="action-btn fire" id="aFire">🔥</button>
     <button class="action-btn" id="aSelect">ESC</button>
@@ -811,10 +829,24 @@ function setupTouchOverlay(){
     btn.addEventListener('touchcancel',()=>stopHold());
   });
 
+  // Space button — sends Space to game or console
+  const spaceBtn=document.getElementById('spaceBtn');
+  if(spaceBtn){
+    spaceBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
+    spaceBtn.addEventListener('click',()=>fire(' '));
+  }
+
   // Fire
   const fireBtn=document.getElementById('aFire');
   if(fireBtn){
     fireBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
+  }
+
+  // CONTINUE button — always visible, sends Space
+  const contBtn=document.getElementById('aContinue');
+  if(contBtn){
+    contBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); fire(' '); },{passive:false});
+    contBtn.addEventListener('click',()=>fire(' '));
   }
 
   // ESC / OK

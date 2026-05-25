@@ -34,9 +34,7 @@ canvas{display:block;}
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
 }
-@media (pointer:coarse){
-  #tapBtn{ display:block; }
-}
+/* tapBtn shown via JS touch detection */
 </style>
 </head>
 <body>
@@ -77,12 +75,69 @@ const msgEl=document.getElementById('msg');
 
 // ── Audio ─────────────────────────────────────────────────────
 const AC=new(window.AudioContext||window.webkitAudioContext)();
+// ── Audio Suite ────────────────────────────────────────────────
 function tone(f,d,v=0.15,t='square'){try{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+0.01);}catch(e){}}
-function sfxDot(){tone(660,0.03,0.07);}
-function sfxPower(){[220,330,440,550].forEach((f,i)=>setTimeout(()=>tone(f,0.07,0.18),i*45));}
-function sfxEatGhost(){[880,660,440].forEach((f,i)=>setTimeout(()=>tone(f,0.09,0.22,'sawtooth'),i*70));}
-function sfxDie(){[440,330,220,165,110].forEach((f,i)=>setTimeout(()=>tone(f,0.13,0.28,'sawtooth'),i*90));}
-function sfxWin(){[523,659,784,1047,784,659,523].forEach((f,i)=>setTimeout(()=>tone(f,0.11,0.22),i*80));}
+function toneSlide(f1,f2,d,v=0.15,t='square'){try{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t;o.frequency.setValueAtTime(f1,AC.currentTime);o.frequency.exponentialRampToValueAtTime(f2,AC.currentTime+d);g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+0.01);}catch(e){}}
+
+// Waka-waka — alternates between two pitches each dot eaten
+let wakaPhase=0;
+function sfxDot(){
+  wakaPhase=1-wakaPhase;
+  toneSlide(wakaPhase?440:330, wakaPhase?330:220, 0.08, 0.12, 'square');
+}
+
+// Power pellet — dramatic rising sweep
+function sfxPower(){
+  toneSlide(200,800,0.18,0.25,'sawtooth');
+  setTimeout(()=>toneSlide(800,400,0.12,0.15,'square'),180);
+}
+
+// Frightened pulse — looping low drone while ghosts are blue
+let frightenedInterval=null;
+function startFrightenedSound(){
+  stopFrightenedSound();
+  frightenedInterval=setInterval(()=>{
+    if(powerTimer<=0){stopFrightenedSound();return;}
+    // Faster pulse as time runs out
+    const urgency=powerTimer<80?0.08:0.18;
+    tone(powerTimer<80?180:140, urgency, 0.08, 'square');
+  },powerTimer<80?120:200);
+}
+function stopFrightenedSound(){
+  clearInterval(frightenedInterval);frightenedInterval=null;
+}
+
+// Eat ghost — ascending "gulp"
+function sfxEatGhost(){
+  [300,500,700,1000].forEach((f,i)=>setTimeout(()=>tone(f,0.06,0.2,'square'),i*40));
+}
+
+// Pac-Man death — classic descending chromatic
+function sfxDie(){
+  const notes=[494,466,440,415,392,370,349,330,311,294,277,262];
+  notes.forEach((f,i)=>setTimeout(()=>tone(f,0.1,0.22,'sawtooth'),i*70));
+}
+
+// Level clear fanfare
+function sfxWin(){
+  const melody=[523,659,784,1047,932,784,1047];
+  melody.forEach((f,i)=>setTimeout(()=>tone(f,0.12,0.22,'square'),i*90));
+}
+
+// Intro jingle — plays once when game starts
+function sfxIntro(){
+  const melody=[
+    [330,0.1],[392,0.1],[494,0.1],[523,0.15],[494,0.1],[523,0.3],
+    [330,0.1],[392,0.1],[494,0.1],[587,0.15],[523,0.1],[587,0.3],
+    [392,0.1],[494,0.1],[587,0.1],[659,0.15],[784,0.4]
+  ];
+  let t=0;
+  melody.forEach(([f,d])=>{
+    setTimeout(()=>tone(f,d*0.9,0.2,'square'),t*1000);
+    t+=d+0.02;
+  });
+}
+
 document.addEventListener('keydown',()=>{if(AC.state==='suspended')AC.resume();});
 
 // ── Map ────────────────────────────────────────────────────────
@@ -191,13 +246,29 @@ function startGame(diff){
   overlay.style.display='none';hideMsg();
   score=0;lives=3;level=1;
   initLevel();updateUI();gstate='playing';
+  sfxIntro();
 }
 
 // ── Movement ───────────────────────────────────────────────────
 function stepPac(){
   const d=getDiff();
+
+  // Smooth interpolation — pac glides toward target cell
+  const targetPx=pac.col*CELL+CELL/2;
+  const targetPy=pac.row*CELL+CELL/2;
+  const lerpSpd=CELL/d.pacFrames;
+  if(pac.px===undefined){ pac.px=targetPx; pac.py=targetPy; }
+  if(Math.abs(pac.px-targetPx)>0.5) pac.px+=Math.sign(targetPx-pac.px)*Math.min(lerpSpd,Math.abs(targetPx-pac.px));
+  else pac.px=targetPx;
+  if(Math.abs(pac.py-targetPy)>0.5) pac.py+=Math.sign(targetPy-pac.py)*Math.min(lerpSpd,Math.abs(targetPy-pac.py));
+  else pac.py=targetPy;
+
+  // Only pick next cell when arrived at current target
+  const arrived=Math.abs(pac.px-targetPx)<0.5&&Math.abs(pac.py-targetPy)<0.5;
+  if(!arrived) return;
+
   pac.moveTimer++;
-  if(pac.moveTimer<d.pacFrames) return;
+  if(pac.moveTimer<1) return;
   pac.moveTimer=0;
 
   // Try queued direction first
@@ -207,7 +278,6 @@ function stepPac(){
   }
   // Move in current direction
   let nc=pac.col+pac.dx, nr=pac.row+pac.dy;
-  // Apply tunnel wrap BEFORE wall check
   if(nc<0)nc=COLS-1;
   if(nc>=COLS)nc=0;
   if(!isWall(nc,nr)){
@@ -221,6 +291,7 @@ function stepPac(){
     map[pac.row][pac.col]=0;score+=50;sfxPower();updateUI();
     powerTimer=300;ghostCombo=0;
     ghosts.forEach(g=>{if(!g.eaten)g.scared=true;});
+    startFrightenedSound();
   }
   if(!map.flat().some(c=>c===2||c===3)) levelWin();
 }
@@ -297,8 +368,7 @@ function checkCollisions(){
         g.scared=false;g.eaten=true;
         ghostCombo++;
         score+=200*Math.pow(2,ghostCombo-1);
-        sfxEatGhost();updateUI();
-        // Reset ghost after 2s
+        sfxEatGhost();updateUI();        // Reset ghost after 2s
         setTimeout(()=>{
           g.eaten=false;g.col=9;g.row=9;
           g.px=9*CELL+CELL/2;g.py=9*CELL+CELL/2;
@@ -306,6 +376,7 @@ function checkCollisions(){
         },2000);
       } else {
         pac.dead=true;pac.deadTimer=90;sfxDie();
+        stopFrightenedSound();
         lives--;updateUI();
       }
     }
@@ -346,7 +417,10 @@ function gameOver(){
 function updatePower(){
   if(powerTimer>0){
     powerTimer--;
-    if(powerTimer===0) ghosts.forEach(g=>{g.scared=false;});
+    if(powerTimer===0){
+      ghosts.forEach(g=>{g.scared=false;});
+      stopFrightenedSound();
+    }
   }
 }
 
@@ -375,9 +449,10 @@ function draw(){
     });
   });
 
-  // Pac-Man — pixel pos = col*CELL+CELL/2 always centered
+  // Pac-Man — smooth pixel position
   if(!pac.dead||pac.deadTimer>30){
-    const px=pac.col*CELL+CELL/2,py=pac.row*CELL+CELL/2;
+    const px=pac.px||pac.col*CELL+CELL/2;
+    const py=pac.py||pac.row*CELL+CELL/2;
     const angle=pac.mouthAngle*Math.PI;
     let rot=0;
     if(pac.dx>0)rot=0;else if(pac.dx<0)rot=Math.PI;
@@ -390,8 +465,8 @@ function draw(){
       ctx.closePath();ctx.fill();ctx.shadowBlur=0;
     }
   } else if(pac.dead){
-    // Death shrink
-    const px=pac.col*CELL+CELL/2,py=pac.row*CELL+CELL/2;
+    const px=pac.px||pac.col*CELL+CELL/2;
+    const py=pac.py||pac.row*CELL+CELL/2;
     const prog=1-(pac.deadTimer/90);
     ctx.fillStyle='#ff0';
     ctx.beginPath();ctx.moveTo(px,py);
@@ -473,7 +548,10 @@ window.addEventListener('message',function(e){
   document.dispatchEvent(new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true}));
   setTimeout(()=>document.dispatchEvent(new KeyboardEvent('keyup',{key,code,bubbles:true,cancelable:true})),80);
 
-// Mobile tap-to-continue button
+// Mobile tap-to-continue button — show on touch devices
+if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+  document.getElementById('tapBtn').style.display='block';
+}
 document.getElementById('tapBtn').addEventListener('touchstart',function(e){
   e.preventDefault();
   document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true,cancelable:true}));
