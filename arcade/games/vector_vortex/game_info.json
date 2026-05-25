@@ -1,0 +1,9 @@
+{
+  "name": "VECTOR VORTEX",
+  "image_desc": "A neon vector space-combat cartridge inspired by early arcade asteroid shooters, rebuilt as a self-contained ICTLabs console game.",
+  "video_src": "https://www.youtube.com/embed/WYSupJ5r2zo?autoplay=1&mute=1&controls=0&loop=1&playlist=WYSupJ5r2zo",
+  "genre": "Arcade",
+  "release_year": 1981,
+  "play_url": "games/vector_vortex/vector_vortex.html",
+  "multiplayer": false
+}
