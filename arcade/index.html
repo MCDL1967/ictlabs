@@ -274,36 +274,37 @@ body::after{
 /* Toggle tab */
 #touchToggle{
   display:none;
-  position:fixed;z-index:100;
-  background:var(--bg-dark);
+  position:fixed;z-index:120;
+  background:rgba(5,8,15,0.94);
   border:1px solid var(--border);
   color:var(--text);
-  font-family:var(--font);font-size:10px;letter-spacing:1px;
+  font-family:var(--font);font-size:10px;letter-spacing:1.5px;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;user-select:none;
-  /* Portrait: bottom-right corner tab */
-  bottom:0;right:16px;
-  padding:6px 12px 4px;
-  border-bottom:none;
-  border-radius:6px 6px 0 0;
+  bottom:max(12px, env(safe-area-inset-bottom, 12px));right:14px;
+  padding:10px 14px;
+  border-radius:999px;
+  box-shadow:0 0 18px var(--glow);
+  backdrop-filter:blur(8px);
 }
-#touchToggle:active{background:var(--accent);}
+#touchToggle:active{background:var(--accent);color:#fff;transform:scale(0.97);}
 
 /* Panel base */
 #touchPanel{
-  position:fixed;z-index:99;
-  background:rgba(0,0,0,0.95);
+  position:fixed;z-index:110;
+  background:linear-gradient(180deg,rgba(5,8,15,0.94),rgba(0,0,0,0.98));
   border:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
-  gap:20px;padding:12px 20px;
-  transition:transform 0.25s ease;
-  /* Portrait: slides up from bottom */
-  left:0;right:0;bottom:0;
-  transform:translateY(100%);
+  gap:18px;padding:14px 18px max(18px, env(safe-area-inset-bottom, 18px));
+  transition:transform 0.22s ease, box-shadow 0.22s ease;
+  left:10px;right:10px;bottom:10px;
+  transform:translateY(calc(100% + 24px));
   flex-direction:row;
   border-top:2px solid var(--accent);
-  border-left:none;border-right:none;border-bottom:none;
+  border-radius:18px;
+  box-shadow:0 0 28px rgba(0,0,0,0.8),0 0 26px var(--glow);
+  backdrop-filter:blur(10px);
 }
 #touchPanel.open{ transform:translateY(0); }
 
@@ -311,19 +312,18 @@ body::after{
 @media (orientation:landscape){
   #touchToggle{
     bottom:50%;transform:translateY(50%);
-    right:0;
+    right:10px;
     writing-mode:vertical-rl;
-    border-radius:6px 0 0 6px;
-    border-right:none;border-bottom:1px solid var(--border);
-    padding:10px 5px;
+    border-radius:999px;
+    padding:12px 7px;
   }
   #touchPanel{
-    top:0;bottom:0;right:0;left:auto;
-    width:160px;
-    transform:translateX(100%);
+    top:10px;bottom:10px;right:10px;left:auto;
+    width:176px;
+    transform:translateX(calc(100% + 24px));
     flex-direction:column;
     border-left:2px solid var(--accent);
-    border-top:none;border-right:none;
+    border-top:1px solid var(--border);
   }
   #touchPanel.open{ transform:translateX(0); }
 }
@@ -333,8 +333,8 @@ body::after{
 .dpad-row{display:flex;align-items:center;gap:2px;}
 .dpad-center{width:42px;height:42px;}
 .dpad-btn{
-  width:46px;height:46px;
-  background:rgba(30,30,30,0.9);
+  width:50px;height:50px;
+  background:rgba(18,22,32,0.92);
   border:1px solid var(--border);
   color:var(--text);font-size:20px;
   display:flex;align-items:center;justify-content:center;
@@ -360,8 +360,8 @@ body::after{
 /* Action buttons */
 #actionBtns{display:flex;flex-direction:column;gap:10px;align-items:center;}
 .action-btn{
-  width:58px;height:58px;border-radius:50%;
-  background:rgba(30,30,30,0.9);
+  width:62px;height:62px;border-radius:50%;
+  background:rgba(18,22,32,0.92);
   border:2px solid var(--border);
   color:var(--text);
   display:flex;align-items:center;justify-content:center;
@@ -388,7 +388,10 @@ body::after{
   display:block;font-size:0.7em;opacity:0.45;
   letter-spacing:0;margin-top:1px;
 }
-   Stack: header / right-pane / game-tabs / controls
+
+/* ═══════════════════════════════════════════════
+   MOBILE — PORTRAIT
+   Stack: header / game tabs / right-pane / controls
 ═══════════════════════════════════════════════ */
 @media (max-width:767px) and (orientation:portrait){
 
@@ -458,7 +461,7 @@ body::after{
   /* Controls — two compact rows, always visible */
   .controls{
     margin:0 6px;
-    margin-bottom:max(6px, env(safe-area-inset-bottom, 6px));
+    margin-bottom:max(18px, env(safe-area-inset-bottom, 18px));
     padding:6px 8px;
     flex-direction:column;
     gap:5px;
@@ -511,7 +514,7 @@ body::after{
 
   /* Controls — single scrollable row */
   .controls{
-    margin:0 5px 5px;
+    margin:0 5px max(12px, env(safe-area-inset-bottom, 12px));
     padding:5px 8px;
     flex-direction:row;
     flex-wrap:nowrap;
@@ -590,7 +593,7 @@ body::after{
 </div>
 
 <!-- TOUCH TOGGLE TAB -->
-<button id="touchToggle">🕹 CTRL</button>
+<button id="touchToggle">CONTROLS</button>
 
 <!-- TOUCH PANEL
      Portrait:  slides up from bottom — d-pad LEFT, actions RIGHT
@@ -692,7 +695,11 @@ function renderList(){
     const el=document.createElement('div');
     el.className='game-item';
     el.textContent=g.name||`Game ${i+1}`;
-    el.addEventListener('click',()=>{ sfxSelect(); selectGame(i); });
+    el.addEventListener('click',()=>{
+      sfxSelect();
+      if(i===selectedIndex){ launchGame('1p'); }
+      else { selectGame(i); }
+    });
     listPane.appendChild(el);
   });
 }
@@ -750,12 +757,15 @@ function launchGame(mode){
   gameFrame.src=url;
   gameBarTitle.textContent=game.name+(mode==='2p'?' · 2P':'');
   gamePane.style.display='flex';
+  document.body.classList.add('is-playing');
+  window.closeTouchPanel && window.closeTouchPanel();
   // Focus the iframe so keyboard events go straight to the game
   setTimeout(()=>gameFrame.focus(),200);
 }
 
 function exitGame(){
   gamePane.style.display='none';
+  document.body.classList.remove('is-playing');
   gameFrame.src='about:blank';
   showDetails(GAMES[selectedIndex]);
 }
@@ -790,8 +800,9 @@ function setupTouchOverlay(){
   if(!panel||!toggle)return;
 
   let open=false;
-  function openPanel(){ open=true;  panel.classList.add('open');    toggle.textContent='✕'; }
-  function closePanel(){ open=false; panel.classList.remove('open'); toggle.textContent='🕹 CTRL'; }
+  function openPanel(){ open=true;  panel.classList.add('open');    toggle.textContent='CLOSE'; }
+  function closePanel(){ open=false; panel.classList.remove('open'); toggle.textContent='CONTROLS'; }
+  window.closeTouchPanel=closePanel;
 
   toggle.addEventListener('touchstart',e=>{ e.preventDefault(); open?closePanel():openPanel(); },{passive:false});
   toggle.addEventListener('click',()=>{ open?closePanel():openPanel(); });
