@@ -1,0 +1,9 @@
+{
+  "name": "TETRIS",
+  "image_desc": "A neon arcade block-stacking challenge with rising speed, line clears, hold piece, ghost drop, and synthesized chiptune sound.",
+  "video_src": "https://www.youtube.com/embed/QQ5U-rN7Veg?autoplay=1&mute=1&controls=0&loop=1&playlist=QQ5U-rN7Veg",
+  "genre": "Puzzle",
+  "release_year": 1984,
+  "play_url": "games/tetris/tetris.html",
+  "multiplayer": false
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TETRIS — ICTLabs Retro Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Audiowide',sans-serif;color:#dff}body{display:flex;flex-direction:column;align-items:center;justify-content:center}#ui{height:40px;display:flex;align-items:center;justify-content:center;gap:34px;color:#74ecff;font-size:11px;letter-spacing:2px;text-shadow:0 0 8px #00d9ff}#ui b{color:#fff}#wrap{position:relative;display:flex;align-items:center;justify-content:center}canvas{display:block;image-rendering:pixelated;background:#02040a;border:2px solid #1c6cff;box-shadow:0 0 20px rgba(40,120,255,.55),inset 0 0 22px rgba(40,120,255,.18)}#overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:10;color:#fff}.hidden{display:none!important}#overlay h1{font-size:clamp(38px,7vw,68px);letter-spacing:8px;color:#fff200;text-shadow:0 0 20px #fff200,0 0 44px #ff7b00;margin-bottom:16px}#overlay .sub{color:#7ff4ff;font-size:13px;letter-spacing:2px;line-height:1.8;margin-bottom:24px;max-width:720px}.btn{background:transparent;border:2px solid #fff200;color:#fff200;font-family:'Audiowide',sans-serif;font-size:13px;letter-spacing:2px;padding:13px 44px;cursor:pointer;box-shadow:0 0 14px rgba(255,242,0,.35)}.btn:hover{background:#fff200;color:#000}.blink{animation:blink 1s steps(2,end) infinite}@keyframes blink{50%{opacity:.25}}
+</style>
+</head>
+<body>
+<div id="ui">
+  <span>SCORE: <b id="score">0</b></span>
+  <span>HI: <b id="hi">0</b></span>
+  <span>LEVEL: <b id="level">1</b></span>
+  <span>LINES: <b id="lines">0</b></span>
+</div>
+<div id="wrap"><canvas id="c"></canvas></div>
+<div id="overlay">
+  <h1 id="ovTitle">TETRIS</h1>
+  <div id="ovText" class="sub">ARROWS / WASD TO MOVE · UP/W ROTATE · SPACE HARD DROP<br>C OR SHIFT HOLD · P PAUSE · R RESTART</div>
+  <button class="btn" id="startBtn">START GAME</button>
+</div>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const W=640,H=480,COLS=10,ROWS=20,BLOCK=20,BOARD_X=220,BOARD_Y=40;
+canvas.width=W;canvas.height=H;
+function resize(){const s=Math.min(window.innerWidth/W,(window.innerHeight-46)/H);canvas.style.width=(W*s)+'px';canvas.style.height=(H*s)+'px'}resize();addEventListener('resize',resize);
+const $=id=>document.getElementById(id);const scoreEl=$('score'),hiEl=$('hi'),levelEl=$('level'),linesEl=$('lines'),overlay=$('overlay'),ovTitle=$('ovTitle'),ovText=$('ovText');
+const COLORS={I:'#00f0ff',J:'#1e5bff',L:'#ff9c00',O:'#fff200',S:'#00ff66',T:'#bd4dff',Z:'#ff3158'};
+const SHAPES={I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],J:[[1,0,0],[1,1,1],[0,0,0]],L:[[0,0,1],[1,1,1],[0,0,0]],O:[[1,1],[1,1]],S:[[0,1,1],[1,1,0],[0,0,0]],T:[[0,1,0],[1,1,1],[0,0,0]],Z:[[1,1,0],[0,1,1],[0,0,0]]};
+let board,piece,next,hold,canHold,bag,score,hi=+localStorage.getItem('ict_tetris_hi')||0,level,lines,dropMs,last,acc,state,combo,musicTimer;
+hiEl.textContent=hi;
+const keys={};
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+document.addEventListener('keydown',()=>{if(AC.state==='suspended')AC.resume()},{once:false});
+function tone(freq,dur=.08,type='square',gain=.08,slide=0){const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(1,freq+slide),t+dur);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur+.01)}
+function noise(dur=.16,gain=.12){const b=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();f.type='lowpass';f.frequency.value=900;g.gain.setValueAtTime(gain,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);s.buffer=b;s.connect(f);f.connect(g);g.connect(AC.destination);s.start();s.stop(AC.currentTime+dur)}
+const sfx={move:()=>tone(260,.035,'square',.035),rot:()=>tone(520,.045,'square',.045),drop:()=>tone(100,.06,'sawtooth',.05,-45),lock:()=>noise(.055,.04),line:n=>{[0,1,2,3].slice(0,n+1).forEach((_,i)=>setTimeout(()=>tone(440+i*140,.09,'square',.07),i*55))},over:()=>{tone(180,.35,'sawtooth',.1,-120);setTimeout(()=>noise(.35,.11),130)},level:()=>{tone(660,.1);setTimeout(()=>tone(880,.1),110);setTimeout(()=>tone(1320,.13),220)}};
+const melody=[330,392,440,494,440,392,330,294,330,392,440,523,494,440,392,330];let mi=0;
+function startMusic(){stopMusic();musicTimer=setInterval(()=>{if(state==='playing'){tone(melody[mi++%melody.length],.07,'triangle',.018)}},185)}function stopMusic(){if(musicTimer)clearInterval(musicTimer)}
+function newBag(){return 'IJLOSTZ'.split('').sort(()=>Math.random()-.5)}function randType(){if(!bag.length)bag=newBag();return bag.pop()}function makePiece(t){return{t,m:SHAPES[t].map(r=>r.slice()),x:Math.floor(COLS/2)-2,y:-1}}
+function reset(){board=Array.from({length:ROWS},()=>Array(COLS).fill(null));bag=[];piece=makePiece(randType());next=makePiece(randType());hold=null;canHold=true;score=0;level=1;lines=0;dropMs=760;last=0;acc=0;combo=-1;state='playing';updateUI();overlay.classList.add('hidden');startMusic()}
+function startGame(){reset()}$('startBtn').onclick=startGame;
+function updateUI(){scoreEl.textContent=score;hiEl.textContent=hi;levelEl.textContent=level;linesEl.textContent=lines}
+function rotate(m){return m[0].map((_,i)=>m.map(r=>r[i]).reverse())}function collide(p,nx=p.x,ny=p.y,nm=p.m){for(let y=0;y<nm.length;y++)for(let x=0;x<nm[y].length;x++)if(nm[y][x]){let bx=nx+x,by=ny+y;if(bx<0||bx>=COLS||by>=ROWS)return true;if(by>=0&&board[by][bx])return true}return false}
+function merge(){for(let y=0;y<piece.m.length;y++)for(let x=0;x<piece.m[y].length;x++)if(piece.m[y][x]){let by=piece.y+y;if(by>=0)board[by][piece.x+x]=piece.t}sfx.lock()}
+function clearLines(){let n=0;for(let y=ROWS-1;y>=0;y--){if(board[y].every(Boolean)){board.splice(y,1);board.unshift(Array(COLS).fill(null));n++;y++}}if(n){combo++;lines+=n;score+=[0,100,300,500,800][n]*level+combo*50;sfx.line(n);let nl=1+Math.floor(lines/10);if(nl>level){level=nl;dropMs=Math.max(95,760-(level-1)*55);sfx.level()}}else combo=-1}
+function spawn(){piece=next;piece.x=Math.floor(COLS/2)-2;piece.y=-1;next=makePiece(randType());canHold=true;if(collide(piece)){gameOver()}}
+function gameOver(){state='over';stopMusic();sfx.over();if(score>hi){hi=score;localStorage.setItem('ict_tetris_hi',hi)}updateUI();ovTitle.textContent='GAME OVER';ovText.innerHTML=`SCORE: ${score}<br>HI-SCORE: ${hi}<br><br><span class="blink">PRESS SPACE OR R TO PLAY AGAIN</span>`;overlay.classList.remove('hidden')}
+function hardDrop(){let d=0;while(!collide(piece,piece.x,piece.y+1)){piece.y++;d++}score+=d*2;lockPiece();sfx.drop()}function softDrop(){if(!collide(piece,piece.x,piece.y+1)){piece.y++;score++;updateUI()}else lockPiece()}
+function lockPiece(){merge();clearLines();spawn();updateUI()}function holdPiece(){if(!canHold)return;const old=hold;hold=piece.t;if(old)piece=makePiece(old);else{piece=next;next=makePiece(randType())}piece.x=Math.floor(COLS/2)-2;piece.y=-1;canHold=false;sfx.rot()}
+document.addEventListener('keydown',e=>{if(e.code==='Escape')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();if(state==='idle'||state==='over'){if(e.code==='Space'||e.code==='KeyR')startGame();return}if(e.code==='KeyP'){state=state==='paused'?'playing':'paused';ovTitle.textContent=state==='paused'?'PAUSED':'TETRIS';ovText.innerHTML='<span class="blink">PRESS P TO RESUME</span>';overlay.classList.toggle('hidden',state!=='paused');return}if(e.code==='KeyR'){startGame();return}if(state!=='playing')return;if(e.code==='ArrowLeft'||e.code==='KeyA'){if(!collide(piece,piece.x-1,piece.y)){piece.x--;sfx.move()}}if(e.code==='ArrowRight'||e.code==='KeyD'){if(!collide(piece,piece.x+1,piece.y)){piece.x++;sfx.move()}}if(e.code==='ArrowDown'||e.code==='KeyS'){softDrop()}if(e.code==='ArrowUp'||e.code==='KeyW'){let r=rotate(piece.m),ox=piece.x;if(collide(piece,piece.x,piece.y,r)){if(!collide(piece,piece.x-1,piece.y,r))piece.x--;else if(!collide(piece,piece.x+1,piece.y,r))piece.x++;else return}piece.m=r;sfx.rot()}if(e.code==='Space')hardDrop();if(e.code==='KeyC'||e.code==='ShiftLeft'||e.code==='ShiftRight')holdPiece()});
+function ghostY(){let y=piece.y;while(!collide(piece,piece.x,y+1))y++;return y}function drawBlock(x,y,c,alpha=1){ctx.globalAlpha=alpha;let px=BOARD_X+x*BLOCK,py=BOARD_Y+y*BLOCK;ctx.fillStyle=c;ctx.fillRect(px+1,py+1,BLOCK-2,BLOCK-2);ctx.fillStyle='rgba(255,255,255,.28)';ctx.fillRect(px+3,py+3,BLOCK-6,3);ctx.strokeStyle='rgba(0,0,0,.55)';ctx.strokeRect(px+1.5,py+1.5,BLOCK-3,BLOCK-3);ctx.globalAlpha=1}
+function drawMini(p,x,y,label){ctx.fillStyle='#66eaff';ctx.font='11px Audiowide';ctx.fillText(label,x,y);if(!p)return;let m=SHAPES[p.t||p],c=COLORS[p.t||p];for(let r=0;r<m.length;r++)for(let col=0;col<m[r].length;col++)if(m[r][col]){ctx.fillStyle=c;ctx.fillRect(x+col*14,y+12+r*14,12,12)}}
+function draw(){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(28,108,255,.55)';ctx.lineWidth=2;ctx.strokeRect(BOARD_X-3,BOARD_Y-3,COLS*BLOCK+6,ROWS*BLOCK+6);ctx.fillStyle='rgba(28,108,255,.08)';ctx.fillRect(BOARD_X,BOARD_Y,COLS*BLOCK,ROWS*BLOCK);ctx.strokeStyle='rgba(80,140,255,.12)';ctx.lineWidth=1;for(let x=1;x<COLS;x++){ctx.beginPath();ctx.moveTo(BOARD_X+x*BLOCK,BOARD_Y);ctx.lineTo(BOARD_X+x*BLOCK,BOARD_Y+ROWS*BLOCK);ctx.stroke()}for(let y=1;y<ROWS;y++){ctx.beginPath();ctx.moveTo(BOARD_X,BOARD_Y+y*BLOCK);ctx.lineTo(BOARD_X+COLS*BLOCK,BOARD_Y+y*BLOCK);ctx.stroke()}for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(board[y][x])drawBlock(x,y,COLORS[board[y][x]]);if(piece&&state!=='over'){let gy=ghostY();for(let y=0;y<piece.m.length;y++)for(let x=0;x<piece.m[y].length;x++)if(piece.m[y][x]&&gy+y>=0)drawBlock(piece.x+x,gy+y,COLORS[piece.t],.22);for(let y=0;y<piece.m.length;y++)for(let x=0;x<piece.m[y].length;x++)if(piece.m[y][x]&&piece.y+y>=0)drawBlock(piece.x+x,piece.y+y,COLORS[piece.t])}ctx.fillStyle='#fff200';ctx.font='18px Audiowide';ctx.fillText('TETRIS',38,62);ctx.fillStyle='#7ff4ff';ctx.font='11px Audiowide';ctx.fillText('ICTLABS RETRO BUILD',38,84);drawMini(next,424,70,'NEXT');drawMini(hold,424,170,'HOLD');ctx.fillStyle='rgba(255,255,255,.72)';ctx.font='10px Audiowide';ctx.fillText('SPACE HARD DROP',424,322);ctx.fillText('C / SHIFT HOLD',424,344);ctx.fillText('P PAUSE',424,366)}
+function loop(t){requestAnimationFrame(loop);let dt=t-last;last=t;if(state==='playing'){acc+=dt;if(acc>dropMs){acc=0;if(!collide(piece,piece.x,piece.y+1))piece.y++;else lockPiece()}}draw()}state='idle';loop(0);
+const urlMode=new URLSearchParams(location.search).get('mode');if(urlMode)startGame(urlMode);
+</script>
+</body>
+</html>
