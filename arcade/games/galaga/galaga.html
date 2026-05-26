@@ -626,6 +626,14 @@ function loop(ts){
     drawBullets();
     drawExplosions();
     drawHUD();
+    // Pause indicator
+    ctx.fillStyle='rgba(0,0,0,0.45)';
+    ctx.fillRect(0,H/2-36,W,72);
+    ctx.fillStyle='#0ff';
+    ctx.font='bold 22px Audiowide,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('PAUSED',W/2,H/2+8);
+    ctx.textAlign='left';
     return;
   }
 
