@@ -614,7 +614,8 @@ function updateUI(){
 function loop(){
   requestAnimationFrame(loop);
   frameCount++;
-  if(gstate==='playing') update();
+  pollICTInput();
+  if(gstate==='playing'&&!paused) update();
   // Beacon pulse
   enemies.forEach(e=>{
     if(!e.alive)return;
@@ -625,6 +626,59 @@ function loop(){
   renderer.render(scene,camera);
 }
 
+
+/*
+Game: Zaxxon/Saxxon
+Adapter Version: zaxxon_input_v1.0
+Console Target: v4.9.2+
+Spec Version: v2
+*/
+// ── ICTLabs Mobile Input Adapter ──────────────────────────────────────────
+function getICTInput(){
+  return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;
+}
+let ictLSel=false,ictLCancel=false,paused=false;
+
+function pollICTInput(){
+  const ict=getICTInput();if(!ict)return;
+  if(AC.state==='suspended')AC.resume();
+
+  // Auto-clear pause when state leaves 'playing' (death / wave transition)
+  if(gstate!=='playing'&&paused){paused=false;hideMsg();}
+
+  // ── SELECT: start / restart / respawn ────────────────────────────────────
+  if(ict.select&&!ictLSel){
+    if(gstate==='idle'||gstate==='gameover'){ictLSel=true;startGame(difficulty);return;}
+    if(gstate==='dead_wait'){ictLSel=true;respawn();return;}
+  }
+  ictLSel=!!ict.select;
+
+  // ── CANCEL: pause toggle ──────────────────────────────────────────────────
+  if(ict.cancel&&!ictLCancel){
+    if(gstate==='playing'){
+      paused=!paused;
+      if(paused) showMsg('PAUSED\nPRESS PAUSE TO RESUME');
+      else        hideMsg();
+    }
+  }
+  ictLCancel=!!ict.cancel;
+
+  if(gstate!=='playing'||paused) return;
+
+  // ── MOVEMENT: analog, continuous, no debounce ─────────────────────────────
+  // moveX < 0 = steer left  → mirrors ArrowLeft  (playerX increases)
+  // moveX > 0 = steer right → mirrors ArrowRight (playerX decreases)
+  // moveY < 0 = climb       → mirrors ArrowUp    (playerAlt increases)
+  // moveY > 0 = descend     → mirrors ArrowDown  (playerAlt decreases)
+  // Altitude damped by 0.7 to match existing ArrowUp/Down feel; tunable here only.
+  const moveSpd=0.12;
+  playerX   = Math.max(-9,     Math.min(9,       playerX   - ict.moveX * moveSpd));
+  playerAlt = Math.max(MIN_ALT,Math.min(MAX_ALT, playerAlt - ict.moveY * moveSpd * 0.7));
+
+  // ── FIRE: continuous while held; fireCooldown provides rate limiting ───────
+  if(ict.fire&&fireCooldown<=0) shoot();
+}
+// ── End ICTLabs Mobile Input Adapter ─────────────────────────────────────
 
 // Touch overlay postMessage bridge
 window.addEventListener("message",function(e){
