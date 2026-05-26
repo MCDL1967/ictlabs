@@ -108,7 +108,7 @@ function startLevel(){
   timeLeft=Math.max(15,30-level*2);
   if(timerInterval)clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
-    if(gstate!=='playing')return;
+    if(gstate!=='playing'||paused)return;
     timeLeft--;
     if(timeLeft<=0){sfxTimeout();killFrog('time');}
     updateUI();
@@ -342,8 +342,92 @@ function drawFrogAt(px,py,scale=1,home=false,death=0){
 function showMsg(t){msgEl.innerHTML=t.replace(/\n/g,'<br>');msgEl.style.display='block';}
 function hideMsg(){msgEl.style.display='none';}
 function updateUI(){hiEl.textContent=hiScore;scEl.textContent=score;lvEl.textContent=level;lfEl.textContent=Math.max(0,lives);tmEl.textContent=timeLeft;}
-function loop(){requestAnimationFrame(loop);if(gstate==='playing')update();draw();}
+function loop(){requestAnimationFrame(loop);pollICTInput();if(gstate==='playing'&&!paused)update();draw();}
 
+
+/*
+Game: Frogger
+Adapter Version: frogger_input_v1.0
+Console Target: v4.9.2+
+Spec Version: v2
+*/
+// ── ICTLabs Mobile Input Adapter ──────────────────────────────────────────
+function getICTInput(){
+  return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;
+}
+// Per-direction edge state: fire once per push, require release before re-hop
+let ictLUp=false,ictLDown=false,ictLLeft=false,ictLRight=false;
+let ictLSel=false,ictLCancel=false,paused=false;
+// Cover-lock: 30 consecutive select=false frames required before arming
+const ICT_ARM_FRAMES=30;
+let ictArmed=false,ictSelLow=0;
+
+// Shared move logic — mirrors the keyboard handler exactly, reuses moveLock
+function ictMove(dc,dr){
+  if(gstate!=='playing'||moveLock||frog.dead)return;
+  const nr=frog.row+dr,nc=frog.col+dc;
+  if(nc<0||nc>=COLS||nr<0||nr>=ROWS)return;
+  frog.row=nr;frog.col=nc;
+  frog.px=nc*CELL+CELL/2;frog.py=rowY(nr)+CELL/2;
+  sfxHop();
+  if(dr>0)score+=10;
+  moveLock=true;setTimeout(()=>{moveLock=false;},120);
+  checkLanding();updateUI();
+}
+
+function pollICTInput(){
+  const ict=getICTInput();if(!ict)return;
+  if(AC.state==='suspended')AC.resume();
+
+  // ── Cover-lock: wait for stable select=false before accepting start ───────
+  if(!ictArmed){
+    if(ict.select) ictSelLow=0; else if(++ictSelLow>=ICT_ARM_FRAMES) ictArmed=true;
+    ictLSel=!!ict.select;
+    return;
+  }
+
+  // Auto-clear pause when leaving playing state (death / level clear)
+  if(gstate!=='playing'&&paused){paused=false;hideMsg();}
+
+  // ── SELECT: start / restart / respawn ────────────────────────────────────
+  if(ict.select&&!ictLSel){
+    if(gstate==='idle'||gstate==='gameover'){ictLSel=true;startGame();return;}
+    if(gstate==='dead_wait'){
+      ictLSel=true;
+      timeLeft=Math.max(15,30-level*2);
+      resetFrog();gstate='playing';hideMsg();
+      return;
+    }
+  }
+  ictLSel=!!ict.select;
+
+  // ── CANCEL: pause toggle ──────────────────────────────────────────────────
+  if(ict.cancel&&!ictLCancel){
+    if(gstate==='playing'){
+      paused=!paused;
+      if(paused) showMsg('PAUSED\nPRESS PAUSE TO RESUME');
+      else        hideMsg();
+    }
+  }
+  ictLCancel=!!ict.cancel;
+
+  if(gstate!=='playing'||paused)return;
+
+  // ── Directional hops: threshold 0.35, one hop per push ───────────────────
+  // Edge-detect each axis independently — release required before re-hop.
+  // moveLock (120 ms) provides secondary rate-limit matching keyboard feel.
+  const up=ict.moveY<-0.35,down=ict.moveY>0.35;
+  const left=ict.moveX<-0.35,right=ict.moveX>0.35;
+
+  if(up   &&!ictLUp)    ictMove( 0, 1);
+  if(down &&!ictLDown)  ictMove( 0,-1);
+  if(left &&!ictLLeft)  ictMove(-1, 0);
+  if(right&&!ictLRight) ictMove( 1, 0);
+
+  ictLUp=up;ictLDown=down;ictLLeft=left;ictLRight=right;
+  // ict.fire: intentionally unused — Frogger has no weapon
+}
+// ── End ICTLabs Mobile Input Adapter ─────────────────────────────────────
 
 // Touch overlay postMessage bridge
 window.addEventListener("message",function(e){
@@ -356,8 +440,8 @@ window.addEventListener("message",function(e){
 });
 gstate='idle';updateUI();loop();
 
-const urlMode=new URLSearchParams(window.location.search).get('mode');
-if(urlMode)startGame();
+// urlMode auto-start removed: shell always passes ?mode=1p which caused
+// startGame() to fire on every load, skipping the cover screen.
 </script>
 </body>
 </html>
