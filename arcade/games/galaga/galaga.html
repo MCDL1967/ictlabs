@@ -615,7 +615,20 @@ function loop(ts){
   updateStars();
   drawStars();
 
+  pollICTInput();
+
   if(state==='title'||state==='gameover') return;
+
+  // Pause: freeze all updates, keep last drawn frame visible
+  if(paused){
+    drawFormation();
+    drawPlayerShip();
+    drawBullets();
+    drawExplosions();
+    drawHUD();
+    return;
+  }
+
   if(state==='levelup'){
     stageDelay--;
     drawFormation();
@@ -920,6 +933,53 @@ function respawn(){
   player.invincible=180;
 }
 
+
+/*
+Game: Galaga
+Adapter Version: galaga_input_v1.0
+Console Target: v4.9.2+
+Spec Version: v2
+*/
+// ── ICTLabs Mobile Input Adapter ──────────────────────────────────────────
+function getICTInput(){
+  return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;
+}
+// Edge-detection state
+let ictLSel=false, ictLCancel=false;
+// Pause flag — Galaga has no native pause; adapter owns this state
+let paused=false;
+
+function pollICTInput(){
+  const ict=getICTInput();if(!ict)return;
+  resumeAC();
+
+  // ── START / RESTART (title or gameover → startGame) ─────────────────────
+  if((state==='title'||state==='gameover')&&ict.select&&!ictLSel){
+    ictLSel=true; // consume before startGame mutates state
+    startGame();
+    return;
+  }
+  ictLSel=!!ict.select;
+
+  // ── CANCEL = pause toggle (playing or forming only) ───────────────────────
+  if(ict.cancel&&!ictLCancel){
+    if(state==='playing'||state==='forming') paused=!paused;
+  }
+  ictLCancel=!!ict.cancel;
+
+  if(paused||state==='title'||state==='gameover') return;
+
+  // ── MOVEMENT (continuous — mirrors keyboard path in updatePlayer) ─────────
+  // No DAS needed: ship movement is smooth/continuous, same as ArrowLeft/Right.
+  if(player&&!player.dead){
+    if(ict.moveX<-0.18 && player.x>20)   player.x-=PLAYER_SPD;
+    if(ict.moveX> 0.18 && player.x<W-20) player.x+=PLAYER_SPD;
+
+    // ── FIRE (hold to shoot — fireCooldown handles rate limiting) ────────────
+    if(ict.fire) tryPlayerShoot();
+  }
+}
+// ── End ICTLabs Mobile Input Adapter ─────────────────────────────────────
 
 // Touch overlay postMessage bridge
 window.addEventListener("message",function(e){
