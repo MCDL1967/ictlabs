@@ -832,10 +832,13 @@ body::after{
 /* ==========================================================
    ICTLabs Retro Console — V4.9.2 Touch Isolation Patch
    Fixes: selection leakage, pointer-events on dpad children,
-   and prevents OS text-selection callout on wheel surface.
+   prevents OS text-selection callout on wheel surface,
+   and reduces overlay height on phones.
    ========================================================== */
 
-/* Full touch isolation on the overlay and every descendant */
+/* Full touch isolation — document root through every overlay descendant */
+html,
+body,
 #touchPanel,
 #touchPanel *,
 #dpad,
@@ -856,6 +859,40 @@ body::after{
 #dpad span,
 #trackDot {
   pointer-events: none !important;
+}
+
+/* ── Phone-only overlay sizing (max 600px / portrait phones) ──
+   Reduces overlay height to ~165–185px so it occupies no more
+   than ~22–25% of visible portrait phone height.
+   Does NOT affect iPad, tablet, or desktop. */
+@media (max-width: 600px) {
+  #touchPanel {
+    min-height: 165px;
+    max-height: 205px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  #dpad {
+    width: min(33vw, 145px);
+    height: min(33vw, 145px);
+    min-width: 128px;
+    min-height: 128px;
+    max-width: 145px;
+    max-height: 145px;
+  }
+  #actionCluster {
+    grid-template-rows: 36px 64px 36px;
+    row-gap: 4px;
+    column-gap: 6px;
+  }
+  #aFire {
+    width: 62px;
+    height: 62px;
+  }
+  .clusterBtn {
+    height: 36px;
+    font-size: 9px;
+  }
 }
 
 </style>
@@ -1005,7 +1042,7 @@ body::after{
 <body>
 
 <div class="header">
-  ⚡ ICTLabs Retro Console v4.9.1 ⚡
+  ⚡ ICTLabs Retro Console v4.9.2 ⚡
   <a href="/apps/" class="back-arrow" title="Back to ICTLabs">←</a>
 </div>
 
@@ -1493,11 +1530,12 @@ loadGames();
 <script>
 /*
 ICTLabs Retro Console
-Version: v4.9.1
+Version: v4.9.2
 Overlay Owner: #touchPanel
 Overlay Runtime Owner: V4.2 IIFE
 Input Transport: window.ICTLabsInput
 CONTINUE removed — SELECT absorbs continue/confirm/start
+Touch isolation: stopImmediatePropagation on all #dpad handlers
 */
 (function(){
   if(window.__ICT_V49__) return;
