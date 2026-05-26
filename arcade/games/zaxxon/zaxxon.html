@@ -638,18 +638,22 @@ function getICTInput(){
   return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;
 }
 let ictLSel=false,ictLCancel=false,paused=false;
-// Arming guard: prevent stale select/fire from auto-starting on cartridge load.
-// Armed only after both select and fire are observed false at least once.
-let ictArmed=false;
+// Cover-lock: ict.select must be continuously false for ≥ ICT_ARM_FRAMES frames
+// before a rising edge can start the game. Requires a stable low window that
+// outlasts any in-flight ICTLabs pulse (120 ms ≈ 7 frames @ 60 fps).
+// 30 frames ≈ 500 ms @ 60 fps — safe at all realistic frame rates.
+const ICT_ARM_FRAMES=30;
+let ictArmed=false,ictSelLow=0;
 
 function pollICTInput(){
   const ict=getICTInput();if(!ict)return;
   if(AC.state==='suspended')AC.resume();
 
-  // ── Arming: wait for a clean frame before accepting start inputs ──────────
+  // ── Cover-lock: require a stable select=false window before arming ────────
+  // Any hot select frame resets the counter; fire is irrelevant for start.
   if(!ictArmed){
-    if(!ict.select&&!ict.fire) ictArmed=true;
-    ictLSel=!!ict.select; // keep edge state current while waiting
+    if(ict.select) ictSelLow=0; else if(++ictSelLow>=ICT_ARM_FRAMES) ictArmed=true;
+    ictLSel=!!ict.select; // keep edge state current throughout
     return;
   }
 
