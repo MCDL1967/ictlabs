@@ -9,24 +9,34 @@
 body{background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;font-family:'Audiowide',sans-serif;}
 #gameCanvas{display:block;}
 #ui{color:#fff;text-align:center;margin-bottom:6px;font-size:11px;letter-spacing:2px;display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;z-index:2;}
-#ui .sc{color:#ff0;} #ui .hi{color:#f80;} #ui .lv{color:#0cf;} #ui .lf{color:#f44;} #ui .fu{color:#0f0;}
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;z-index:10;}
-#overlay h1{font-size:clamp(28px,5vw,56px);color:#ff0;text-shadow:0 0 24px #ff0;margin-bottom:8px;letter-spacing:6px;}
+#ui .sc{color:#ff0;text-shadow:0 0 8px rgba(255,220,0,0.4);}
+#ui .hi{color:#f80;} #ui .lv{color:#0cf;} #ui .lf{color:#f44;} #ui .fu{color:#0f0;}
+@keyframes titleGlow{
+  from{text-shadow:0 0 20px #ff0,0 0 50px #ff8800,0 0 90px rgba(255,80,0,0.4);}
+  to{text-shadow:0 0 32px #ff0,0 0 72px #ffaa00,0 0 130px rgba(255,120,0,0.6);}
+}
+@keyframes blink{50%{opacity:0}}
+#overlay{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,8,28,0.97) 0%,rgba(0,0,0,0.99) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;z-index:10;}
+#overlay h1{font-size:clamp(42px,7vw,82px);color:#ff0;text-shadow:0 0 20px #ff0,0 0 50px #ff8800,0 0 90px rgba(255,80,0,0.4);margin-bottom:4px;letter-spacing:10px;animation:titleGlow 3s ease-in-out infinite alternate;}
+.gz3-badge{font-size:clamp(9px,1.3vw,11px);color:#0cf;letter-spacing:8px;margin-bottom:10px;padding:3px 14px;border:1px solid rgba(0,200,255,0.35);text-shadow:0 0 10px #0cf;}
+.sub-tag{font-size:clamp(8px,1.1vw,11px);color:rgba(255,200,80,0.6);letter-spacing:4px;margin-bottom:20px;}
+.ctrl-hints{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;font-size:clamp(7px,0.95vw,9px);color:rgba(180,210,255,0.4);letter-spacing:2px;}
+.ctrl-hints span{padding:3px 9px;border:1px solid rgba(100,150,255,0.18);}
+.select-hint{margin-top:12px;font-size:clamp(8px,1.1vw,10px);color:rgba(0,255,120,0.8);letter-spacing:4px;text-shadow:0 0 8px rgba(0,255,80,0.4);animation:blink .9s step-end infinite;}
 .sub{font-size:clamp(8px,1.2vw,12px);color:rgba(255,255,255,0.5);margin-bottom:20px;letter-spacing:2px;line-height:2.2;}
-.diff-btns{display:flex;gap:10px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+.diff-btns{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
 .start-btn{background:transparent;border:2px solid #ff0;color:#ff0;font-family:'Audiowide',sans-serif;font-size:clamp(9px,1.3vw,12px);letter-spacing:2px;padding:10px 28px;cursor:pointer;transition:all 0.15s;}
 .start-btn:hover{background:#ff0;color:#000;}
 .start-btn.g{border-color:#0f0;color:#0f0;} .start-btn.g:hover{background:#0f0;color:#000;}
 .start-btn.r{border-color:#f44;color:#f44;} .start-btn.r:hover{background:#f44;color:#000;}
-#msg{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(14px,2.5vw,22px);color:#ff0;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:1.8;}
-@keyframes blink{50%{opacity:0}}
-#hud{position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:5;padding:8px 16px;display:flex;gap:20px;align-items:flex-end;}
+#msg{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-family:'Audiowide',sans-serif;font-size:clamp(15px,2.8vw,24px);color:#ff0;text-shadow:0 0 16px #ff0,0 0 32px #ff8800;letter-spacing:3px;pointer-events:none;display:none;z-index:9;animation:blink .7s step-end infinite;text-align:center;line-height:2;background:rgba(0,4,18,0.85);padding:16px 28px;border:1px solid rgba(255,200,0,0.22);}
+#hud{position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:5;padding:10px 18px;display:flex;gap:20px;align-items:flex-end;}
 .meter{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.meter-bar{width:12px;height:80px;background:rgba(0,0,0,0.5);border:1px solid;position:relative;}
+.meter-bar{width:14px;height:88px;background:rgba(0,0,0,0.65);border:1px solid;position:relative;}
 .meter-fill{position:absolute;bottom:0;left:0;right:0;transition:height 0.1s;}
-.meter-label{font-size:8px;letter-spacing:2px;color:#fff;opacity:0.7;}
-#altBar{border-color:#0ff;} #altFill{background:#0ff;}
-#fuelBar{border-color:#0f0;} #fuelFill{background:#0f0;}
+.meter-label{font-size:8px;letter-spacing:2px;color:#fff;opacity:0.65;text-shadow:0 0 5px rgba(255,255,255,0.3);}
+#altBar{border-color:#0ff;box-shadow:0 0 6px rgba(0,200,255,0.25);} #altFill{background:linear-gradient(to top,#006688,#00ffff);}
+#fuelBar{border-color:#0f0;box-shadow:0 0 6px rgba(0,255,80,0.25);} #fuelFill{background:linear-gradient(to top,#003300,#00ff44);}
 
 </style>
 </head>
@@ -51,13 +61,20 @@ body{background:#000;display:flex;flex-direction:column;align-items:center;justi
 </div>
 <div id="msg"></div>
 <div id="overlay">
+  <div class="gz3-badge">ICTLabs · GZ3</div>
   <h1>ZAXXON</h1>
-  <p class="sub">3D Space Fortress Assault<br>↑↓ Altitude &nbsp;·&nbsp; ←→ Strafe &nbsp;·&nbsp; Space Fire<br>Fly low to collect fuel · Destroy all enemies · Defeat the boss</p>
+  <div class="sub-tag">SPACE FORTRESS ASSAULT</div>
+  <div class="ctrl-hints">
+    <span>TRACKPAD &mdash; FLY</span>
+    <span>FIRE &mdash; SHOOT</span>
+    <span>PAUSE &mdash; PAUSE</span>
+  </div>
   <div class="diff-btns">
     <button class="start-btn g" onclick="startGame('beginner')">BEGINNER</button>
     <button class="start-btn"   onclick="startGame('intermediate')">INTERMEDIATE</button>
     <button class="start-btn r" onclick="startGame('advanced')">ADVANCED</button>
   </div>
+  <div class="select-hint">PRESS SELECT TO START</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -90,25 +107,30 @@ renderer.setSize(W,H);
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.toneMapping=THREE.ReinhardToneMapping;
+renderer.toneMappingExposure=1.5;
 
 const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x000510,0.015); // less fog = more visibility
-scene.background=new THREE.Color(0x000510);
+scene.fog=new THREE.FogExp2(0x000a1e,0.016);
+scene.background=new THREE.Color(0x000a1e);
 
 const camera=new THREE.PerspectiveCamera(65,W/H,0.1,200);
 camera.position.set(0,35,-20);
 camera.lookAt(0,0,25);
 
 // ── Lighting ──────────────────────────────────────────────
-const ambLight=new THREE.AmbientLight(0x334455,1.8);
+const ambLight=new THREE.AmbientLight(0x223344,0.9); // dark ambient = strong contrast
 scene.add(ambLight);
-const dirLight=new THREE.DirectionalLight(0x8899ff,2.0);
-dirLight.position.set(0,20,10);
+const dirLight=new THREE.DirectionalLight(0x99aaff,3.0); // strong blue-white key
+dirLight.position.set(5,25,8);
 dirLight.castShadow=true;
 scene.add(dirLight);
-const rimLight=new THREE.DirectionalLight(0xff4400,0.4);
-rimLight.position.set(0,-10,-20);
+const rimLight=new THREE.DirectionalLight(0xff5500,1.2); // hot orange rim from behind
+rimLight.position.set(0,-8,-20);
 scene.add(rimLight);
+const fillLight=new THREE.DirectionalLight(0x002255,0.8); // cool deep fill from left
+fillLight.position.set(-15,5,20);
+scene.add(fillLight);
 
 // ── Audio ─────────────────────────────────────────────────
 const AC=new(window.AudioContext||window.webkitAudioContext)();
@@ -122,18 +144,18 @@ document.addEventListener('keydown',()=>{if(AC.state==='suspended')AC.resume();}
 
 // ── Materials ─────────────────────────────────────────────
 const MAT={
-  ground:  new THREE.MeshLambertMaterial({color:0x0a1f0a,wireframe:false}),
-  grid:    new THREE.MeshLambertMaterial({color:0x00ff44,wireframe:true,transparent:true,opacity:0.25}),
-  wall:    new THREE.MeshPhongMaterial({color:0x334433,emissive:0x001100,shininess:30}),
-  wallTop: new THREE.MeshPhongMaterial({color:0x556655,emissive:0x002200,shininess:60}),
-  player:  new THREE.MeshPhongMaterial({color:0x4499ff,emissive:0x112244,shininess:80}),
-  cockpit: new THREE.MeshPhongMaterial({color:0x88ddff,emissive:0x224466,shininess:120,transparent:true,opacity:0.85}),
-  enemy:   new THREE.MeshPhongMaterial({color:0xff2200,emissive:0xaa1100,shininess:80}),
-  missile: new THREE.MeshPhongMaterial({color:0xff8800,emissive:0xaa4400,shininess:60}),
-  boss:    new THREE.MeshPhongMaterial({color:0xff0044,emissive:0xaa0022,shininess:80}),
-  fuel:    new THREE.MeshPhongMaterial({color:0x00aa00,emissive:0x003300,shininess:40}),
-  bullet:  new THREE.MeshBasicMaterial({color:0xffff00}),
-  ebullet: new THREE.MeshBasicMaterial({color:0xff4444}),
+  ground:  new THREE.MeshLambertMaterial({color:0x081808}),
+  grid:    new THREE.MeshLambertMaterial({color:0x00dd55,wireframe:true,transparent:true,opacity:0.32}),
+  wall:    new THREE.MeshPhongMaterial({color:0x3a4a3a,emissive:0x0a1a0a,shininess:40}),
+  wallTop: new THREE.MeshPhongMaterial({color:0x607060,emissive:0x103010,shininess:80}),
+  player:  new THREE.MeshPhongMaterial({color:0x2288ff,emissive:0x0a2255,shininess:140}),
+  cockpit: new THREE.MeshPhongMaterial({color:0xaaeeff,emissive:0x2255aa,shininess:160,transparent:true,opacity:0.88}),
+  enemy:   new THREE.MeshPhongMaterial({color:0xff3300,emissive:0xcc1100,shininess:100}),
+  missile: new THREE.MeshPhongMaterial({color:0xff9900,emissive:0xbb5500,shininess:80}),
+  boss:    new THREE.MeshPhongMaterial({color:0xff0055,emissive:0xcc0033,shininess:100}),
+  fuel:    new THREE.MeshPhongMaterial({color:0x00cc00,emissive:0x004400,shininess:60}),
+  bullet:  new THREE.MeshBasicMaterial({color:0xffffff}),
+  ebullet: new THREE.MeshBasicMaterial({color:0xff5500}),
 };
 
 // ── Helpers ───────────────────────────────────────────────
@@ -156,13 +178,22 @@ grid.rotation.x=-Math.PI/2;
 grid.position.set(0,0.05,100);
 scene.add(grid);
 
-// Starfield
-const starGeo=new THREE.BufferGeometry();
+// Starfield — two layers for depth parallax feel
 const starVerts=[];
-for(let i=0;i<800;i++){starVerts.push((Math.random()-0.5)*200,(Math.random()*40+5),(Math.random()-0.5)*400);}
-starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starVerts,3));
-const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xffffff,size:0.15}));
+for(let i=0;i<1400;i++){starVerts.push((Math.random()-0.5)*300,(Math.random()*60+5),(Math.random()-0.5)*600);}
+const stars=new THREE.Points(
+  new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(starVerts,3)),
+  new THREE.PointsMaterial({color:0xffffff,size:0.18,sizeAttenuation:true})
+);
 scene.add(stars);
+// Distant blue-tinted stars
+const starVerts2=[];
+for(let i=0;i<250;i++){starVerts2.push((Math.random()-0.5)*200,(Math.random()*40+25),(Math.random()-0.5)*400);}
+const stars2=new THREE.Points(
+  new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(starVerts2,3)),
+  new THREE.PointsMaterial({color:0x8899ff,size:0.28,sizeAttenuation:true})
+);
+scene.add(stars2);
 
 // ── Player ship ───────────────────────────────────────────
 function makePlayerShip(){
@@ -181,10 +212,13 @@ function makePlayerShip(){
   // Engine pods
   [-0.6,0.6].forEach(x=>{
     const pod=box(0.35,0.25,1.2,MAT.player); pod.position.set(x,-0.2,-0.5); g.add(pod);
-    // Engine glow light
-    const light=new THREE.PointLight(0x4499ff,1.5,3);
-    light.position.set(x,-0.2,-1.2); g.add(light);
+    // Engine glow — brighter, wider range
+    const light=new THREE.PointLight(0x2266ff,4,6);
+    light.position.set(x,-0.2,-1.4); g.add(light);
   });
+  // Forward headlight — illuminates obstacles ahead
+  const headLight=new THREE.PointLight(0x8899ff,2,10);
+  headLight.position.set(0,0.5,2.5); g.add(headLight);
   // Nose
   const nose=cyl(0.05,0.3,0.8,MAT.player); nose.rotation.x=Math.PI/2;
   nose.position.set(0,0,2); g.add(nose);
@@ -261,16 +295,19 @@ const explosions=[];
 function spawnExplosion(pos,color=0xff6600){
   const group=new THREE.Group();
   group.position.copy(pos);
-  const mat=new THREE.MeshBasicMaterial({color});
-  for(let i=0;i<20;i++){
-    const p=sphere(0.08+Math.random()*0.12,mat);
-    const vel=new THREE.Vector3((Math.random()-0.5)*8,(Math.random()-0.5)*8,(Math.random()-0.5)*8);
+  // Multi-color burst: hot white core → colour → dark ember
+  const palette=[color,0xffcc00,0xffffff,color,0xff8800];
+  for(let i=0;i<40;i++){
+    const c=palette[i%palette.length];
+    const p=sphere(0.06+Math.random()*0.20,new THREE.MeshBasicMaterial({color:c}));
+    const spd=5+Math.random()*11;
+    const vel=new THREE.Vector3((Math.random()-0.5)*spd,(Math.random()-0.5)*spd,(Math.random()-0.5)*spd);
     group._particles=group._particles||[];
-    group._particles.push({mesh:p,vel,life:1});
+    group._particles.push({mesh:p,vel});
     group.add(p);
   }
-  // Point light flash
-  const flash=new THREE.PointLight(color,4,8);
+  // Bright flash with wider radius
+  const flash=new THREE.PointLight(color,14,20);
   group.add(flash);
   group._flash=flash;
   group._life=1;
@@ -282,13 +319,13 @@ function spawnExplosion(pos,color=0xff6600){
 function updateExplosions(){
   for(let i=explosions.length-1;i>=0;i--){
     const g=explosions[i];
-    g._life-=0.04;
+    g._life-=0.028; // slower fade = more dramatic
     if(g._life<=0){ scene.remove(g); explosions.splice(i,1); continue; }
-    g._flash.intensity=g._life*4;
+    g._flash.intensity=g._life*g._life*14; // quadratic — sharp initial flash then dies
     (g._particles||[]).forEach(p=>{
       p.mesh.position.add(p.vel.clone().multiplyScalar(0.016));
-      p.vel.multiplyScalar(0.92);
-      p.mesh.scale.setScalar(g._life);
+      p.vel.multiplyScalar(0.88); // drag: particles slow and spread
+      p.mesh.scale.setScalar(Math.max(0.01,g._life));
     });
   }
 }
