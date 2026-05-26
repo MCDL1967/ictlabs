@@ -771,6 +771,9 @@ body::after{
 #ictV41Joy::before{
   border-color:#2f6bff!important;
 }
+</style><style>
+/* === V4.6 INPUT API PATCH === */
+/* V4.6 preserves V4.5 geometry. It only adds a state-based mobile input API. */
 </style></head>
 <body>
 
@@ -1791,6 +1794,180 @@ loadGames();
     });
 
  });
+})();
+</script>
+
+<script>
+/* ICTLabs Retro Console — V4.6 Mobile Input API */
+(function(){
+  if(window.__ICT_V46_INPUT_API__) return;
+  window.__ICT_V46_INPUT_API__ = true;
+
+  const ready = fn => document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', fn)
+    : fn();
+
+  ready(function(){
+
+    const input = window.ICTLabsInput = window.ICTLabsInput || {
+      moveX:0,
+      moveY:0,
+      magnitude:0,
+      angle:0,
+      fire:false,
+      select:false,
+      cancel:false,
+      pause:false,
+      close:false,
+      source:'console-v4.6'
+    };
+
+    function pushInput(){
+      input.ts = performance.now();
+      const frame = document.querySelector('iframe');
+      try{
+        if(frame && frame.contentWindow){
+          frame.contentWindow.ICTLabsInput = input;
+        }
+      }catch(e){}
+    }
+
+    // Keep iframe synchronized even after game iframe reloads.
+    setInterval(pushInput, 250);
+
+    const pad = document.getElementById('ictV41Joy');
+    const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
+
+    if(pad){
+      let pid = null;
+
+      function releasePad(){
+        input.moveX = 0;
+        input.moveY = 0;
+        input.magnitude = 0;
+        input.angle = 0;
+        if(knob) knob.style.transform = 'translate(0px,0px)';
+        pushInput();
+        pid = null;
+      }
+
+      function updatePad(clientX, clientY){
+        const r = pad.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const radius = r.width / 2;
+
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+
+        const raw = Math.hypot(dx, dy);
+        const visualLimit = radius * 0.62;
+
+        if(raw > visualLimit && raw > 0){
+          const s = visualLimit / raw;
+          dx *= s;
+          dy *= s;
+        }
+
+        if(knob) knob.style.transform = `translate(${dx}px,${dy}px)`;
+
+        const nx = Math.max(-1, Math.min(1, (clientX - cx) / radius));
+        const ny = Math.max(-1, Math.min(1, (clientY - cy) / radius));
+        const mag = Math.min(1, Math.hypot(nx, ny));
+        const dead = 0.18;
+
+        if(mag < dead){
+          input.moveX = 0;
+          input.moveY = 0;
+          input.magnitude = 0;
+          input.angle = 0;
+        }else{
+          // normalize dead-zone out so motion begins cleanly after center
+          const scaled = (mag - dead) / (1 - dead);
+          input.moveX = nx * scaled / mag;
+          input.moveY = ny * scaled / mag;
+          input.magnitude = scaled;
+          input.angle = Math.atan2(ny, nx);
+        }
+
+        pushInput();
+      }
+
+      pad.addEventListener('pointerdown', e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        pid = e.pointerId;
+        pad.setPointerCapture?.(pid);
+        updatePad(e.clientX, e.clientY);
+      }, true);
+
+      pad.addEventListener('pointermove', e=>{
+        if(pid !== e.pointerId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        updatePad(e.clientX, e.clientY);
+      }, true);
+
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+        pad.addEventListener(ev, e=>{
+          if(pid !== null && e.pointerId !== pid) return;
+          e.preventDefault();
+          e.stopPropagation();
+          releasePad();
+        }, true);
+      });
+    }
+
+    const fire = document.getElementById('ictV41Fire');
+    if(fire){
+      fire.addEventListener('pointerdown', e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        input.fire = true;
+        pushInput();
+      }, true);
+
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+        fire.addEventListener(ev, e=>{
+          e.preventDefault();
+          e.stopPropagation();
+          input.fire = false;
+          pushInput();
+        }, true);
+      });
+    }
+
+    // Optional V4.5 pause/select/cancel/close bridge
+    function bindStateButton(id, prop, pulse=false){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('pointerdown', e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        input[prop] = true;
+        pushInput();
+        if(pulse){
+          setTimeout(()=>{
+            input[prop] = false;
+            pushInput();
+          }, 140);
+        }
+      }, true);
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+        el.addEventListener(ev, e=>{
+          e.preventDefault();
+          e.stopPropagation();
+          if(!pulse) input[prop] = false;
+          pushInput();
+        }, true);
+      });
+    }
+
+    bindStateButton('ictV45Pause','pause',true);
+    bindStateButton('ictV41Close','close',true);
+
+    pushInput();
+  });
 })();
 </script>
 </body>
