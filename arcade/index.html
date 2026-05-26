@@ -774,95 +774,33 @@ body::after{
 </style><style>
 /* === V4.6 INPUT API PATCH === */
 /* V4.6 preserves V4.5 geometry. It only adds a state-based mobile input API. */
-</style><style>
-
-/* === ICTLABS CONSOLE V4.8 VERIFIED PATCH === */
-
-#ictVersionTag{
-  position:fixed;
-  top:8px;
-  right:72px;
-  z-index:99999;
-  color:#8ffcff;
-  font-family:monospace;
-  font-size:11px;
-  letter-spacing:2px;
-  padding:4px 8px;
-  border:1px solid rgba(47,107,255,.7);
-  border-radius:8px;
-  background:rgba(0,0,0,.45);
-  box-shadow:0 0 10px rgba(47,107,255,.35);
-}
-
-/* HARD REBUILD of action cluster */
-#ictV41Overlay .ict-v41-actions{
-  display:grid!important;
-  grid-template-columns:64px 76px 64px!important;
-  grid-template-rows:44px 76px 44px!important;
-  grid-template-areas:
-    ". select ."
-    "close fire ."
-    ". cancel .";
-  align-items:center!important;
-  justify-items:center!important;
-  gap:8px!important;
-  min-width:220px!important;
-  padding-right:10px!important;
-}
-
-#ictV48Select{grid-area:select!important;}
-#ictV48Close{grid-area:close!important;}
-#ictV48Fire{grid-area:fire!important;}
-#ictV48Cancel{grid-area:cancel!important;}
-
-.ict-v48-btn{
-  width:64px!important;
-  height:42px!important;
-  border-radius:16px!important;
-  border:2px solid #2f6bff!important;
-  background:rgba(0,0,0,.62)!important;
-  color:#fff!important;
-  font-family:'Audiowide',sans-serif!important;
-  font-size:10px!important;
-  letter-spacing:1px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  box-shadow:0 0 12px rgba(47,107,255,.45)!important;
-}
-
-#ictV48Fire{
-  width:74px!important;
-  height:74px!important;
-  border-radius:50%!important;
-}
-
-#ictV48Fire svg{
-  width:40px;
-  height:40px;
-  stroke:#fff;
-  fill:none;
-  stroke-width:2.2;
-}
-
-@media(max-width:520px){
-  #ictV41Overlay .ict-v41-actions{
-    grid-template-columns:56px 66px 56px!important;
-    grid-template-rows:40px 66px 40px!important;
-    min-width:188px!important;
-  }
-  .ict-v48-btn{
-    width:56px!important;
-    height:38px!important;
-    font-size:9px!important;
-  }
-  #ictV48Fire{
-    width:64px!important;
-    height:64px!important;
-  }
-}
-
 </style>
+<style>
+/* ICTLabs Retro Console
+Version: v4.9
+Overlay Owner: #touchPanel
+Overlay Runtime Owner: V4.2 IIFE
+Input Transport: window.ICTLabsInput
+*/
+
+#consoleVersion{
+position:fixed;top:8px;right:70px;z-index:99999;
+font-family:monospace;font-size:11px;letter-spacing:2px;
+color:#8ffcff;padding:4px 8px;border:1px solid rgba(47,107,255,.7);
+border-radius:8px;background:rgba(0,0,0,.45)
+}
+
+#touchPanel{display:grid;grid-template-columns:minmax(132px,1.05fr) minmax(132px,.92fr) minmax(160px,.78fr);grid-template-areas:"track continue actions";gap:16px;align-items:center}
+#trackpadWrap{grid-area:track}
+#continueWrap{grid-area:continue;display:flex;align-items:center;justify-content:center}
+#actionCluster{grid-area:actions;display:grid;grid-template-columns:64px 76px 64px;grid-template-rows:44px 76px 44px;grid-template-areas:". select ." "close fire ." ". cancel .";align-items:center;justify-items:center;gap:8px}
+#aSelect{grid-area:select}
+#aClose{grid-area:close}
+#aFire{grid-area:fire;width:74px;height:74px;border-radius:50%}
+#aCancel{grid-area:cancel}
+.clusterBtn{width:64px;height:42px;border-radius:16px}
+</style>
+
 </head>
 <body>
 
@@ -926,22 +864,34 @@ body::after{
 
 <!-- TOUCH PANEL
      V4: bottom-docked touch overlay, slides in from right, never affects game real estate. -->
+
 <div id="touchPanel">
-  <div id="dpad">
-    <button class="dpad-btn" id="dUp">▲</button>
-    <div class="dpad-row">
-      <button class="dpad-btn" id="dLeft">◀</button>
-      <div class="dpad-center"></div>
-      <button class="dpad-btn" id="dRight">▶</button>
+  <div id="trackpadWrap">
+    <div id="dpad">
+      <span class="up">▲</span>
+      <span class="down">▼</span>
+      <span class="left">◀</span>
+      <span class="right">▶</span>
+      <div id="trackDot"></div>
     </div>
-    <button class="dpad-btn" id="dDown">▼</button>
   </div>
-  <button id="spaceBtn">CONTINUE</button>
-  <div id="actionBtns">
-    <button class="action-btn fire" id="aFire">✸</button>
-    <button class="action-btn" id="aSelect">ESC</button>
+
+  <div id="continueWrap">
+    <button id="spaceBtn">CONTINUE</button>
+  </div>
+
+  <div id="actionCluster">
+    <button id="aSelect" class="clusterBtn">SELECT</button>
+    <button id="aClose" class="clusterBtn">CLOSE</button>
+    <button id="aFire" aria-label="Fire">
+      <svg viewBox="0 0 64 64">
+        <path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/>
+      </svg>
+    </button>
+    <button id="aCancel" class="clusterBtn">CANCEL</button>
   </div>
 </div>
+
 
 <!-- INSTRUCTIONS MODAL -->
 <div id="instrModal">
@@ -952,1252 +902,86 @@ body::after{
   </div>
 </div>
 
+
+
 <script>
-// ── State ─────────────────────────────────────────────────
-let GAMES = [];
-let selectedIndex = 0;
-const SKINS = ['', 'skin-green', 'skin-gold', 'skin-red'];
-let skinIndex = 0;
-let loadTimer = null;
-
-// ── DOM ───────────────────────────────────────────────────
-const listPane    = document.getElementById('gameListPane');
-const metaBox     = document.getElementById('gameMeta');
-const metaTitle   = document.getElementById('metaTitle');
-const metaSubtitle= document.getElementById('metaSubtitle');
-const metaDesc    = document.getElementById('metaDesc');
-const previewWrap = document.getElementById('gamePreview');
-const previewFrame= document.getElementById('previewFrame');
-const loadingInd  = document.getElementById('loadingIndicator');
-const noVideoMsg  = document.getElementById('noVideoMsg');
-const emptyState  = document.getElementById('emptyState');
-const gamePane    = document.getElementById('gamePane');
-const gameFrame   = document.getElementById('gameFrame');
-const gameBarTitle= document.getElementById('gameBarTitle');
-
-// ── Audio (Web Audio) ─────────────────────────────────────
-const AC = new (window.AudioContext||window.webkitAudioContext)();
-function beep(freq,dur,vol=0.15,type='square'){
-  try{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.connect(g);g.connect(AC.destination);
-    o.type=type;o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,AC.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
-    o.start();o.stop(AC.currentTime+dur+0.01);
-  }catch(e){}
-}
-function sfxNav()   { beep(330,0.06,0.12); }
-function sfxSelect(){ beep(520,0.08,0.18); }
-function sfxSkin()  { beep(440,0.05,0.12); beep(660,0.05,0.12); }
-function sfxSave()  { [440,550,660].forEach((f,i)=>setTimeout(()=>beep(f,0.07,0.15),i*60)); }
-document.addEventListener('keydown',()=>{ if(AC.state==='suspended') AC.resume(); },{once:false});
-
-// ── Load games ────────────────────────────────────────────
-async function loadGames(){
-  try{
-    const m = await fetch('games/manifest.json');
-    if(!m.ok) throw new Error();
-    const manifest = await m.json();
-    const promises = (manifest.games||[]).map(async folder=>{
-      try{
-        const r = await fetch(`games/${folder}/game_info.json`);
-        if(!r.ok) return null;
-        const d = await r.json();
-        d._folder = folder; return d;
-      }catch{ return null; }
-    });
-    GAMES = (await Promise.all(promises)).filter(Boolean);
-  }catch{ GAMES=[]; }
-  renderList();
-  if(GAMES.length>0){ selectGame(0); }
-}
-
-function renderList(){
-  listPane.innerHTML='';
-  if(!GAMES.length){
-    listPane.innerHTML='<div class="empty-state"><div class="big">📂</div><div>No games found</div></div>';
-    return;
-  }
-  GAMES.forEach((g,i)=>{
-    const el=document.createElement('div');
-    el.className='game-item';
-    el.textContent=g.name||`Game ${i+1}`;
-    el.addEventListener('click',()=>{
-      sfxSelect();
-      if(i===selectedIndex){ launchGame('1p'); }
-      else { selectGame(i); }
-    });
-    listPane.appendChild(el);
-  });
-}
-
-function selectGame(index){
-  if(!GAMES.length) return;
-  if(index<0) index=GAMES.length-1;
-  if(index>=GAMES.length) index=0;
-  selectedIndex=index;
-  document.querySelectorAll('.game-item').forEach((el,i)=>{
-    el.classList.toggle('selected',i===selectedIndex);
-    if(i===selectedIndex) el.scrollIntoView({behavior:'smooth',block:'nearest'});
-  });
-  showDetails(GAMES[selectedIndex]);
-  update2pButton();
-}
-
-function showDetails(game){
-  emptyState.style.display='none';
-  metaBox.style.display='block';
-  previewWrap.style.display='block';
-  metaTitle.textContent   = game.name||'—';
-  metaSubtitle.textContent= [game.genre,game.release_year].filter(Boolean).join(' · ');
-  metaDesc.textContent    = game.image_desc||'';
-  if(loadTimer) clearTimeout(loadTimer);
-  previewFrame.src='about:blank';
-  previewFrame.style.opacity='0';
-  loadingInd.style.display='block';
-  noVideoMsg.style.display='none';
-  if(game.video_src){
-    loadTimer=setTimeout(()=>{ previewFrame.src=game.video_src; },1500);
-  }else{
-    loadingInd.style.display='none';
-    noVideoMsg.style.display='flex';
-    previewFrame.style.opacity='1';
-  }
-}
-
-previewFrame.addEventListener('load',()=>{
-  if(previewFrame.src!=='about:blank'){
-    loadingInd.style.display='none';
-    previewFrame.style.opacity='1';
-  }
-});
-
-// ── Launch ────────────────────────────────────────────────
-function launchGame(mode){
-  if(!GAMES.length) return;
-  const game=GAMES[selectedIndex];
-  if(!game.play_url) return;
-  metaBox.style.display='none';
-  previewWrap.style.display='none';
-  emptyState.style.display='none';
-  const url=game.play_url+(mode?'?mode='+mode:'');
-  gameFrame.src=url;
-  gameBarTitle.textContent=game.name+(mode==='2p'?' · 2P':'');
-  gamePane.style.display='flex';
-  document.body.classList.add('is-playing');
-  window.closeTouchPanel && window.closeTouchPanel();
-  // Focus the iframe so keyboard events go straight to the game
-  setTimeout(()=>gameFrame.focus(),200);
-}
-
-function exitGame(){
-  gamePane.style.display='none';
-  document.body.classList.remove('is-playing');
-  gameFrame.src='about:blank';
-  showDetails(GAMES[selectedIndex]);
-}
-
-document.getElementById('exitButton').addEventListener('click',exitGame);
-document.addEventListener('keydown',e=>{
-  // Only handle console keys when game is NOT running
-  if(gamePane.style.display!=='none'){
-    if(e.key==='Escape') exitGame();
-    return;
-  }
-  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W')  { sfxNav();    selectGame(selectedIndex-1); e.preventDefault(); }
-  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') { sfxNav();    selectGame(selectedIndex+1); e.preventDefault(); }
-  if(e.key==='Enter')    { sfxSelect(); launchGame('1p'); e.preventDefault(); }
-  if(e.key==='1')        { sfxSelect(); launchGame('1p'); e.preventDefault(); }
-  if(e.key==='2')        { sfxSelect(); launchGame('2p'); e.preventDefault(); }
-  if(e.key==='h'||e.key==='H'){
-    document.getElementById('instrButton').click();
-    e.preventDefault();
-  }
-});
-
-// ── Nav buttons ───────────────────────────────────────────
-document.getElementById('upButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex-1); });
-document.getElementById('downButton').addEventListener('click',()=>{ sfxNav(); selectGame(selectedIndex+1); });
-document.getElementById('selectButton').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
-
-// ── Touch panel ───────────────────────────────────────────
-function setupTouchOverlay(){
-  const panel=document.getElementById('touchPanel');
-  const toggle=document.getElementById('touchToggle');
-  if(!panel||!toggle)return;
-
-  const isTouch = matchMedia('(pointer: coarse)').matches;
-  let open=false;
-
-  function openPanel(){
-    if(!isTouch) return;
-    open=true;
-    panel.classList.add('open');
-    toggle.textContent='CLOSE';
-  }
-  function closePanel(){
-    open=false;
-    panel.classList.remove('open');
-    toggle.textContent='CONTROLS';
-    releaseDirections();
-  }
-  window.closeTouchPanel=closePanel;
-
-  toggle.addEventListener('touchstart',e=>{ e.preventDefault(); open?closePanel():openPanel(); },{passive:false});
-  toggle.addEventListener('click',()=>{ open?closePanel():openPanel(); });
-
-  function sendKey(type,key){
-    const code = key===' ' ? 'Space' : key;
-    if(gamePane.style.display!=='none'){
-      try{ gameFrame.contentWindow.postMessage({type:'key',event:type,key,code},'*'); }catch(ex){}
-      try{
-        const ev=new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true,view:gameFrame.contentWindow});
-        gameFrame.contentDocument&&gameFrame.contentDocument.dispatchEvent(ev);
-      }catch(ex){}
-    }else{
-      if(type==='keydown'){
-        if(key==='ArrowUp')   { sfxNav(); selectGame(selectedIndex-1); }
-        if(key==='ArrowDown') { sfxNav(); selectGame(selectedIndex+1); }
-        if(key===' ')         { sfxSelect(); launchGame('1p'); }
-      }
-    }
-  }
-  function tap(key,ms=80){ sendKey('keydown',key); setTimeout(()=>sendKey('keyup',key),ms); }
-
-  const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};
-  let joyPointer=null;
-  function setDir(key,on){
-    if(active[key]===on)return;
-    active[key]=on;
-    sendKey(on?'keydown':'keyup',key);
-  }
-  function releaseDirections(){
-    Object.keys(active).forEach(k=>setDir(k,false));
-    joyPointer=null;
-  }
-  function updateJoystick(clientX,clientY){
-    const r=dpad.getBoundingClientRect();
-    const cx=r.left+r.width/2;
-    const cy=r.top+r.height/2; // true joystick center = visual inner circle center
-    const dx=clientX-cx;
-    const dy=clientY-cy;
-    const threshold=r.width*0.13;
-    setDir('ArrowLeft', dx < -threshold);
-    setDir('ArrowRight',dx > threshold);
-    setDir('ArrowUp',   dy < -threshold);
-    setDir('ArrowDown', dy > threshold);
-  }
-
-  const dpad=document.getElementById('dpad');
-  if(dpad){
-    dpad.addEventListener('pointerdown',e=>{
-      e.preventDefault();
-      joyPointer=e.pointerId;
-      dpad.setPointerCapture&&dpad.setPointerCapture(joyPointer);
-      updateJoystick(e.clientX,e.clientY);
-    });
-    dpad.addEventListener('pointermove',e=>{
-      if(joyPointer!==e.pointerId)return;
-      e.preventDefault();
-      updateJoystick(e.clientX,e.clientY);
-    });
-    ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-      dpad.addEventListener(ev,e=>{
-        if(joyPointer!==null&&e.pointerId!==joyPointer)return;
-        releaseDirections();
-      });
-    });
-  }
-
-  const spaceBtn=document.getElementById('spaceBtn');
-  if(spaceBtn){
-    spaceBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); tap(' '); },{passive:false});
-    spaceBtn.addEventListener('click',()=>tap(' '));
-  }
-
-  const fireBtn=document.getElementById('aFire');
-  if(fireBtn){
-    fireBtn.addEventListener('touchstart',e=>{ e.stopPropagation(); e.preventDefault(); tap(' '); },{passive:false});
-    fireBtn.addEventListener('click',()=>tap(' '));
-  }
-
-  const escBtn=document.getElementById('aSelect');
-  if(escBtn){
-    escBtn.addEventListener('touchstart',e=>{
-      e.stopPropagation(); e.preventDefault();
-      if(open){ closePanel(); return; }
-      if(gamePane.style.display!=='none') exitGame();
-      else { sfxSelect(); launchGame('1p'); }
-    },{passive:false});
-    escBtn.addEventListener('click',()=>{
-      if(open){ closePanel(); return; }
-      if(gamePane.style.display!=='none') exitGame();
-      else { sfxSelect(); launchGame('1p'); }
-    });
-  }
-}
-setupTouchOverlay();
-
-// ── 1P / 2P ───────────────────────────────────────────────
-document.getElementById('btn1p').addEventListener('click',()=>{ sfxSelect(); launchGame('1p'); });
-document.getElementById('btn2p').addEventListener('click',()=>{
-  if(!GAMES.length) return;
-  if(!GAMES[selectedIndex].multiplayer) return;
-  sfxSelect(); launchGame('2p');
-});
-
-function update2pButton(){
-  const btn=document.getElementById('btn2p');
-  const has2p=GAMES.length&&GAMES[selectedIndex].multiplayer;
-  btn.style.opacity=has2p?'1':'0.3';
-  btn.style.cursor=has2p?'pointer':'not-allowed';
-}
-
-// ── Skin cycling ──────────────────────────────────────────
-document.getElementById('skinButton').addEventListener('click',()=>{
-  sfxSkin();
-  if(SKINS[skinIndex]) document.body.classList.remove(SKINS[skinIndex]);
-  skinIndex=(skinIndex+1)%SKINS.length;
-  if(SKINS[skinIndex]) document.body.classList.add(SKINS[skinIndex]);
-});
-
-// ── Save Skin ─────────────────────────────────────────────
-document.getElementById('saveSkinButton').addEventListener('click',()=>{
-  localStorage.setItem('ictlabs-arcade-skin',skinIndex);
-  sfxSave();
-  const btn=document.getElementById('saveSkinButton');
-  btn.textContent='✓ Saved';
-  btn.classList.add('active-btn');
-  setTimeout(()=>{ btn.textContent='💾 Save'; btn.classList.remove('active-btn'); },1400);
-});
-
-// Restore saved skin
-const savedSkin=localStorage.getItem('ictlabs-arcade-skin');
-if(savedSkin!==null){
-  skinIndex=parseInt(savedSkin)||0;
-  if(SKINS[skinIndex]) document.body.classList.add(SKINS[skinIndex]);
-}
-
-// ── Instructions ──────────────────────────────────────────
-const INSTRUCTIONS={
-  galaga:{
-    title:'GALAGA — Controls',
-    body:'← → &nbsp;&nbsp; Move ship\nSpace &nbsp;&nbsp; Fire\nZ / X &nbsp;&nbsp; Dual fire\n\nBee &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 50 / 100 pts\nButterfly &nbsp; 80 / 160 pts\nBoss &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 150 / 400 pts\n\nDestroy all enemies to advance.\nWatch out for the Boss tractor beam!'
-  },
-  pong:{
-    title:'PONG — Controls',
-    body:'1 Player\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp; Your paddle (right)\nCPU controls the left side\n\n2 Players\nW / S &nbsp;&nbsp;&nbsp;&nbsp; Left paddle (P1)\n↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp; Right paddle (P2)\n\nFirst to 7 wins the set.\nBest of 3 sets wins the match.'
-  },
-  frogger:{
-    title:'FROGGER — Controls',
-    body:'↑ ↓ ← → or WASD to hop\n\nCross the road — avoid cars & trucks\nCross the river — ride logs & turtles\nDiving turtles will sink — jump off!\n\nGet all 5 frogs home to advance.\nTime limit — move fast!'
-  },
-  zaxxon:{
-    title:'ZAXXON — Controls',
-    body:'↑ / ↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Altitude\n← / → &nbsp;&nbsp;&nbsp;&nbsp; Strafe\nSpace &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fire\n\nManage fuel — collect fuel tanks\nDestroy turrets and missiles\nDefeat the Zaxxon robot to advance\n\nAltitude meter on right — stay\nwithin fortress wall height to pass!'
-  },
-  pacman:{
-    title:'PAC-MAN — Controls',
-    body:'Arrow keys or WASD to move\n\nDot \xa0\xa010 pts\nPower Pellet \xa0\xa050 pts\nGhost (1st) \xa0200 pts\nGhost (2nd) \xa0400 pts\n\nEat all dots to advance.\nGrab power pellets to eat ghosts!'
-  },
-  snake:{
-    title:'SNAKE — Controls',
-    body:'Arrow keys or WASD to move\n\nEat 🍎 to grow and score.\nDon\'t hit the walls or yourself.\n\n⭐ Bonus star = 5× points!\nIt disappears fast — grab it!\nA ring shows time remaining.\n\nSpeed increases as you grow.'
-  },
-  tetris:{
-    title:'TETRIS — Controls',
-    body:'Move: Arrow Keys or A/D\nRotate: Up or W\nSoft Drop: Down or S\nHard Drop: Space\nHold Piece: C or Shift\nPause: P\nRestart: R\n\nClear full horizontal lines before the stack reaches the top.\nScoring: single 100, double 300, triple 500, tetris 800 × level.\nCombos and hard drops add bonus points.'
-  },
-  vector_vortex:{
-    title:'VECTOR VORTEX — Controls',
-    body:'Arrow Keys or WASD = Rotate / Thrust / Brake\nSpace = Fire\nShift = Shield\nP = Pause\n\nDestroy asteroids, clear waves, and survive as long as possible.\nLarge asteroid = 50 pts\nMedium asteroid = 100 pts\nSmall asteroid = 200 pts'
-  }
+/* ICTLabs v4.9 unified touchPanel runtime */
+(function(){
+window.ICTLabsInput = window.ICTLabsInput || {
+ moveX:0,moveY:0,magnitude:0,angle:0,
+ fire:false,select:false,cancel:false,close:false,pause:false
 };
 
-const instrModal=document.getElementById('instrModal');
-const instrTitle=document.getElementById('instrTitle');
-const instrBody =document.getElementById('instrBody');
+function sync(){
+ const f=document.querySelector('iframe');
+ try{if(f&&f.contentWindow)f.contentWindow.ICTLabsInput=window.ICTLabsInput;}catch(e){}
+}
 
-document.getElementById('instrButton').addEventListener('click',()=>{
-  if(!GAMES.length) return;
-  const folder=GAMES[selectedIndex]._folder;
-  const info=INSTRUCTIONS[folder]||{
-    title:(GAMES[selectedIndex].name||'Game')+' — Controls',
-    body:'Use keyboard controls.\nSee game screen for details.'
-  };
-  instrTitle.textContent=info.title;
-  instrBody.innerHTML=info.body.replace(/\n/g,'<br>');
-  instrModal.style.display='flex';
-});
-document.getElementById('instrClose').addEventListener('click',()=>{ instrModal.style.display='none'; });
-instrModal.addEventListener('click',e=>{ if(e.target===instrModal) instrModal.style.display='none'; });
+if(!document.getElementById('consoleVersion')){
+ const v=document.createElement('div');
+ v.id='consoleVersion';
+ v.textContent='CONSOLE v4.9';
+ document.body.appendChild(v);
+}
 
-// ── Boot ──────────────────────────────────────────────────
-loadGames();
-</script>
+const pad=document.getElementById('dpad');
+const dot=document.getElementById('trackDot');
 
-<script>
-(function(){
- const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
- ready(function(){
-  const isTouch=()=>matchMedia('(max-width:1024px), (pointer:coarse)').matches;
-  const norm=el=>(el&&(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase())||'';
-  const all=()=>Array.from(document.querySelectorAll('button,a,[role="button"],.btn,.button,div,span')).filter(el=>norm(el));
-
-  Array.from(document.querySelectorAll('a,button')).forEach(el=>{const t=norm(el),a=(el.getAttribute('aria-label')||'').toUpperCase();if(t==='←'||t==='↵'||a.includes('BACK')||a.includes('HOME'))el.classList.add('back-btn')});
-
-  let controls=document.getElementById('touchToggle')||document.querySelector('.touch-toggle,.controls-toggle,[data-role="controls-toggle"]')||all().find(el=>norm(el).includes('CONTROL'));
-  if(controls){controls.id=controls.id||'touchToggle';controls.classList.add('controls-toggle');controls.style.visibility='';}
-
-  let deck=document.getElementById('ictV41Overlay');
-  if(!deck){
-   deck=document.createElement('div');deck.id='ictV41Overlay';deck.className='ict-v41-overlay';
-   deck.innerHTML='<div class="ict-v41-joy" id="ictV41Joy"><span class="up">▲</span><span class="down">▼</span><span class="left">◀</span><span class="right">▶</span><div class="ict-v41-joy-dot"></div></div><div class="ict-v41-continue-wrap"><button class="ict-v41-continue" id="ictV41Continue" type="button">CONTINUE</button></div><div class="ict-v41-actions"><button class="ict-v41-fire" id="ictV41Fire" type="button" aria-label="Fire"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/></svg></button><button class="ict-v41-esc" id="ictV41Esc" type="button">ESC</button><button class="ict-v41-close" id="ictV41Close" type="button">CLOSE</button></div>';
-   document.body.appendChild(deck);
+if(pad&&dot){
+ let pid=null;
+ function release(){
+  window.ICTLabsInput.moveX=0;
+  window.ICTLabsInput.moveY=0;
+  window.ICTLabsInput.magnitude=0;
+  dot.style.transform='translate(0,0)';
+  sync();
+ }
+ function upd(x,y){
+  const r=pad.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2, rad=r.width/2;
+  let dx=x-cx, dy=y-cy;
+  const raw=Math.hypot(dx,dy), limit=rad*.62;
+  if(raw>limit&&raw>0){const s=limit/raw;dx*=s;dy*=s}
+  dot.style.transform=`translate(${dx}px,${dy}px)`;
+  const nx=Math.max(-1,Math.min(1,(x-cx)/rad));
+  const ny=Math.max(-1,Math.min(1,(y-cy)/rad));
+  const mag=Math.min(1,Math.hypot(nx,ny));
+  const dead=.18;
+  if(mag<dead){
+   window.ICTLabsInput.moveX=0;
+   window.ICTLabsInput.moveY=0;
+   window.ICTLabsInput.magnitude=0;
+  }else{
+   const scaled=(mag-dead)/(1-dead);
+   window.ICTLabsInput.moveX=nx*scaled/mag;
+   window.ICTLabsInput.moveY=ny*scaled/mag;
+   window.ICTLabsInput.magnitude=scaled;
+   window.ICTLabsInput.angle=Math.atan2(ny,nx);
   }
+  sync();
+ }
+ pad.addEventListener('pointerdown',e=>{pid=e.pointerId;upd(e.clientX,e.clientY)});
+ pad.addEventListener('pointermove',e=>{if(pid!==e.pointerId)return;upd(e.clientX,e.clientY)});
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>pad.addEventListener(ev,release));
+}
 
-  Array.from(document.querySelectorAll('.touch-controls,#touchControls,.mobile-controls,#mobileControls')).forEach(el=>{if(el!==deck&&(norm(el).includes('CONTINUE')||norm(el).includes('SPACE')))el.style.display='none'});
-
-  function send(type,code,key){const ev=new KeyboardEvent(type,{code,key,bubbles:true,cancelable:true});document.dispatchEvent(ev);window.dispatchEvent(ev);const f=document.querySelector('iframe');try{if(f&&f.contentWindow){f.contentWindow.dispatchEvent(ev);f.contentWindow.document.dispatchEvent(ev)}}catch(e){}}
-  function tap(code,key,ms=72){send('keydown',code,key);setTimeout(()=>send('keyup',code,key),ms)}
-  function show(){if(isTouch())deck.classList.add('show')}
-  function hide(){deck.classList.remove('show');releaseDirs();stopFire();tap('Escape','Escape',80)}
-  if(controls){controls.addEventListener('click',e=>{if(!isTouch())return;e.preventDefault();e.stopPropagation();show()},true)}
-  document.getElementById('ictV41Continue').addEventListener('click',()=>tap('Space',' '));
-  document.getElementById('ictV41Close').addEventListener('click',hide);
-  document.getElementById('ictV41Esc').addEventListener('click',hide);
-
-  let fireTimer=null;function fireOnce(){tap('Space',' ');tap('KeyX','x')}function startFire(e){e.preventDefault();fireOnce();stopFire();fireTimer=setInterval(fireOnce,130)}function stopFire(){if(fireTimer){clearInterval(fireTimer);fireTimer=null}send('keyup','Space',' ');send('keyup','KeyX','x')}
-  const fire=document.getElementById('ictV41Fire');fire.addEventListener('pointerdown',startFire);['pointerup','pointercancel','pointerleave'].forEach(ev=>fire.addEventListener(ev,stopFire));
-
-  const joy=document.getElementById('ictV41Joy');const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};let pid=null;
-  function setDir(code,on){if(active[code]===on)return;active[code]=on;send(on?'keydown':'keyup',code,code)}
-  function releaseDirs(){Object.keys(active).forEach(k=>setDir(k,false));pid=null}
-  function update(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=x-cx,dy=y-cy,rad=r.width/2,mag=Math.hypot(dx,dy),dead=rad*.20;if(mag<dead){setDir('ArrowLeft',false);setDir('ArrowRight',false);setDir('ArrowUp',false);setDir('ArrowDown',false);return}const nx=dx/rad,ny=dy/rad,th=.24;setDir('ArrowLeft',nx<-th);setDir('ArrowRight',nx>th);setDir('ArrowUp',ny<-th);setDir('ArrowDown',ny>th)}
-  joy.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;joy.setPointerCapture&&joy.setPointerCapture(pid);update(e.clientX,e.clientY)});
-  joy.addEventListener('pointermove',e=>{if(pid!==e.pointerId)return;e.preventDefault();update(e.clientX,e.clientY)});
-  ['pointerup','pointercancel','pointerleave'].forEach(ev=>joy.addEventListener(ev,e=>{if(pid!==null&&e.pointerId!==pid)return;releaseDirs()}));
-  addEventListener('resize',()=>{if(!isTouch())deck.classList.remove('show')});
+function bindPulse(id,prop){
+ const el=document.getElementById(id);
+ if(!el)return;
+ el.addEventListener('pointerdown',()=>{
+  window.ICTLabsInput[prop]=true;sync();
+  if(prop!=='fire') setTimeout(()=>{window.ICTLabsInput[prop]=false;sync();},140);
  });
-})();
-</script>
-
-
-<script>
-/* ICTLabs Retro Console — V4.2 Stabilization JS */
-(function(){
-  const ready = fn => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn();
-
-  ready(function(){
-    const isTouch = () => window.matchMedia('(max-width:1024px), (pointer:coarse)').matches;
-
-    const panel = document.getElementById('touchPanel');
-    const hardControls = document.getElementById('desktopControlsButton');
-    const rogueToggle = document.getElementById('touchToggle');
-    const v41 = document.getElementById('ictV41Overlay');
-
-    // Fully remove the rogue overlay trigger and V4.1 experimental overlay from behavior.
-    if(rogueToggle) rogueToggle.remove();
-    if(v41) v41.remove();
-
-    // Restore original panel if V4.1 hid it.
-    if(panel){
-      panel.style.display = '';
-      panel.classList.remove('show');
-    }
-
-    let open = panel && panel.classList.contains('open');
-
-    function sendKey(type,key){
-      const gameFrame = document.getElementById('gameFrame');
-      const gamePane  = document.getElementById('gamePane');
-      const code = key === ' ' ? 'Space' : key;
-
-      if(gamePane && gamePane.style.display !== 'none'){
-        try{ gameFrame.contentWindow.postMessage({type:'key',event:type,key,code},'*'); }catch(ex){}
-        try{
-          const ev = new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true});
-          gameFrame.contentWindow && gameFrame.contentWindow.dispatchEvent(ev);
-          gameFrame.contentDocument && gameFrame.contentDocument.dispatchEvent(ev);
-        }catch(ex){}
-      }else{
-        if(type === 'keydown'){
-          const up = document.getElementById('upButton');
-          const down = document.getElementById('downButton');
-          const select = document.getElementById('selectButton');
-          if(key === 'ArrowUp') up && up.click();
-          if(key === 'ArrowDown') down && down.click();
-          if(key === ' ') select && select.click();
-        }
-      }
-    }
-
-    function tap(key,ms=70){
-      sendKey('keydown',key);
-      window.setTimeout(()=>sendKey('keyup',key),ms);
-    }
-
-    function openPanel(){
-      if(!panel || !isTouch()) return;
-      open = true;
-      panel.classList.add('open');
-    }
-
-    function closePanel(){
-      if(!panel) return;
-      open = false;
-      panel.classList.remove('open');
-      releaseDirections();
-      stopFire();
-      // Cabinet rule: close/esc hides overlay and pauses/back-outs active game.
-      tap('Escape',80);
-    }
-
-    // Hard main-panel CONTROLS button is the only open trigger.
-    if(hardControls){
-      hardControls.removeAttribute('aria-disabled');
-      hardControls.addEventListener('click', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopPropagation();
-        open ? closePanel() : openPanel();
-      }, true);
-      hardControls.addEventListener('touchstart', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopPropagation();
-        open ? closePanel() : openPanel();
-      }, {passive:false, capture:true});
-    }
-
-    // Replace existing dpad behavior in capture phase.
-    const dpad = document.getElementById('dpad');
-    const active = {ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false};
-    let joyPointer = null;
-
-    function setDir(key,on){
-      if(active[key] === on) return;
-      active[key] = on;
-      sendKey(on ? 'keydown' : 'keyup', key);
-    }
-
-    function releaseDirections(){
-      Object.keys(active).forEach(k => setDir(k,false));
-      joyPointer = null;
-    }
-
-    function updateJoystick(clientX, clientY){
-      if(!dpad) return;
-
-      const r = dpad.getBoundingClientRect();
-
-      // TRUE ORIGIN: visual center of the pressure pad.
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-
-      // TRUE SCALE: center to outer circle perimeter.
-      const radius = Math.min(r.width, r.height) / 2;
-      const dx = clientX - cx;
-      const dy = clientY - cy;
-
-      const nx = dx / radius;
-      const ny = dy / radius;
-
-      const mag = Math.hypot(nx, ny);
-      const dead = 0.18;
-
-      if(mag < dead){
-        setDir('ArrowLeft',false);
-        setDir('ArrowRight',false);
-        setDir('ArrowUp',false);
-        setDir('ArrowDown',false);
-        return;
-      }
-
-      // Independent axes allow diagonals and continuous pressure-pad steering.
-      const axis = 0.22;
-      setDir('ArrowLeft',  nx < -axis);
-      setDir('ArrowRight', nx >  axis);
-      setDir('ArrowUp',    ny < -axis);
-      setDir('ArrowDown',  ny >  axis);
-    }
-
-    if(dpad){
-      ['touchstart','pointerdown'].forEach(ev=>{
-        dpad.addEventListener(ev, function(e){
-          if(!isTouch()) return;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          const p = e.touches ? e.touches[0] : e;
-          joyPointer = p.pointerId || 'touch';
-          if(e.pointerId && dpad.setPointerCapture) dpad.setPointerCapture(e.pointerId);
-          updateJoystick(p.clientX,p.clientY);
-        }, {passive:false, capture:true});
-      });
-
-      dpad.addEventListener('pointermove', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        updateJoystick(e.clientX,e.clientY);
-      }, {passive:false, capture:true});
-
-      dpad.addEventListener('touchmove', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        const p = e.touches && e.touches[0];
-        if(p) updateJoystick(p.clientX,p.clientY);
-      }, {passive:false, capture:true});
-
-      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
-        dpad.addEventListener(ev, function(e){
-          if(!isTouch()) return;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          releaseDirections();
-        }, {passive:false, capture:true});
-      });
-    }
-
-    // CONTINUE remains Space.
-    const spaceBtn = document.getElementById('spaceBtn');
-    if(spaceBtn){
-      spaceBtn.addEventListener('click', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        tap(' ');
-      }, true);
-      spaceBtn.addEventListener('touchstart', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        tap(' ');
-      }, {passive:false, capture:true});
-    }
-
-    // Blast: hold-to-fire, capture phase blocks older tap-only listeners.
-    const fireBtn = document.getElementById('aFire');
-    let fireTimer = null;
-    function fireOnce(){ tap(' '); }
-    function startFire(e){
-      if(!isTouch()) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      stopFire();
-      fireOnce();
-      fireTimer = window.setInterval(fireOnce, 125);
-    }
-    function stopFire(e){
-      if(e && isTouch()){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }
-      if(fireTimer){
-        window.clearInterval(fireTimer);
-        fireTimer = null;
-      }
-      sendKey('keyup',' ');
-    }
-    if(fireBtn){
-      fireBtn.textContent = '✸';
-      fireBtn.addEventListener('pointerdown', startFire, {passive:false, capture:true});
-      fireBtn.addEventListener('touchstart', startFire, {passive:false, capture:true});
-      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
-        fireBtn.addEventListener(ev, stopFire, {passive:false, capture:true});
-      });
-    }
-
-    // ESC on overlay closes overlay and pauses/backs out.
-    const escBtn = document.getElementById('aSelect');
-    if(escBtn){
-      escBtn.addEventListener('click', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        closePanel();
-      }, true);
-      escBtn.addEventListener('touchstart', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        closePanel();
-      }, {passive:false, capture:true});
-    }
-
-    window.addEventListener('resize', function(){
-      if(!isTouch()){
-        closePanel();
-      }
-    });
-  });
-})();
-</script>
-
-
-<script>
-(function(){
- if(window.__ICT_V45__) return;
- window.__ICT_V45__ = true;
-
- const ready=fn=>document.readyState==='loading'
-   ? document.addEventListener('DOMContentLoaded',fn)
-   : fn();
-
- ready(function(){
-
-  // Dedicated transport channels
-  const movementState = {
-    up:false,
-    down:false,
-    left:false,
-    right:false
-  };
-
-  let fireInterval = null;
-
-  // Add PAUSE button if missing
-  const actions = document.querySelector('#ictV41Overlay .ict-v41-actions');
-
-  if(actions && !document.getElementById('ictV45Pause')){
-    const pause = document.createElement('button');
-    pause.id = 'ictV45Pause';
-    pause.textContent = 'PAUSE';
-
-    actions.insertBefore(
-      pause,
-      document.getElementById('ictV41Close')
-    );
-
-    pause.addEventListener('click', ()=>{
-      emitDiscrete('KeyP','p');
-    });
-  }
-
-  function emitToTargets(ev){
-    document.dispatchEvent(ev);
-
-    const frame = document.querySelector('iframe');
-
-    try{
-      if(frame && frame.contentWindow){
-        frame.contentWindow.dispatchEvent(ev);
-        frame.contentWindow.document.dispatchEvent(ev);
-      }
-    }catch(e){}
-  }
-
-  // DISCRETE transport channel
-  function emitDiscrete(code,key,duration=55){
-    const down = new KeyboardEvent('keydown',{
-      key:key,
-      code:code,
-      bubbles:true
-    });
-
-    const up = new KeyboardEvent('keyup',{
-      key:key,
-      code:code,
-      bubbles:true
-    });
-
-    emitToTargets(down);
-
-    setTimeout(()=>{
-      emitToTargets(up);
-    },duration);
-  }
-
-  // PERSISTENT movement transport channel
-  function setMovement(code,on){
-
-    const map = {
-      ArrowUp:'up',
-      ArrowDown:'down',
-      ArrowLeft:'left',
-      ArrowRight:'right'
-    };
-
-    const slot = map[code];
-
-    if(!slot) return;
-
-    if(movementState[slot] === on) return;
-
-    movementState[slot] = on;
-
-    const ev = new KeyboardEvent(
-      on ? 'keydown':'keyup',
-      {
-        key:code,
-        code:code,
-        bubbles:true
-      }
-    );
-
-    emitToTargets(ev);
-  }
-
-  // FIRE ISOLATED from movement channel
-  const fireBtn = document.getElementById('ictV41Fire');
-
-  if(fireBtn){
-
-    function firePulse(){
-      emitDiscrete('Space',' ');
-      emitDiscrete('KeyX','x');
-    }
-
-    fireBtn.addEventListener('pointerdown', e=>{
-      e.preventDefault();
-
-      firePulse();
-
-      if(fireInterval){
-        clearInterval(fireInterval);
-      }
-
-      fireInterval = setInterval(()=>{
-        firePulse();
-      },120);
-    });
-
-    ['pointerup','pointercancel','pointerleave']
-      .forEach(ev=>{
-        fireBtn.addEventListener(ev, ()=>{
-          if(fireInterval){
-            clearInterval(fireInterval);
-            fireInterval = null;
-          }
-        });
-      });
-  }
-
-  // TRACKPAD TRANSPORT ONLY
-  const joy = document.getElementById('ictV41Joy');
-  const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
-
-  if(!joy || !knob) return;
-
-  let pid = null;
-
-  function clearMovement(){
-    setMovement('ArrowUp',false);
-    setMovement('ArrowDown',false);
-    setMovement('ArrowLeft',false);
-    setMovement('ArrowRight',false);
-
-    knob.style.transform = 'translate(0px,0px)';
-  }
-
-  function updateTrackpad(x,y){
-
-    const r = joy.getBoundingClientRect();
-
-    const cx = r.left + r.width/2;
-    const cy = r.top + r.height/2;
-
-    let dx = x - cx;
-    let dy = y - cy;
-
-    const radius = r.width/2;
-
-    const limit = radius * 0.62;
-
-    const raw = Math.hypot(dx,dy);
-
-    // visual knob only
-    if(raw > limit && raw > 0){
-      const s = limit/raw;
-      dx *= s;
-      dy *= s;
-    }
-
-    knob.style.transform =
-      `translate(${dx}px,${dy}px)`;
-
-    // REAL vector values
-    const nx = (x-cx)/radius;
-    const ny = (y-cy)/radius;
-
-    const mag = Math.hypot(nx,ny);
-
-    // dead zone
-    if(mag < 0.18){
-      clearMovement();
-      return;
-    }
-
-    const th = 0.22;
-
-    // NO FIRE INTERACTION HERE
-    setMovement('ArrowLeft', nx < -th);
-    setMovement('ArrowRight', nx > th);
-    setMovement('ArrowUp', ny < -th);
-    setMovement('ArrowDown', ny > th);
-
-    // future analog payload
-    window.ICTLabsTrackpad = {
-      x:Math.max(-1,Math.min(1,nx)),
-      y:Math.max(-1,Math.min(1,ny)),
-      magnitude:mag,
-      angle:Math.atan2(ny,nx)
-    };
-  }
-
-  joy.addEventListener('pointerdown', e=>{
-    e.preventDefault();
-
-    pid = e.pointerId;
-
-    joy.setPointerCapture?.(pid);
-
-    updateTrackpad(
-      e.clientX,
-      e.clientY
-    );
-  });
-
-  joy.addEventListener('pointermove', e=>{
-    if(pid !== e.pointerId) return;
-
-    e.preventDefault();
-
-    updateTrackpad(
-      e.clientX,
-      e.clientY
-    );
-  });
-
-  ['pointerup','pointercancel','pointerleave']
-    .forEach(ev=>{
-      joy.addEventListener(ev, e=>{
-        if(pid !== null && e.pointerId !== pid) return;
-
-        clearMovement();
-
-        pid = null;
-      });
-    });
-
- });
-})();
-</script>
-
-<script>
-/* ICTLabs Retro Console — V4.6 Mobile Input API */
-(function(){
-  if(window.__ICT_V46_INPUT_API__) return;
-  window.__ICT_V46_INPUT_API__ = true;
-
-  const ready = fn => document.readyState === 'loading'
-    ? document.addEventListener('DOMContentLoaded', fn)
-    : fn();
-
-  ready(function(){
-
-    const input = window.ICTLabsInput = window.ICTLabsInput || {
-      moveX:0,
-      moveY:0,
-      magnitude:0,
-      angle:0,
-      fire:false,
-      select:false,
-      cancel:false,
-      pause:false,
-      close:false,
-      source:'console-v4.6'
-    };
-
-    function pushInput(){
-      input.ts = performance.now();
-      const frame = document.querySelector('iframe');
-      try{
-        if(frame && frame.contentWindow){
-          frame.contentWindow.ICTLabsInput = input;
-        }
-      }catch(e){}
-    }
-
-    // Keep iframe synchronized even after game iframe reloads.
-    setInterval(pushInput, 250);
-
-    const pad = document.getElementById('ictV41Joy');
-    const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
-
-    if(pad){
-      let pid = null;
-
-      function releasePad(){
-        input.moveX = 0;
-        input.moveY = 0;
-        input.magnitude = 0;
-        input.angle = 0;
-        if(knob) knob.style.transform = 'translate(0px,0px)';
-        pushInput();
-        pid = null;
-      }
-
-      function updatePad(clientX, clientY){
-        const r = pad.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const radius = r.width / 2;
-
-        let dx = clientX - cx;
-        let dy = clientY - cy;
-
-        const raw = Math.hypot(dx, dy);
-        const visualLimit = radius * 0.62;
-
-        if(raw > visualLimit && raw > 0){
-          const s = visualLimit / raw;
-          dx *= s;
-          dy *= s;
-        }
-
-        if(knob) knob.style.transform = `translate(${dx}px,${dy}px)`;
-
-        const nx = Math.max(-1, Math.min(1, (clientX - cx) / radius));
-        const ny = Math.max(-1, Math.min(1, (clientY - cy) / radius));
-        const mag = Math.min(1, Math.hypot(nx, ny));
-        const dead = 0.18;
-
-        if(mag < dead){
-          input.moveX = 0;
-          input.moveY = 0;
-          input.magnitude = 0;
-          input.angle = 0;
-        }else{
-          // normalize dead-zone out so motion begins cleanly after center
-          const scaled = (mag - dead) / (1 - dead);
-          input.moveX = nx * scaled / mag;
-          input.moveY = ny * scaled / mag;
-          input.magnitude = scaled;
-          input.angle = Math.atan2(ny, nx);
-        }
-
-        pushInput();
-      }
-
-      pad.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        pid = e.pointerId;
-        pad.setPointerCapture?.(pid);
-        updatePad(e.clientX, e.clientY);
-      }, true);
-
-      pad.addEventListener('pointermove', e=>{
-        if(pid !== e.pointerId) return;
-        e.preventDefault();
-        e.stopPropagation();
-        updatePad(e.clientX, e.clientY);
-      }, true);
-
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        pad.addEventListener(ev, e=>{
-          if(pid !== null && e.pointerId !== pid) return;
-          e.preventDefault();
-          e.stopPropagation();
-          releasePad();
-        }, true);
-      });
-    }
-
-    const fire = document.getElementById('ictV41Fire');
-    if(fire){
-      fire.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        input.fire = true;
-        pushInput();
-      }, true);
-
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        fire.addEventListener(ev, e=>{
-          e.preventDefault();
-          e.stopPropagation();
-          input.fire = false;
-          pushInput();
-        }, true);
-      });
-    }
-
-    // Optional V4.5 pause/select/cancel/close bridge
-    function bindStateButton(id, prop, pulse=false){
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        input[prop] = true;
-        pushInput();
-        if(pulse){
-          setTimeout(()=>{
-            input[prop] = false;
-            pushInput();
-          }, 140);
-        }
-      }, true);
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        el.addEventListener(ev, e=>{
-          e.preventDefault();
-          e.stopPropagation();
-          if(!pulse) input[prop] = false;
-          pushInput();
-        }, true);
-      });
-    }
-
-    bindStateButton('ictV45Pause','pause',true);
-    bindStateButton('ictV41Close','close',true);
-
-    pushInput();
-  });
-})();
-</script>
-
-<script>
-/* === ICTLABS CONSOLE V4.8 VERIFIED PATCH === */
-(function(){
- if(window.__ICT_V48__) return;
- window.__ICT_V48__ = true;
-
- const ready=fn=>document.readyState==='loading'
-   ? document.addEventListener('DOMContentLoaded',fn)
-   : fn();
-
- ready(function(){
-
-  // Visible runtime version
-  if(!document.getElementById('ictVersionTag')){
-    const v=document.createElement('div');
-    v.id='ictVersionTag';
-    v.textContent='CONSOLE v4.8';
-    document.body.appendChild(v);
-  }
-
-  function pushInput(){
-    const frame=document.querySelector('iframe');
-    try{
-      if(frame&&frame.contentWindow){
-        frame.contentWindow.ICTLabsInput=window.ICTLabsInput;
-      }
-    }catch(e){}
-  }
-
-  window.ICTLabsInput = window.ICTLabsInput || {
-    moveX:0,moveY:0,magnitude:0,angle:0,
-    fire:false,select:false,cancel:false,close:false,pause:false
-  };
-
-  function buildDiamond(){
-    const overlay=document.getElementById('ictV41Overlay');
-    const actions=document.querySelector('#ictV41Overlay .ict-v41-actions');
-    if(!overlay||!actions) return false;
-
-    // HARD REPLACE CONTENT
-    actions.innerHTML = `
-      <button id="ictV48Select" class="ict-v48-btn" type="button">SELECT</button>
-      <button id="ictV48Close" class="ict-v48-btn" type="button">CLOSE</button>
-      <button id="ictV48Fire" class="ict-v48-btn" type="button" aria-label="Fire">
-        <svg viewBox="0 0 64 64">
-          <path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/>
-        </svg>
-      </button>
-      <button id="ictV48Cancel" class="ict-v48-btn" type="button">CANCEL</button>
-    `;
-
-    function pulse(prop,time=120){
-      window.ICTLabsInput[prop]=true;
-      pushInput();
-      setTimeout(()=>{
-        window.ICTLabsInput[prop]=false;
-        pushInput();
-      },time);
-    }
-
-    // FIRE isolated state
-    let fireInt=null;
-    const fire=document.getElementById('ictV48Fire');
-
-    function stopFire(){
-      if(fireInt){
-        clearInterval(fireInt);
-        fireInt=null;
-      }
-      window.ICTLabsInput.fire=false;
-      pushInput();
-    }
-
-    function startFire(e){
-      e.preventDefault();
-      e.stopPropagation();
-
-      window.ICTLabsInput.fire=true;
-      pushInput();
-
-      stopFire();
-
-      window.ICTLabsInput.fire=true;
-      pushInput();
-
-      fireInt=setInterval(()=>{
-        window.ICTLabsInput.fire=true;
-        pushInput();
-      },80);
-    }
-
-    fire.addEventListener('pointerdown',startFire,true);
-    ['pointerup','pointercancel','pointerleave']
-      .forEach(ev=>fire.addEventListener(ev,stopFire,true));
-
-    document.getElementById('ictV48Select')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-        pulse('select');
-      },true);
-
-    document.getElementById('ictV48Cancel')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-        pulse('cancel');
-      },true);
-
-    document.getElementById('ictV48Close')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-
-        pulse('close');
-
-        overlay.classList.remove('show');
-        overlay.classList.remove('active');
-      },true);
-
-    window.__ICT_V48_DIAMOND_READY__=true;
-    return true;
-  }
-
-  // immediate + retries + mutation observer
-  if(buildDiamond()) return;
-
-  let tries=0;
-  const retry=setInterval(()=>{
-    tries++;
-    if(buildDiamond()||tries>50){
-      clearInterval(retry);
-    }
-  },100);
-
-  const mo=new MutationObserver(()=>{
-    buildDiamond();
-  });
-
-  mo.observe(document.body,{childList:true,subtree:true});
- });
+ if(prop==='fire'){
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>el.addEventListener(ev,()=>{window.ICTLabsInput.fire=false;sync();}));
+ }
+}
+bindPulse('aFire','fire');
+bindPulse('aSelect','select');
+bindPulse('aCancel','cancel');
+bindPulse('aClose','close');
+
+sync();
 })();
 </script>
 
