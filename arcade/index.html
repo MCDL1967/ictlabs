@@ -623,6 +623,104 @@ body::after{
 @media(min-width:700px) and (max-width:1024px){.ict-v41-overlay{min-height:178px;grid-template-columns:1.05fr 1fr .52fr;padding:16px 22px}.ict-v41-joy{width:168px;height:168px}.ict-v41-continue{width:190px;height:64px}.ict-v41-actions{padding-right:16px}}
 
 </style>
+<style>
+
+/* ==========================================================
+   ICTLabs Retro Console — V4.2 Stabilization Patch
+   Surgical corrections only.
+   ========================================================== */
+
+/* 1) Kill rogue floating controls trigger permanently. */
+#touchToggle{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* 2) Remove V4.1 experimental overlay permanently. Use original #touchPanel only. */
+#ictV41Overlay,
+.ict-v41-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* 3) Hard main-panel CONTROLS button rules. */
+@media (max-width:1024px), (pointer:coarse){
+  #desktopControlsButton{
+    opacity:1 !important;
+    filter:none !important;
+    cursor:pointer !important;
+    pointer-events:auto !important;
+    color:var(--text) !important;
+  }
+  #desktopControlsButton:hover{
+    background:var(--accent);
+    color:#fff;
+    box-shadow:0 0 10px var(--glow);
+  }
+}
+@media (min-width:1025px) and (pointer:fine){
+  #desktopControlsButton{
+    opacity:.35 !important;
+    filter:saturate(.45) !important;
+    pointer-events:none !important;
+    cursor:not-allowed !important;
+  }
+}
+
+/* 4) Phone-only back-arrow collision fix. */
+@media (max-width:767px) and (orientation:portrait){
+  .header .back-arrow{
+    right:8px !important;
+    top:50% !important;
+    width:52px !important;
+    min-width:52px !important;
+    max-width:52px !important;
+    height:38px !important;
+    min-height:38px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:1.5px solid var(--border) !important;
+    background:rgba(0,0,0,.72) !important;
+    box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(37,99,235,.12) !important;
+    overflow:hidden !important;
+    isolation:isolate !important;
+    z-index:4 !important;
+  }
+}
+
+/* 5) Original touchPanel restored as the one and only overlay. */
+#touchPanel{
+  display:grid !important;
+}
+@media (pointer:fine) and (min-width:1025px){
+  #touchPanel{display:none !important;}
+}
+
+/* 6) True joystick surface: children are visual only; dpad owns all touch math. */
+#dpad{
+  touch-action:none !important;
+  pointer-events:auto !important;
+}
+#dpad .dpad-btn,
+#dpad .dpad-row,
+#dpad .dpad-center{
+  pointer-events:none !important;
+}
+
+/* Keep blast as a clean vector symbol, not an emoji-like colored icon. */
+#aFire{
+  color:#fff !important;
+  font-size:27px !important;
+  line-height:1 !important;
+  text-shadow:0 0 8px rgba(255,255,255,.9) !important;
+}
+#aFire::first-letter{
+  color:#fff !important;
+}
+
+</style>
 </head>
 <body>
 
@@ -1140,6 +1238,259 @@ loadGames();
   ['pointerup','pointercancel','pointerleave'].forEach(ev=>joy.addEventListener(ev,e=>{if(pid!==null&&e.pointerId!==pid)return;releaseDirs()}));
   addEventListener('resize',()=>{if(!isTouch())deck.classList.remove('show')});
  });
+})();
+</script>
+
+
+<script>
+/* ICTLabs Retro Console — V4.2 Stabilization JS */
+(function(){
+  const ready = fn => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn();
+
+  ready(function(){
+    const isTouch = () => window.matchMedia('(max-width:1024px), (pointer:coarse)').matches;
+
+    const panel = document.getElementById('touchPanel');
+    const hardControls = document.getElementById('desktopControlsButton');
+    const rogueToggle = document.getElementById('touchToggle');
+    const v41 = document.getElementById('ictV41Overlay');
+
+    // Fully remove the rogue overlay trigger and V4.1 experimental overlay from behavior.
+    if(rogueToggle) rogueToggle.remove();
+    if(v41) v41.remove();
+
+    // Restore original panel if V4.1 hid it.
+    if(panel){
+      panel.style.display = '';
+      panel.classList.remove('show');
+    }
+
+    let open = panel && panel.classList.contains('open');
+
+    function sendKey(type,key){
+      const gameFrame = document.getElementById('gameFrame');
+      const gamePane  = document.getElementById('gamePane');
+      const code = key === ' ' ? 'Space' : key;
+
+      if(gamePane && gamePane.style.display !== 'none'){
+        try{ gameFrame.contentWindow.postMessage({type:'key',event:type,key,code},'*'); }catch(ex){}
+        try{
+          const ev = new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true});
+          gameFrame.contentWindow && gameFrame.contentWindow.dispatchEvent(ev);
+          gameFrame.contentDocument && gameFrame.contentDocument.dispatchEvent(ev);
+        }catch(ex){}
+      }else{
+        if(type === 'keydown'){
+          const up = document.getElementById('upButton');
+          const down = document.getElementById('downButton');
+          const select = document.getElementById('selectButton');
+          if(key === 'ArrowUp') up && up.click();
+          if(key === 'ArrowDown') down && down.click();
+          if(key === ' ') select && select.click();
+        }
+      }
+    }
+
+    function tap(key,ms=70){
+      sendKey('keydown',key);
+      window.setTimeout(()=>sendKey('keyup',key),ms);
+    }
+
+    function openPanel(){
+      if(!panel || !isTouch()) return;
+      open = true;
+      panel.classList.add('open');
+    }
+
+    function closePanel(){
+      if(!panel) return;
+      open = false;
+      panel.classList.remove('open');
+      releaseDirections();
+      stopFire();
+      // Cabinet rule: close/esc hides overlay and pauses/back-outs active game.
+      tap('Escape',80);
+    }
+
+    // Hard main-panel CONTROLS button is the only open trigger.
+    if(hardControls){
+      hardControls.removeAttribute('aria-disabled');
+      hardControls.addEventListener('click', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        open ? closePanel() : openPanel();
+      }, true);
+      hardControls.addEventListener('touchstart', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        open ? closePanel() : openPanel();
+      }, {passive:false, capture:true});
+    }
+
+    // Replace existing dpad behavior in capture phase.
+    const dpad = document.getElementById('dpad');
+    const active = {ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false};
+    let joyPointer = null;
+
+    function setDir(key,on){
+      if(active[key] === on) return;
+      active[key] = on;
+      sendKey(on ? 'keydown' : 'keyup', key);
+    }
+
+    function releaseDirections(){
+      Object.keys(active).forEach(k => setDir(k,false));
+      joyPointer = null;
+    }
+
+    function updateJoystick(clientX, clientY){
+      if(!dpad) return;
+
+      const r = dpad.getBoundingClientRect();
+
+      // TRUE ORIGIN: visual center of the pressure pad.
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+
+      // TRUE SCALE: center to outer circle perimeter.
+      const radius = Math.min(r.width, r.height) / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+
+      const nx = dx / radius;
+      const ny = dy / radius;
+
+      const mag = Math.hypot(nx, ny);
+      const dead = 0.18;
+
+      if(mag < dead){
+        setDir('ArrowLeft',false);
+        setDir('ArrowRight',false);
+        setDir('ArrowUp',false);
+        setDir('ArrowDown',false);
+        return;
+      }
+
+      // Independent axes allow diagonals and continuous pressure-pad steering.
+      const axis = 0.22;
+      setDir('ArrowLeft',  nx < -axis);
+      setDir('ArrowRight', nx >  axis);
+      setDir('ArrowUp',    ny < -axis);
+      setDir('ArrowDown',  ny >  axis);
+    }
+
+    if(dpad){
+      ['touchstart','pointerdown'].forEach(ev=>{
+        dpad.addEventListener(ev, function(e){
+          if(!isTouch()) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          const p = e.touches ? e.touches[0] : e;
+          joyPointer = p.pointerId || 'touch';
+          if(e.pointerId && dpad.setPointerCapture) dpad.setPointerCapture(e.pointerId);
+          updateJoystick(p.clientX,p.clientY);
+        }, {passive:false, capture:true});
+      });
+
+      dpad.addEventListener('pointermove', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        updateJoystick(e.clientX,e.clientY);
+      }, {passive:false, capture:true});
+
+      dpad.addEventListener('touchmove', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const p = e.touches && e.touches[0];
+        if(p) updateJoystick(p.clientX,p.clientY);
+      }, {passive:false, capture:true});
+
+      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
+        dpad.addEventListener(ev, function(e){
+          if(!isTouch()) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          releaseDirections();
+        }, {passive:false, capture:true});
+      });
+    }
+
+    // CONTINUE remains Space.
+    const spaceBtn = document.getElementById('spaceBtn');
+    if(spaceBtn){
+      spaceBtn.addEventListener('click', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        tap(' ');
+      }, true);
+      spaceBtn.addEventListener('touchstart', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        tap(' ');
+      }, {passive:false, capture:true});
+    }
+
+    // Blast: hold-to-fire, capture phase blocks older tap-only listeners.
+    const fireBtn = document.getElementById('aFire');
+    let fireTimer = null;
+    function fireOnce(){ tap(' '); }
+    function startFire(e){
+      if(!isTouch()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      stopFire();
+      fireOnce();
+      fireTimer = window.setInterval(fireOnce, 125);
+    }
+    function stopFire(e){
+      if(e && isTouch()){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+      if(fireTimer){
+        window.clearInterval(fireTimer);
+        fireTimer = null;
+      }
+      sendKey('keyup',' ');
+    }
+    if(fireBtn){
+      fireBtn.textContent = '✸';
+      fireBtn.addEventListener('pointerdown', startFire, {passive:false, capture:true});
+      fireBtn.addEventListener('touchstart', startFire, {passive:false, capture:true});
+      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
+        fireBtn.addEventListener(ev, stopFire, {passive:false, capture:true});
+      });
+    }
+
+    // ESC on overlay closes overlay and pauses/backs out.
+    const escBtn = document.getElementById('aSelect');
+    if(escBtn){
+      escBtn.addEventListener('click', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closePanel();
+      }, true);
+      escBtn.addEventListener('touchstart', function(e){
+        if(!isTouch()) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closePanel();
+      }, {passive:false, capture:true});
+    }
+
+    window.addEventListener('resize', function(){
+      if(!isTouch()){
+        closePanel();
+      }
+    });
+  });
 })();
 </script>
 
