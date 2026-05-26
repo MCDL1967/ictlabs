@@ -776,81 +776,89 @@ body::after{
 /* V4.6 preserves V4.5 geometry. It only adds a state-based mobile input API. */
 </style><style>
 
-/* === V4.7.1 CONTROLLER DIAMOND PATCH — SMOKE SAFE === */
-/* Base: V4.6. Does not restructure shell. Only styles inserted action buttons once overlay exists. */
+/* === ICTLABS CONSOLE V4.8 VERIFIED PATCH === */
 
-#ictV41Overlay .ict-v41-actions.ict-v471-diamond{
+#ictVersionTag{
+  position:fixed;
+  top:8px;
+  right:72px;
+  z-index:99999;
+  color:#8ffcff;
+  font-family:monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  padding:4px 8px;
+  border:1px solid rgba(47,107,255,.7);
+  border-radius:8px;
+  background:rgba(0,0,0,.45);
+  box-shadow:0 0 10px rgba(47,107,255,.35);
+}
+
+/* HARD REBUILD of action cluster */
+#ictV41Overlay .ict-v41-actions{
   display:grid!important;
-  grid-template-columns:repeat(3, minmax(52px, 1fr))!important;
-  grid-template-rows:repeat(3, auto)!important;
+  grid-template-columns:64px 76px 64px!important;
+  grid-template-rows:44px 76px 44px!important;
+  grid-template-areas:
+    ". select ."
+    "close fire ."
+    ". cancel .";
   align-items:center!important;
   justify-items:center!important;
   gap:8px!important;
-  padding-right:8px!important;
-  min-width:160px!important;
+  min-width:220px!important;
+  padding-right:10px!important;
 }
 
-/*
-       SELECT
- CLOSE         FIRE
-       CANCEL
-*/
-#ictV47Select{grid-column:2!important;grid-row:1!important;}
-#ictV41Close{grid-column:1!important;grid-row:2!important;}
-#ictV41Fire{grid-column:3!important;grid-row:2!important;width:66px!important;height:66px!important;margin:0!important;}
-#ictV47Cancel{grid-column:2!important;grid-row:3!important;}
+#ictV48Select{grid-area:select!important;}
+#ictV48Close{grid-area:close!important;}
+#ictV48Fire{grid-area:fire!important;}
+#ictV48Cancel{grid-area:cancel!important;}
 
-.ict-v47-action-btn{
-  width:68px!important;
-  height:44px!important;
-  border-radius:17px!important;
+.ict-v48-btn{
+  width:64px!important;
+  height:42px!important;
+  border-radius:16px!important;
   border:2px solid #2f6bff!important;
   background:rgba(0,0,0,.62)!important;
   color:#fff!important;
   font-family:'Audiowide',sans-serif!important;
   font-size:10px!important;
   letter-spacing:1px!important;
-  box-shadow:0 0 12px rgba(47,107,255,.45), inset 0 0 8px rgba(47,107,255,.12)!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  text-align:center!important;
-  padding:0!important;
+  box-shadow:0 0 12px rgba(47,107,255,.45)!important;
 }
 
-#ictV45Pause{display:none!important;}
+#ictV48Fire{
+  width:74px!important;
+  height:74px!important;
+  border-radius:50%!important;
+}
+
+#ictV48Fire svg{
+  width:40px;
+  height:40px;
+  stroke:#fff;
+  fill:none;
+  stroke-width:2.2;
+}
 
 @media(max-width:520px){
-  #ictV41Overlay .ict-v41-actions.ict-v471-diamond{
-    min-width:150px!important;
-    gap:6px!important;
-    padding-right:2px!important;
+  #ictV41Overlay .ict-v41-actions{
+    grid-template-columns:56px 66px 56px!important;
+    grid-template-rows:40px 66px 40px!important;
+    min-width:188px!important;
   }
-  .ict-v47-action-btn{
-    width:60px!important;
-    height:40px!important;
+  .ict-v48-btn{
+    width:56px!important;
+    height:38px!important;
     font-size:9px!important;
   }
-  #ictV41Fire{
-    width:58px!important;
-    height:58px!important;
-  }
-}
-
-@media(min-width:700px) and (max-width:1024px){
-  #ictV41Overlay .ict-v41-actions.ict-v471-diamond{
-    min-width:182px!important;
-    gap:9px!important;
-    padding-right:10px!important;
-  }
-  .ict-v47-action-btn{
-    width:74px!important;
-    height:46px!important;
-    font-size:10px!important;
-  }
-  #ictV41Fire{
-    width:70px!important;
-    height:70px!important;
+  #ictV48Fire{
+    width:64px!important;
+    height:64px!important;
   }
 }
 
@@ -2053,157 +2061,143 @@ loadGames();
 </script>
 
 <script>
-/* ICTLabs Retro Console — V4.7.1 Controller Diamond Actions — lifecycle safe */
+/* === ICTLABS CONSOLE V4.8 VERIFIED PATCH === */
 (function(){
-  if(window.__ICT_V471_DIAMOND__) return;
-  window.__ICT_V471_DIAMOND__ = true;
+ if(window.__ICT_V48__) return;
+ window.__ICT_V48__ = true;
 
-  const ready = fn => document.readyState === 'loading'
-    ? document.addEventListener('DOMContentLoaded', fn)
-    : fn();
+ const ready=fn=>document.readyState==='loading'
+   ? document.addEventListener('DOMContentLoaded',fn)
+   : fn();
 
-  ready(function(){
+ ready(function(){
 
-    const input = window.ICTLabsInput = window.ICTLabsInput || {
-      moveX:0, moveY:0, magnitude:0, angle:0,
-      fire:false, select:false, cancel:false, pause:false, close:false,
-      source:'console-v4.7.1'
-    };
-    input.source = 'console-v4.7.1';
+  // Visible runtime version
+  if(!document.getElementById('ictVersionTag')){
+    const v=document.createElement('div');
+    v.id='ictVersionTag';
+    v.textContent='CONSOLE v4.8';
+    document.body.appendChild(v);
+  }
 
-    function pushInput(){
-      input.ts = performance.now();
-      const frame = document.querySelector('iframe');
-      try{
-        if(frame && frame.contentWindow){
-          frame.contentWindow.ICTLabsInput = input;
-        }
-      }catch(e){}
-    }
+  function pushInput(){
+    const frame=document.querySelector('iframe');
+    try{
+      if(frame&&frame.contentWindow){
+        frame.contentWindow.ICTLabsInput=window.ICTLabsInput;
+      }
+    }catch(e){}
+  }
 
-    function emitDiscrete(code,key,duration=60){
-      const down = new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true});
-      const up = new KeyboardEvent('keyup',{key,code,bubbles:true,cancelable:true});
-      document.dispatchEvent(down);
-      const frame = document.querySelector('iframe');
-      try{
-        if(frame && frame.contentWindow){
-          frame.contentWindow.dispatchEvent(down);
-          frame.contentWindow.document.dispatchEvent(down);
-        }
-      }catch(e){}
-      setTimeout(()=>{
-        document.dispatchEvent(up);
-        try{
-          if(frame && frame.contentWindow){
-            frame.contentWindow.dispatchEvent(up);
-            frame.contentWindow.document.dispatchEvent(up);
-          }
-        }catch(e){}
-      }, duration);
-    }
+  window.ICTLabsInput = window.ICTLabsInput || {
+    moveX:0,moveY:0,magnitude:0,angle:0,
+    fire:false,select:false,cancel:false,close:false,pause:false
+  };
 
-    function pulseState(prop, code, key){
-      input[prop] = true;
+  function buildDiamond(){
+    const overlay=document.getElementById('ictV41Overlay');
+    const actions=document.querySelector('#ictV41Overlay .ict-v41-actions');
+    if(!overlay||!actions) return false;
+
+    // HARD REPLACE CONTENT
+    actions.innerHTML = `
+      <button id="ictV48Select" class="ict-v48-btn" type="button">SELECT</button>
+      <button id="ictV48Close" class="ict-v48-btn" type="button">CLOSE</button>
+      <button id="ictV48Fire" class="ict-v48-btn" type="button" aria-label="Fire">
+        <svg viewBox="0 0 64 64">
+          <path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/>
+        </svg>
+      </button>
+      <button id="ictV48Cancel" class="ict-v48-btn" type="button">CANCEL</button>
+    `;
+
+    function pulse(prop,time=120){
+      window.ICTLabsInput[prop]=true;
       pushInput();
-      if(code) emitDiscrete(code,key);
       setTimeout(()=>{
-        input[prop] = false;
+        window.ICTLabsInput[prop]=false;
         pushInput();
-      }, 140);
+      },time);
     }
 
-    function bindButton(id, prop, code, key){
-      const el = document.getElementById(id);
-      if(!el || el.dataset.ictBound === '1') return;
-      el.dataset.ictBound = '1';
+    // FIRE isolated state
+    let fireInt=null;
+    const fire=document.getElementById('ictV48Fire');
 
-      el.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        pulseState(prop, code, key);
-      }, true);
-
-      el.addEventListener('click', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-      }, true);
-    }
-
-    function installDiamond(){
-      const overlay = document.getElementById('ictV41Overlay');
-      const actions = document.querySelector('#ictV41Overlay .ict-v41-actions');
-      const fire = document.getElementById('ictV41Fire');
-      const close = document.getElementById('ictV41Close');
-
-      if(!overlay || !actions || !fire || !close) return false;
-
-      actions.classList.add('ict-v471-diamond');
-
-      let select = document.getElementById('ictV47Select');
-      if(!select){
-        select = document.createElement('button');
-        select.id = 'ictV47Select';
-        select.className = 'ict-v47-action-btn';
-        select.type = 'button';
-        select.textContent = 'SELECT';
-        actions.appendChild(select);
+    function stopFire(){
+      if(fireInt){
+        clearInterval(fireInt);
+        fireInt=null;
       }
-
-      let cancel = document.getElementById('ictV47Cancel');
-      if(!cancel){
-        cancel = document.createElement('button');
-        cancel.id = 'ictV47Cancel';
-        cancel.className = 'ict-v47-action-btn';
-        cancel.type = 'button';
-        cancel.textContent = 'CANCEL';
-        actions.appendChild(cancel);
-      }
-
-      bindButton('ictV47Select','select','Enter','Enter');
-      bindButton('ictV47Cancel','cancel','Escape','Escape');
-
-      // CLOSE remains cabinet state. Existing close behavior from V4.6 stays intact.
-      if(close.dataset.ictCloseStateBound !== '1'){
-        close.dataset.ictCloseStateBound = '1';
-        close.addEventListener('pointerdown', ()=>{
-          input.close = true;
-          pushInput();
-        }, true);
-        ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-          close.addEventListener(ev, ()=>{
-            input.close = false;
-            pushInput();
-          }, true);
-        });
-      }
-
-      // Make the installation observable for smoke testing.
-      window.__ICT_V471_DIAMOND_READY__ = true;
+      window.ICTLabsInput.fire=false;
       pushInput();
-      return true;
     }
 
-    // Immediate attempt.
-    installDiamond();
+    function startFire(e){
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Retry because V4.6 creates overlay dynamically after DOMContentLoaded.
-    let tries = 0;
-    const retry = setInterval(()=>{
-      tries++;
-      if(installDiamond() || tries > 40){
-        clearInterval(retry);
-      }
-    }, 100);
+      window.ICTLabsInput.fire=true;
+      pushInput();
 
-    // Mutation observer catches overlay creation without depending on timing.
-    const mo = new MutationObserver(()=>{
-      if(installDiamond()){
-        // Keep observer lightweight but active for reload/rebuild cases.
-      }
-    });
-    mo.observe(document.body, {childList:true, subtree:true});
+      stopFire();
+
+      window.ICTLabsInput.fire=true;
+      pushInput();
+
+      fireInt=setInterval(()=>{
+        window.ICTLabsInput.fire=true;
+        pushInput();
+      },80);
+    }
+
+    fire.addEventListener('pointerdown',startFire,true);
+    ['pointerup','pointercancel','pointerleave']
+      .forEach(ev=>fire.addEventListener(ev,stopFire,true));
+
+    document.getElementById('ictV48Select')
+      .addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+        pulse('select');
+      },true);
+
+    document.getElementById('ictV48Cancel')
+      .addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+        pulse('cancel');
+      },true);
+
+    document.getElementById('ictV48Close')
+      .addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+
+        pulse('close');
+
+        overlay.classList.remove('show');
+        overlay.classList.remove('active');
+      },true);
+
+    window.__ICT_V48_DIAMOND_READY__=true;
+    return true;
+  }
+
+  // immediate + retries + mutation observer
+  if(buildDiamond()) return;
+
+  let tries=0;
+  const retry=setInterval(()=>{
+    tries++;
+    if(buildDiamond()||tries>50){
+      clearInterval(retry);
+    }
+  },100);
+
+  const mo=new MutationObserver(()=>{
+    buildDiamond();
   });
+
+  mo.observe(document.body,{childList:true,subtree:true});
+ });
 })();
 </script>
 
