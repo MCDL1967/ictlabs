@@ -407,6 +407,51 @@ function idleDraw(){
 }
 
 
+/*
+Game: Snake
+Adapter Version: snake_input_v1.0
+Console Target: v4.9.2+
+Spec Version: v2
+*/
+function getICTInput(){return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;}
+let ictLUp=false,ictLDown=false,ictLLeft=false,ictLRight=false;
+let ictLSel=false,ictLCancel=false,paused=false;
+const ICT_ARM_FRAMES=30;
+let ictArmed=false,ictSelLow=0;
+function pollICTInput(){
+  const ict=getICTInput();if(!ict)return;
+  if(AC.state==='suspended')AC.resume();
+  if(!ictArmed){
+    if(ict.select)ictSelLow=0;else if(++ictSelLow>=ICT_ARM_FRAMES)ictArmed=true;
+    ictLSel=!!ict.select;return;
+  }
+  if(gstate!=='playing'&&paused){paused=false;hideMsg();}
+  if(ict.select&&!ictLSel){
+    if(gstate==='idle'||gstate==='dead'){ictLSel=true;startGame();return;}
+  }
+  ictLSel=!!ict.select;
+  if(ict.cancel&&!ictLCancel){
+    if(gstate==='playing'){
+      paused=!paused;
+      if(paused){clearInterval(gameLoop);gameLoop=null;showMsg('PAUSED\nPRESS PAUSE TO RESUME');}
+      else{hideMsg();gameLoop=setInterval(tick,speed);}
+    }
+  }
+  ictLCancel=!!ict.cancel;
+  if(gstate!=='playing'||paused)return;
+  const up=ict.moveY<-0.35,down=ict.moveY>0.35;
+  const left=ict.moveX<-0.35,right=ict.moveX>0.35;
+  const setDir=d=>{
+    if(d.x===dir.x*-1&&d.y===dir.y*-1)return;
+    if(nextDir.x!==d.x||nextDir.y!==d.y){sfxTurn();nextDir=d;}
+  };
+  if(up   &&!ictLUp)    setDir({x:0,y:-1});
+  if(down &&!ictLDown)  setDir({x:0,y:1});
+  if(left &&!ictLLeft)  setDir({x:-1,y:0});
+  if(right&&!ictLRight) setDir({x:1,y:0});
+  ictLUp=up;ictLDown=down;ictLLeft=left;ictLRight=right;
+}
+
 // Touch overlay postMessage bridge
 window.addEventListener("message",function(e){
   if(!e.data||e.data.type!=="key")return;
@@ -419,10 +464,7 @@ window.addEventListener("message",function(e){
 // ── Boot ───────────────────────────────────────────────
 updateUI();
 idleDraw();
-// Auto-start if launched from console
-
-const urlMode=new URLSearchParams(window.location.search).get('mode');
-if(urlMode) startGame();
+(function ictLoop(){requestAnimationFrame(ictLoop);pollICTInput();})();
 </script>
 </body>
 </html>
