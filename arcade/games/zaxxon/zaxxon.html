@@ -638,10 +638,20 @@ function getICTInput(){
   return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;
 }
 let ictLSel=false,ictLCancel=false,paused=false;
+// Arming guard: prevent stale select/fire from auto-starting on cartridge load.
+// Armed only after both select and fire are observed false at least once.
+let ictArmed=false;
 
 function pollICTInput(){
   const ict=getICTInput();if(!ict)return;
   if(AC.state==='suspended')AC.resume();
+
+  // ── Arming: wait for a clean frame before accepting start inputs ──────────
+  if(!ictArmed){
+    if(!ict.select&&!ict.fire) ictArmed=true;
+    ictLSel=!!ict.select; // keep edge state current while waiting
+    return;
+  }
 
   // Auto-clear pause when state leaves 'playing' (death / wave transition)
   if(gstate!=='playing'&&paused){paused=false;hideMsg();}
