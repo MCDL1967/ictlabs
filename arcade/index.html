@@ -721,7 +721,63 @@ body::after{
 }
 
 </style>
-</head>
+<style>
+/* === V4.4 TRACKPAD SURGICAL PATCH === */
+
+/* Kill only rogue floating controls */
+.floating-control,
+.floating-controls,
+.overlay-control,
+.overlay-controls,
+#overlayControl,
+#overlayControls{
+  display:none!important;
+}
+
+/* V4.4 overlay action ordering only */
+#ictV41Overlay .ict-v41-actions{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:10px!important;
+  padding-right:10px!important;
+}
+
+/* FIRE closest to right thumb */
+#ictV41Fire{
+  order:1!important;
+  width:74px!important;
+  height:74px!important;
+  margin-right:6px!important;
+}
+
+/* PAUSE secondary */
+#ictV44Pause{
+  order:2!important;
+  width:70px!important;
+  height:50px!important;
+  border-radius:18px!important;
+  border:2px solid #2f6bff!important;
+  background:rgba(0,0,0,.62)!important;
+  color:#fff!important;
+  font-family:'Audiowide',sans-serif!important;
+  box-shadow:0 0 12px rgba(47,107,255,.45)!important;
+}
+
+/* CLOSE tertiary */
+#ictV41Close{
+  order:3!important;
+}
+
+/* Trackpad visual cleanup */
+#ictV41Joy{
+  border-color:#2f6bff!important;
+}
+#ictV41Joy::before{
+  border-color:#2f6bff!important;
+}
+</style></head>
 <body>
 
 <div class="header">
@@ -1494,5 +1550,147 @@ loadGames();
 })();
 </script>
 
+
+<script>
+(function(){
+ if(window.__ICT_V44__) return;
+ window.__ICT_V44__ = true;
+
+ const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
+
+ ready(function(){
+
+  // add PAUSE button only if missing
+  const actions = document.querySelector('#ictV41Overlay .ict-v41-actions');
+  if(actions && !document.getElementById('ictV44Pause')){
+    const pause = document.createElement('button');
+    pause.id = 'ictV44Pause';
+    pause.textContent = 'PAUSE';
+    actions.insertBefore(pause, document.getElementById('ictV41Close'));
+
+    pause.addEventListener('click', ()=>{
+      const ev1 = new KeyboardEvent('keydown',{key:'p',code:'KeyP',bubbles:true});
+      const ev2 = new KeyboardEvent('keyup',{key:'p',code:'KeyP',bubbles:true});
+      document.dispatchEvent(ev1);
+      document.dispatchEvent(ev2);
+
+      const frame = document.querySelector('iframe');
+      try{
+        frame.contentWindow.document.dispatchEvent(ev1);
+        frame.contentWindow.document.dispatchEvent(ev2);
+      }catch(e){}
+    });
+  }
+
+  // surgical TRACKPAD math replacement
+  const joy = document.getElementById('ictV41Joy');
+  const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
+
+  if(!joy || !knob) return;
+
+  const active = {
+    ArrowUp:false,
+    ArrowDown:false,
+    ArrowLeft:false,
+    ArrowRight:false
+  };
+
+  let pid = null;
+
+  function send(type, code){
+    const ev = new KeyboardEvent(type,{
+      key:code,
+      code:code,
+      bubbles:true
+    });
+
+    document.dispatchEvent(ev);
+
+    const frame = document.querySelector('iframe');
+    try{
+      frame.contentWindow.document.dispatchEvent(ev);
+    }catch(e){}
+  }
+
+  function setKey(code,on){
+    if(active[code] === on) return;
+    active[code] = on;
+    send(on ? 'keydown':'keyup', code);
+  }
+
+  function releaseAll(){
+    Object.keys(active).forEach(k=>setKey(k,false));
+    knob.style.transform = 'translate(0px,0px)';
+    pid = null;
+  }
+
+  function update(x,y){
+
+    const r = joy.getBoundingClientRect();
+
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+
+    let dx = x - cx;
+    let dy = y - cy;
+
+    const radius = r.width/2;
+
+    const limit = radius * 0.62;
+
+    const raw = Math.hypot(dx,dy);
+
+    if(raw > limit && raw > 0){
+      const s = limit/raw;
+      dx *= s;
+      dy *= s;
+    }
+
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+
+    const nx = (x-cx)/radius;
+    const ny = (y-cy)/radius;
+
+    const dead = 0.18;
+
+    if(Math.hypot(nx,ny) < dead){
+      setKey('ArrowLeft',false);
+      setKey('ArrowRight',false);
+      setKey('ArrowUp',false);
+      setKey('ArrowDown',false);
+      return;
+    }
+
+    const th = 0.22;
+
+    setKey('ArrowLeft', nx < -th);
+    setKey('ArrowRight', nx > th);
+    setKey('ArrowUp', ny < -th);
+    setKey('ArrowDown', ny > th);
+  }
+
+  joy.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    pid = e.pointerId;
+    joy.setPointerCapture?.(pid);
+    update(e.clientX,e.clientY);
+  });
+
+  joy.addEventListener('pointermove', e=>{
+    if(pid !== e.pointerId) return;
+    e.preventDefault();
+    update(e.clientX,e.clientY);
+  });
+
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+    joy.addEventListener(ev, e=>{
+      if(pid !== null && e.pointerId !== pid) return;
+      releaseAll();
+    });
+  });
+
+ });
+})();
+</script>
 </body>
 </html>
