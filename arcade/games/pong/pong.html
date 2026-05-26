@@ -234,17 +234,17 @@ function advanceSet(){
 // ── Update ────────────────────────────────────────────
 function update(){
   frameCount++;
-  // 1P: human controls RIGHT paddle (p2) with ↑↓, CPU controls left (p1)
-  // 2P: W/S = left (p1), ↑↓ = right (p2)
+  // 1P: human controls RIGHT paddle (p2) with ↑↓ / ICT trackpad, CPU controls left (p1)
+  // 2P: W/S = left (p1), ↑↓ / ICT trackpad = right (p2)
   if(mode==='1p'){
-    if(keys['ArrowUp'])   p2.y=Math.max(0,p2.y-PAD_SPD);
-    if(keys['ArrowDown']) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
+    if(keys['ArrowUp']  ||ictMoveY<-0.18) p2.y=Math.max(0,p2.y-PAD_SPD);
+    if(keys['ArrowDown']||ictMoveY> 0.18) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
     updateAI();
   } else {
     if(keys['KeyW'])      p1.y=Math.max(0,p1.y-PAD_SPD);
     if(keys['KeyS'])      p1.y=Math.min(H-PAD_H,p1.y+PAD_SPD);
-    if(keys['ArrowUp'])   p2.y=Math.max(0,p2.y-PAD_SPD);
-    if(keys['ArrowDown']) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
+    if(keys['ArrowUp']  ||ictMoveY<-0.18) p2.y=Math.max(0,p2.y-PAD_SPD);
+    if(keys['ArrowDown']||ictMoveY> 0.18) p2.y=Math.min(H-PAD_H,p2.y+PAD_SPD);
   }
   moveBall();
 }
@@ -347,10 +347,51 @@ function showMatchOver(w){
   };
 }
 
+/*
+Game: Pong
+Adapter Version: pong_input_v1.0
+Console Target: v4.9.2+
+Spec Version: v2
+*/
+function getICTInput(){return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;}
+let ictLSel=false,ictLCancel=false,paused=false;
+let ictMoveY=0;
+const ICT_ARM_FRAMES=30;
+let ictArmed=false,ictSelLow=0;
+function pollICTInput(){
+  const ict=getICTInput();if(!ict)return;
+  if(AC.state==='suspended')AC.resume();
+  if(!ictArmed){
+    if(ict.select)ictSelLow=0;else if(++ictSelLow>=ICT_ARM_FRAMES)ictArmed=true;
+    ictLSel=!!ict.select;ictMoveY=0;return;
+  }
+  if(gstate!=='playing'&&paused){paused=false;hideMsg();}
+  if(ict.select&&!ictLSel){
+    if(gstate==='idle')    {ictLSel=true;startGame('1p');return;}
+    if(gstate==='setOver') {ictLSel=true;advanceSet();return;}
+    if(gstate==='matchOver'){ictLSel=true;startGame(mode);return;}
+  }
+  ictLSel=!!ict.select;
+  if(ict.cancel&&!ictLCancel){
+    if(gstate==='playing'){paused=!paused;if(paused)showMsg('PAUSED\nPRESS PAUSE TO RESUME');else hideMsg();}
+  }
+  ictLCancel=!!ict.cancel;
+  ictMoveY=(gstate==='playing'&&!paused)?ict.moveY:0;
+}
+
 // ── Loop ──────────────────────────────────────────────
-function loop(){
+let lastTime=0,accumulator=0;
+const TICK_MS=1000/60; // fixed 60fps-equivalent game logic tick
+function loop(ts){
   requestAnimationFrame(loop);
-  if(gstate==='playing') update();
+  if(!lastTime){lastTime=ts;draw();return;}
+  const dt=Math.min(ts-lastTime,100);lastTime=ts;
+  accumulator+=dt;
+  pollICTInput();
+  while(accumulator>=TICK_MS){
+    accumulator-=TICK_MS;
+    if(gstate==='playing'&&!paused) update();
+  }
   draw();
 }
 
@@ -366,10 +407,7 @@ window.addEventListener("message",function(e){
 });
 // ── Boot ──────────────────────────────────────────────
 savedOverlay=overlay.innerHTML;
-loop();
-// Auto-start if mode passed via URL param from console
-const urlMode = new URLSearchParams(window.location.search).get('mode');
-if (urlMode === '1p' || urlMode === '2p') startGame(urlMode);
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
