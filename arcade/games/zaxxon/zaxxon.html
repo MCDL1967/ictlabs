@@ -704,11 +704,11 @@ window.addEventListener("message",function(e){
   setTimeout(()=>document.dispatchEvent(new KeyboardEvent("keyup",{key,code,bubbles:true,cancelable:true})),80);
 });
 // ── Boot ──────────────────────────────────────────────────
+// urlMode auto-start removed: the shell always passes ?mode=1p which
+// caused startGame() to fire immediately on every load, skipping the
+// cover screen. Difficulty selection is via the cover buttons or SELECT.
 updateUI();
 loop();
-
-const urlMode=new URLSearchParams(window.location.search).get('mode');
-if(urlMode) startGame('intermediate');
 </script>
 </body>
 </html>
