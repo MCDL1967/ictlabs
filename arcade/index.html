@@ -295,128 +295,262 @@ body::after{
 #touchToggle:active{background:var(--accent);color:#fff;transform:scale(0.97);}
 #touchToggle.dimmed{opacity:.35;cursor:not-allowed;}
 
-#touchPanel{
-  position:fixed;z-index:110;
-  left:10px;right:10px;bottom:max(10px, env(safe-area-inset-bottom, 10px));
-  min-height:clamp(150px,22vh,210px);
-  background:linear-gradient(180deg,rgba(5,8,15,0.94),rgba(0,0,0,0.98));
-  border:1px solid var(--border);
-  border-top:2px solid var(--accent);
-  border-radius:18px;
-  box-shadow:0 0 28px rgba(0,0,0,0.8),0 0 26px var(--glow);
-  backdrop-filter:blur(10px);
-  display:grid;
-  grid-template-columns:minmax(142px,1fr) minmax(118px,.7fr) minmax(82px,.48fr);
-  grid-template-areas:'dpad continue actions';
-  align-items:center;
-  gap:14px;
-  padding:14px 16px max(16px, env(safe-area-inset-bottom, 16px));
-  transform:translateX(calc(100% + 28px));
-  transition:transform 0.24s ease, box-shadow 0.22s ease;
-  touch-action:none;
-}
-#touchPanel.open{transform:translateX(0);}
+#touchPanel {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 9999;
 
-#dpad{
-  grid-area:dpad;
-  width:clamp(136px,30vw,178px);
-  height:clamp(136px,30vw,178px);
-  justify-self:center;
-  align-self:center;
-  position:relative;
-  display:block;
-  border:3px solid var(--accent);
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(37,99,235,.18),rgba(5,8,15,.9) 44%,rgba(0,0,0,.96));
-  box-shadow:0 0 16px var(--glow), inset 0 0 20px rgba(37,99,235,.18);
-}
-#dpad::before{
-  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:42%;height:42%;border:3px solid var(--accent);border-radius:50%;
-  box-shadow:0 0 12px var(--glow), inset 0 0 12px rgba(37,99,235,.18);
-}
-#dpad::after{
-  content:'●';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  color:#dcecff;font-size:18px;text-shadow:0 0 10px var(--accent);opacity:.9;
-}
-.dpad-row{display:contents;}
-.dpad-center{display:none;}
-.dpad-btn{
-  position:absolute;
-  width:38px;height:38px;
-  background:transparent;
-  border:none;
-  color:#dcecff;font-size:20px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border-radius:50%;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:none;user-select:none;
-  text-shadow:0 0 8px var(--accent);
-  z-index:2;
-}
-#dUp{left:50%;top:8px;transform:translateX(-50%);}
-#dDown{left:50%;bottom:8px;transform:translateX(-50%);}
-#dLeft{left:10px;top:50%;transform:translateY(-50%);}
-#dRight{right:10px;top:50%;transform:translateY(-50%);}
-.dpad-btn:active{background:rgba(37,99,235,.18);color:#fff;}
+  min-height: 188px;
 
-#spaceBtn{
-  grid-area:continue;
-  justify-self:center;
-  align-self:center;
-  width:min(100%,190px);
-  min-height:70px;
-  background:rgba(30,30,30,0.9);
-  border:2px solid #ff0;color:#ff0;
-  font-family:var(--font);font-size:11px;letter-spacing:2px;
-  padding:10px 16px;border-radius:10px;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;user-select:none;
-  box-shadow:0 0 14px rgba(255,255,0,.38), inset 0 0 12px rgba(255,255,0,.08);
-}
-#spaceBtn:active{background:#ff0;color:#000;}
+  border: 2px solid var(--skin-border, #2f6bff);
+  border-radius: 24px;
 
-#actionBtns{
-  grid-area:actions;
-  display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;
-  justify-self:center;align-self:center;
-}
-.action-btn{
-  width:62px;height:62px;border-radius:50%;
-  background:rgba(18,22,32,0.92);
-  border:2px solid var(--border);
-  color:var(--text);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;user-select:none;
-  font-family:var(--font);font-size:12px;letter-spacing:1px;
-  box-shadow:0 0 12px var(--glow);
-}
-.action-btn.fire{font-size:26px;}
-.action-btn:active{background:var(--accent);color:#fff;}
+  background:
+    linear-gradient(
+      180deg,
+      rgba(4,10,24,.97),
+      rgba(0,0,0,.96)
+    );
 
-@media (pointer:coarse){#touchToggle{display:flex;align-items:center;justify-content:center;}}
-@media (pointer:fine){#touchToggle{display:none!important;}#touchPanel{display:none!important;}}
+  box-shadow:
+    0 0 22px rgba(47,107,255,.50),
+    inset 0 0 24px rgba(47,107,255,.13);
 
-@media (max-width:767px) and (orientation:portrait){
-  #touchPanel{
-    min-height:clamp(128px,18vh,166px);
-    grid-template-columns:minmax(112px,.9fr) minmax(84px,.62fr) minmax(68px,.42fr);
-    gap:8px;
-    padding:12px 12px max(12px, env(safe-area-inset-bottom,12px));
-  }
-  #dpad{width:clamp(112px,32vw,138px);height:clamp(112px,32vw,138px);}
-  #spaceBtn{width:min(100%,152px);min-height:56px;font-size:9px;padding:8px 10px;}
-  .action-btn{width:54px;height:54px;}
-  .action-btn.fire{font-size:23px;}
-  #actionBtns{gap:9px;transform:translateX(-6px);}
+  display: grid;
+
+  grid-template-columns:
+    minmax(132px,1.05fr)
+    minmax(132px,.92fr)
+    minmax(160px,.78fr);
+
+  grid-template-areas:
+    "track continue actions";
+
+  align-items: center;
+  gap: 16px;
+
+  padding: 14px 18px;
+
+  transform: translateX(112%);
+  transition: transform .24s ease-out;
+
+  touch-action: none;
 }
 
-@media (min-width:768px) and (pointer:coarse){
-  #touchPanel{min-height:190px;grid-template-columns:minmax(170px,1fr) minmax(150px,.72fr) minmax(90px,.45fr);}
-  #spaceBtn{align-self:center;transform:translateY(2px);}
+#touchPanel.show {
+  transform: translateX(0);
+}
+
+#trackpadWrap {
+  grid-area: track;
+}
+
+#dpad {
+  width: min(34vw,172px);
+  height: min(34vw,172px);
+
+  max-width: 172px;
+  max-height: 172px;
+
+  min-width: 136px;
+  min-height: 136px;
+
+  border: 3px solid var(--skin-border, #2f6bff);
+  border-radius: 50%;
+
+  position: relative;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(47,107,255,.20),
+      rgba(0,0,0,.82) 64%
+    );
+
+  box-shadow:
+    0 0 18px rgba(47,107,255,.72),
+    inset 0 0 16px rgba(47,107,255,.20);
+}
+
+#dpad::before {
+  content: "";
+
+  position: absolute;
+  inset: 32%;
+
+  border: 3px solid var(--skin-border, #2f6bff);
+  border-radius: 50%;
+}
+
+#dpad::after {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #f4f8ff;
+
+  transform: translate(-50%, -50%);
+}
+
+#dpad span {
+  position: absolute;
+  color: #f4f8ff;
+  font-size: 21px;
+}
+
+#dpad .up {
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
+}
+
+#dpad .down {
+  left: 50%;
+  bottom: 10%;
+  transform: translateX(-50%);
+}
+
+#dpad .left {
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#dpad .right {
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#trackDot {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: 22px;
+  height: 22px;
+
+  margin-left: -11px;
+  margin-top: -11px;
+
+  border: 2px solid #fff;
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.1);
+
+  box-shadow:
+    0 0 12px rgba(255,255,255,.65);
+
+  pointer-events: none;
+}
+
+#continueWrap {
+  grid-area: continue;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#spaceBtn {
+  width: min(28vw,178px);
+  min-width: 128px;
+  height: 60px;
+
+  border: 3px solid #ffff25;
+  border-radius: 16px;
+
+  background: rgba(255,255,37,.07);
+
+  color: #ffff25;
+
+  font-family: 'Audiowide', sans-serif;
+  font-size: clamp(12px,2.4vw,16px);
+
+  letter-spacing: 2px;
+}
+
+#actionCluster {
+  grid-area: actions;
+
+  display: grid;
+
+  grid-template-columns: 64px 76px 64px;
+  grid-template-rows: 44px 76px 44px;
+
+  grid-template-areas:
+    ". select ."
+    "close fire ."
+    ". cancel .";
+
+  align-items: center;
+  justify-items: center;
+
+  gap: 8px;
+
+  min-width: 220px;
+}
+
+#aSelect {
+  grid-area: select;
+}
+
+#aClose {
+  grid-area: close;
+}
+
+#aFire {
+  grid-area: fire;
+
+  width: 74px;
+  height: 74px;
+
+  border-radius: 50%;
+
+  border: 2px solid var(--skin-border, #2f6bff);
+
+  background: rgba(0,0,0,.62);
+}
+
+#aFire svg {
+  width: 40px;
+  height: 40px;
+
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.2;
+}
+
+#aCancel {
+  grid-area: cancel;
+}
+
+.clusterBtn {
+  width: 64px;
+  height: 42px;
+
+  border-radius: 16px;
+
+  border: 2px solid var(--skin-border, #2f6bff);
+
+  background: rgba(0,0,0,.62);
+
+  color: #fff;
+
+  font-family: 'Audiowide', sans-serif;
+  font-size: 10px;
+
+  letter-spacing: 1px;
 }
 /* Keyboard shortcut hints on buttons */
 /* Keyboard shortcut hints on buttons */
@@ -867,7 +1001,7 @@ body::after{
 <body>
 
 <div class="header">
-  ⚡ ICTLabs Retro Console ⚡
+  ⚡ ICTLabs Retro Console v4.9 ⚡
   <a href="/apps/" class="back-arrow" title="Back to ICTLabs">←</a>
 </div>
 
@@ -927,20 +1061,43 @@ body::after{
 <!-- TOUCH PANEL
      V4: bottom-docked touch overlay, slides in from right, never affects game real estate. -->
 <div id="touchPanel">
-  <div id="dpad">
-    <button class="dpad-btn" id="dUp">▲</button>
-    <div class="dpad-row">
-      <button class="dpad-btn" id="dLeft">◀</button>
-      <div class="dpad-center"></div>
-      <button class="dpad-btn" id="dRight">▶</button>
+
+  <div id="trackpadWrap">
+    <div id="dpad">
+      <span class="up">▲</span>
+      <span class="down">▼</span>
+      <span class="left">◀</span>
+      <span class="right">▶</span>
+      <div id="trackDot"></div>
     </div>
-    <button class="dpad-btn" id="dDown">▼</button>
   </div>
-  <button id="spaceBtn">CONTINUE</button>
-  <div id="actionBtns">
-    <button class="action-btn fire" id="aFire">✸</button>
-    <button class="action-btn" id="aSelect">ESC</button>
+
+  <div id="continueWrap">
+    <button id="spaceBtn">CONTINUE</button>
   </div>
+
+  <div id="actionCluster">
+
+    <button id="aSelect" class="clusterBtn">
+      SELECT
+    </button>
+
+    <button id="aClose" class="clusterBtn">
+      CLOSE
+    </button>
+
+    <button id="aFire">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/>
+      </svg>
+    </button>
+
+    <button id="aCancel" class="clusterBtn">
+      CANCEL
+    </button>
+
+  </div>
+
 </div>
 
 <!-- INSTRUCTIONS MODAL -->
@@ -1337,869 +1494,158 @@ instrModal.addEventListener('click',e=>{ if(e.target===instrModal) instrModal.st
 loadGames();
 </script>
 
-<script>
-(function(){
- const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
- ready(function(){
-  const isTouch=()=>matchMedia('(max-width:1024px), (pointer:coarse)').matches;
-  const norm=el=>(el&&(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase())||'';
-  const all=()=>Array.from(document.querySelectorAll('button,a,[role="button"],.btn,.button,div,span')).filter(el=>norm(el));
-
-  Array.from(document.querySelectorAll('a,button')).forEach(el=>{const t=norm(el),a=(el.getAttribute('aria-label')||'').toUpperCase();if(t==='←'||t==='↵'||a.includes('BACK')||a.includes('HOME'))el.classList.add('back-btn')});
-
-  let controls=document.getElementById('touchToggle')||document.querySelector('.touch-toggle,.controls-toggle,[data-role="controls-toggle"]')||all().find(el=>norm(el).includes('CONTROL'));
-  if(controls){controls.id=controls.id||'touchToggle';controls.classList.add('controls-toggle');controls.style.visibility='';}
-
-  let deck=document.getElementById('ictV41Overlay');
-  if(!deck){
-   deck=document.createElement('div');deck.id='ictV41Overlay';deck.className='ict-v41-overlay';
-   deck.innerHTML='<div class="ict-v41-joy" id="ictV41Joy"><span class="up">▲</span><span class="down">▼</span><span class="left">◀</span><span class="right">▶</span><div class="ict-v41-joy-dot"></div></div><div class="ict-v41-continue-wrap"><button class="ict-v41-continue" id="ictV41Continue" type="button">CONTINUE</button></div><div class="ict-v41-actions"><button class="ict-v41-fire" id="ictV41Fire" type="button" aria-label="Fire"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/></svg></button><button class="ict-v41-esc" id="ictV41Esc" type="button">ESC</button><button class="ict-v41-close" id="ictV41Close" type="button">CLOSE</button></div>';
-   document.body.appendChild(deck);
-  }
-
-  Array.from(document.querySelectorAll('.touch-controls,#touchControls,.mobile-controls,#mobileControls')).forEach(el=>{if(el!==deck&&(norm(el).includes('CONTINUE')||norm(el).includes('SPACE')))el.style.display='none'});
-
-  function send(type,code,key){const ev=new KeyboardEvent(type,{code,key,bubbles:true,cancelable:true});document.dispatchEvent(ev);window.dispatchEvent(ev);const f=document.querySelector('iframe');try{if(f&&f.contentWindow){f.contentWindow.dispatchEvent(ev);f.contentWindow.document.dispatchEvent(ev)}}catch(e){}}
-  function tap(code,key,ms=72){send('keydown',code,key);setTimeout(()=>send('keyup',code,key),ms)}
-  function show(){if(isTouch())deck.classList.add('show')}
-  function hide(){deck.classList.remove('show');releaseDirs();stopFire();tap('Escape','Escape',80)}
-  if(controls){controls.addEventListener('click',e=>{if(!isTouch())return;e.preventDefault();e.stopPropagation();show()},true)}
-  document.getElementById('ictV41Continue').addEventListener('click',()=>tap('Space',' '));
-  document.getElementById('ictV41Close').addEventListener('click',hide);
-  document.getElementById('ictV41Esc').addEventListener('click',hide);
-
-  let fireTimer=null;function fireOnce(){tap('Space',' ');tap('KeyX','x')}function startFire(e){e.preventDefault();fireOnce();stopFire();fireTimer=setInterval(fireOnce,130)}function stopFire(){if(fireTimer){clearInterval(fireTimer);fireTimer=null}send('keyup','Space',' ');send('keyup','KeyX','x')}
-  const fire=document.getElementById('ictV41Fire');fire.addEventListener('pointerdown',startFire);['pointerup','pointercancel','pointerleave'].forEach(ev=>fire.addEventListener(ev,stopFire));
-
-  const joy=document.getElementById('ictV41Joy');const active={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};let pid=null;
-  function setDir(code,on){if(active[code]===on)return;active[code]=on;send(on?'keydown':'keyup',code,code)}
-  function releaseDirs(){Object.keys(active).forEach(k=>setDir(k,false));pid=null}
-  function update(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=x-cx,dy=y-cy,rad=r.width/2,mag=Math.hypot(dx,dy),dead=rad*.20;if(mag<dead){setDir('ArrowLeft',false);setDir('ArrowRight',false);setDir('ArrowUp',false);setDir('ArrowDown',false);return}const nx=dx/rad,ny=dy/rad,th=.24;setDir('ArrowLeft',nx<-th);setDir('ArrowRight',nx>th);setDir('ArrowUp',ny<-th);setDir('ArrowDown',ny>th)}
-  joy.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;joy.setPointerCapture&&joy.setPointerCapture(pid);update(e.clientX,e.clientY)});
-  joy.addEventListener('pointermove',e=>{if(pid!==e.pointerId)return;e.preventDefault();update(e.clientX,e.clientY)});
-  ['pointerup','pointercancel','pointerleave'].forEach(ev=>joy.addEventListener(ev,e=>{if(pid!==null&&e.pointerId!==pid)return;releaseDirs()}));
-  addEventListener('resize',()=>{if(!isTouch())deck.classList.remove('show')});
- });
-})();
-</script>
 
 
 <script>
-/* ICTLabs Retro Console — V4.2 Stabilization JS */
+/*
+ICTLabs Retro Console
+Version: v4.9
+Overlay Owner: #touchPanel
+Overlay Runtime Owner: V4.2 IIFE
+Input Transport: window.ICTLabsInput
+*/
 (function(){
-  const ready = fn => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn();
-
+  if(window.__ICT_V49__) return;
+  window.__ICT_V49__ = true;
+  const ready = fn => document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', fn) : fn();
   ready(function(){
-    const isTouch = () => window.matchMedia('(max-width:1024px), (pointer:coarse)').matches;
-
+    const isTouch = () => window.matchMedia('(max-width:1024px),(pointer:coarse)').matches;
     const panel = document.getElementById('touchPanel');
     const hardControls = document.getElementById('desktopControlsButton');
-    const rogueToggle = document.getElementById('touchToggle');
-    const v41 = document.getElementById('ictV41Overlay');
-
-    // Fully remove the rogue overlay trigger and V4.1 experimental overlay from behavior.
-    if(rogueToggle) rogueToggle.remove();
-    if(v41) v41.remove();
-
-    // Restore original panel if V4.1 hid it.
-    if(panel){
-      panel.style.display = '';
-      panel.classList.remove('show');
+    let open = false;
+    const input = window.ICTLabsInput = {
+      moveX:0, moveY:0, magnitude:0, angle:0,
+      fire:false, select:false, cancel:false, close:false, pause:false
+    };
+    function pushInput(){
+      const frame = document.getElementById('gameFrame');
+      try{ if(frame && frame.contentWindow) frame.contentWindow.ICTLabsInput = input; }catch(e){}
     }
-
-    let open = panel && panel.classList.contains('open');
-
-    function sendKey(type,key){
-      const gameFrame = document.getElementById('gameFrame');
-      const gamePane  = document.getElementById('gamePane');
-      const code = key === ' ' ? 'Space' : key;
-
-      if(gamePane && gamePane.style.display !== 'none'){
-        try{ gameFrame.contentWindow.postMessage({type:'key',event:type,key,code},'*'); }catch(ex){}
-        try{
-          const ev = new KeyboardEvent(type,{key,code,bubbles:true,cancelable:true});
-          gameFrame.contentWindow && gameFrame.contentWindow.dispatchEvent(ev);
-          gameFrame.contentDocument && gameFrame.contentDocument.dispatchEvent(ev);
-        }catch(ex){}
-      }else{
-        if(type === 'keydown'){
-          const up = document.getElementById('upButton');
-          const down = document.getElementById('downButton');
-          const select = document.getElementById('selectButton');
-          if(key === 'ArrowUp') up && up.click();
-          if(key === 'ArrowDown') down && down.click();
-          if(key === ' ') select && select.click();
-        }
-      }
+    setInterval(pushInput, 250);
+    function pulse(prop, time=120){
+      input[prop] = true; pushInput();
+      setTimeout(()=>{ input[prop] = false; pushInput(); }, time);
     }
-
-    function tap(key,ms=70){
-      sendKey('keydown',key);
-      window.setTimeout(()=>sendKey('keyup',key),ms);
-    }
-
     function openPanel(){
       if(!panel || !isTouch()) return;
-      open = true;
-      panel.classList.add('open');
+      open = true; panel.classList.add('show');
     }
-
     function closePanel(){
       if(!panel) return;
-      open = false;
-      panel.classList.remove('open');
-      releaseDirections();
-      stopFire();
-      // Cabinet rule: close/esc hides overlay and pauses/back-outs active game.
-      tap('Escape',80);
+      open = false; panel.classList.remove('show');
+      input.moveX=0; input.moveY=0; input.magnitude=0;
+      input.fire=false; pushInput();
     }
-
-    // Hard main-panel CONTROLS button is the only open trigger.
     if(hardControls){
-      hardControls.removeAttribute('aria-disabled');
-      hardControls.addEventListener('click', function(e){
+      hardControls.addEventListener('click', e=>{
         if(!isTouch()) return;
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         open ? closePanel() : openPanel();
       }, true);
-      hardControls.addEventListener('touchstart', function(e){
+      hardControls.addEventListener('touchstart', e=>{
         if(!isTouch()) return;
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         open ? closePanel() : openPanel();
       }, {passive:false, capture:true});
     }
-
-    // Replace existing dpad behavior in capture phase.
     const dpad = document.getElementById('dpad');
-    const active = {ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false};
-    let joyPointer = null;
-
-    function setDir(key,on){
-      if(active[key] === on) return;
-      active[key] = on;
-      sendKey(on ? 'keydown' : 'keyup', key);
+    const trackDot = document.getElementById('trackDot');
+    let pid = null;
+    const deadZone = 0.18;
+    function releasePad(){
+      input.moveX=0; input.moveY=0; input.magnitude=0; input.angle=0;
+      if(trackDot) trackDot.style.transform='translate(0px,0px)';
+      pushInput(); pid = null;
     }
-
-    function releaseDirections(){
-      Object.keys(active).forEach(k => setDir(k,false));
-      joyPointer = null;
-    }
-
-    function updateJoystick(clientX, clientY){
-      if(!dpad) return;
-
+    function updatePad(clientX, clientY){
       const r = dpad.getBoundingClientRect();
-
-      // TRUE ORIGIN: visual center of the pressure pad.
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-
-      // TRUE SCALE: center to outer circle perimeter.
-      const radius = Math.min(r.width, r.height) / 2;
-      const dx = clientX - cx;
-      const dy = clientY - cy;
-
-      const nx = dx / radius;
-      const ny = dy / radius;
-
-      const mag = Math.hypot(nx, ny);
-      const dead = 0.18;
-
-      if(mag < dead){
-        setDir('ArrowLeft',false);
-        setDir('ArrowRight',false);
-        setDir('ArrowUp',false);
-        setDir('ArrowDown',false);
-        return;
+      const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      const radius = r.width/2;
+      let dx = clientX - cx, dy = clientY - cy;
+      const raw = Math.hypot(dx, dy);
+      const limit = radius * 0.62;
+      if(raw > limit && raw > 0){ const s=limit/raw; dx*=s; dy*=s; }
+      if(trackDot) trackDot.style.transform=`translate(${dx}px,${dy}px)`;
+      const nx = Math.max(-1, Math.min(1, (clientX-cx)/radius));
+      const ny = Math.max(-1, Math.min(1, (clientY-cy)/radius));
+      const mag = Math.min(1, Math.hypot(nx, ny));
+      if(mag < deadZone){
+        input.moveX=0; input.moveY=0; input.magnitude=0; input.angle=0;
+      } else {
+        const scaled = (mag - deadZone) / (1 - deadZone);
+        input.moveX = nx * scaled / mag;
+        input.moveY = ny * scaled / mag;
+        input.magnitude = scaled;
+        input.angle = Math.atan2(ny, nx);
       }
-
-      // Independent axes allow diagonals and continuous pressure-pad steering.
-      const axis = 0.22;
-      setDir('ArrowLeft',  nx < -axis);
-      setDir('ArrowRight', nx >  axis);
-      setDir('ArrowUp',    ny < -axis);
-      setDir('ArrowDown',  ny >  axis);
+      pushInput();
     }
-
     if(dpad){
-      ['touchstart','pointerdown'].forEach(ev=>{
-        dpad.addEventListener(ev, function(e){
-          if(!isTouch()) return;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          const p = e.touches ? e.touches[0] : e;
-          joyPointer = p.pointerId || 'touch';
-          if(e.pointerId && dpad.setPointerCapture) dpad.setPointerCapture(e.pointerId);
-          updateJoystick(p.clientX,p.clientY);
-        }, {passive:false, capture:true});
-      });
-
-      dpad.addEventListener('pointermove', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        updateJoystick(e.clientX,e.clientY);
-      }, {passive:false, capture:true});
-
-      dpad.addEventListener('touchmove', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        const p = e.touches && e.touches[0];
-        if(p) updateJoystick(p.clientX,p.clientY);
-      }, {passive:false, capture:true});
-
-      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
-        dpad.addEventListener(ev, function(e){
-          if(!isTouch()) return;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          releaseDirections();
-        }, {passive:false, capture:true});
+      dpad.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation();
+        pid = e.pointerId; dpad.setPointerCapture?.(pid);
+        updatePad(e.clientX, e.clientY);
+      }, true);
+      dpad.addEventListener('pointermove', e=>{
+        if(pid !== e.pointerId) return;
+        e.preventDefault(); e.stopPropagation();
+        updatePad(e.clientX, e.clientY);
+      }, true);
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+        dpad.addEventListener(ev, e=>{
+          if(pid !== null && e.pointerId !== pid) return;
+          e.preventDefault(); releasePad();
+        }, true);
       });
     }
-
-    // CONTINUE remains Space.
+    const fireBtn = document.getElementById('aFire');
+    if(fireBtn){
+      fireBtn.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation();
+        input.fire = true; pushInput();
+      }, true);
+      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+        fireBtn.addEventListener(ev, e=>{
+          e.preventDefault(); e.stopPropagation();
+          input.fire = false; pushInput();
+        }, true);
+      });
+    }
     const spaceBtn = document.getElementById('spaceBtn');
     if(spaceBtn){
-      spaceBtn.addEventListener('click', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        tap(' ');
+      spaceBtn.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation(); pulse('select');
       }, true);
-      spaceBtn.addEventListener('touchstart', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        tap(' ');
-      }, {passive:false, capture:true});
     }
-
-    // Blast: hold-to-fire, capture phase blocks older tap-only listeners.
-    const fireBtn = document.getElementById('aFire');
-    let fireTimer = null;
-    function fireOnce(){ tap(' '); }
-    function startFire(e){
-      if(!isTouch()) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      stopFire();
-      fireOnce();
-      fireTimer = window.setInterval(fireOnce, 125);
-    }
-    function stopFire(e){
-      if(e && isTouch()){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }
-      if(fireTimer){
-        window.clearInterval(fireTimer);
-        fireTimer = null;
-      }
-      sendKey('keyup',' ');
-    }
-    if(fireBtn){
-      fireBtn.textContent = '✸';
-      fireBtn.addEventListener('pointerdown', startFire, {passive:false, capture:true});
-      fireBtn.addEventListener('touchstart', startFire, {passive:false, capture:true});
-      ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(ev=>{
-        fireBtn.addEventListener(ev, stopFire, {passive:false, capture:true});
-      });
-    }
-
-    // ESC on overlay closes overlay and pauses/backs out.
-    const escBtn = document.getElementById('aSelect');
-    if(escBtn){
-      escBtn.addEventListener('click', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        closePanel();
+    const aSelect = document.getElementById('aSelect');
+    if(aSelect){
+      aSelect.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation(); pulse('select');
       }, true);
-      escBtn.addEventListener('touchstart', function(e){
-        if(!isTouch()) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        closePanel();
-      }, {passive:false, capture:true});
     }
-
-    window.addEventListener('resize', function(){
-      if(!isTouch()){
-        closePanel();
-      }
-    });
-  });
-})();
-</script>
-
-
-<script>
-(function(){
- if(window.__ICT_V45__) return;
- window.__ICT_V45__ = true;
-
- const ready=fn=>document.readyState==='loading'
-   ? document.addEventListener('DOMContentLoaded',fn)
-   : fn();
-
- ready(function(){
-
-  // Dedicated transport channels
-  const movementState = {
-    up:false,
-    down:false,
-    left:false,
-    right:false
-  };
-
-  let fireInterval = null;
-
-  // Add PAUSE button if missing
-  const actions = document.querySelector('#ictV41Overlay .ict-v41-actions');
-
-  if(actions && !document.getElementById('ictV45Pause')){
-    const pause = document.createElement('button');
-    pause.id = 'ictV45Pause';
-    pause.textContent = 'PAUSE';
-
-    actions.insertBefore(
-      pause,
-      document.getElementById('ictV41Close')
-    );
-
-    pause.addEventListener('click', ()=>{
-      emitDiscrete('KeyP','p');
-    });
-  }
-
-  function emitToTargets(ev){
-    document.dispatchEvent(ev);
-
-    const frame = document.querySelector('iframe');
-
-    try{
-      if(frame && frame.contentWindow){
-        frame.contentWindow.dispatchEvent(ev);
-        frame.contentWindow.document.dispatchEvent(ev);
-      }
-    }catch(e){}
-  }
-
-  // DISCRETE transport channel
-  function emitDiscrete(code,key,duration=55){
-    const down = new KeyboardEvent('keydown',{
-      key:key,
-      code:code,
-      bubbles:true
-    });
-
-    const up = new KeyboardEvent('keyup',{
-      key:key,
-      code:code,
-      bubbles:true
-    });
-
-    emitToTargets(down);
-
-    setTimeout(()=>{
-      emitToTargets(up);
-    },duration);
-  }
-
-  // PERSISTENT movement transport channel
-  function setMovement(code,on){
-
-    const map = {
-      ArrowUp:'up',
-      ArrowDown:'down',
-      ArrowLeft:'left',
-      ArrowRight:'right'
-    };
-
-    const slot = map[code];
-
-    if(!slot) return;
-
-    if(movementState[slot] === on) return;
-
-    movementState[slot] = on;
-
-    const ev = new KeyboardEvent(
-      on ? 'keydown':'keyup',
-      {
-        key:code,
-        code:code,
-        bubbles:true
-      }
-    );
-
-    emitToTargets(ev);
-  }
-
-  // FIRE ISOLATED from movement channel
-  const fireBtn = document.getElementById('ictV41Fire');
-
-  if(fireBtn){
-
-    function firePulse(){
-      emitDiscrete('Space',' ');
-      emitDiscrete('KeyX','x');
-    }
-
-    fireBtn.addEventListener('pointerdown', e=>{
-      e.preventDefault();
-
-      firePulse();
-
-      if(fireInterval){
-        clearInterval(fireInterval);
-      }
-
-      fireInterval = setInterval(()=>{
-        firePulse();
-      },120);
-    });
-
-    ['pointerup','pointercancel','pointerleave']
-      .forEach(ev=>{
-        fireBtn.addEventListener(ev, ()=>{
-          if(fireInterval){
-            clearInterval(fireInterval);
-            fireInterval = null;
-          }
-        });
-      });
-  }
-
-  // TRACKPAD TRANSPORT ONLY
-  const joy = document.getElementById('ictV41Joy');
-  const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
-
-  if(!joy || !knob) return;
-
-  let pid = null;
-
-  function clearMovement(){
-    setMovement('ArrowUp',false);
-    setMovement('ArrowDown',false);
-    setMovement('ArrowLeft',false);
-    setMovement('ArrowRight',false);
-
-    knob.style.transform = 'translate(0px,0px)';
-  }
-
-  function updateTrackpad(x,y){
-
-    const r = joy.getBoundingClientRect();
-
-    const cx = r.left + r.width/2;
-    const cy = r.top + r.height/2;
-
-    let dx = x - cx;
-    let dy = y - cy;
-
-    const radius = r.width/2;
-
-    const limit = radius * 0.62;
-
-    const raw = Math.hypot(dx,dy);
-
-    // visual knob only
-    if(raw > limit && raw > 0){
-      const s = limit/raw;
-      dx *= s;
-      dy *= s;
-    }
-
-    knob.style.transform =
-      `translate(${dx}px,${dy}px)`;
-
-    // REAL vector values
-    const nx = (x-cx)/radius;
-    const ny = (y-cy)/radius;
-
-    const mag = Math.hypot(nx,ny);
-
-    // dead zone
-    if(mag < 0.18){
-      clearMovement();
-      return;
-    }
-
-    const th = 0.22;
-
-    // NO FIRE INTERACTION HERE
-    setMovement('ArrowLeft', nx < -th);
-    setMovement('ArrowRight', nx > th);
-    setMovement('ArrowUp', ny < -th);
-    setMovement('ArrowDown', ny > th);
-
-    // future analog payload
-    window.ICTLabsTrackpad = {
-      x:Math.max(-1,Math.min(1,nx)),
-      y:Math.max(-1,Math.min(1,ny)),
-      magnitude:mag,
-      angle:Math.atan2(ny,nx)
-    };
-  }
-
-  joy.addEventListener('pointerdown', e=>{
-    e.preventDefault();
-
-    pid = e.pointerId;
-
-    joy.setPointerCapture?.(pid);
-
-    updateTrackpad(
-      e.clientX,
-      e.clientY
-    );
-  });
-
-  joy.addEventListener('pointermove', e=>{
-    if(pid !== e.pointerId) return;
-
-    e.preventDefault();
-
-    updateTrackpad(
-      e.clientX,
-      e.clientY
-    );
-  });
-
-  ['pointerup','pointercancel','pointerleave']
-    .forEach(ev=>{
-      joy.addEventListener(ev, e=>{
-        if(pid !== null && e.pointerId !== pid) return;
-
-        clearMovement();
-
-        pid = null;
-      });
-    });
-
- });
-})();
-</script>
-
-<script>
-/* ICTLabs Retro Console — V4.6 Mobile Input API */
-(function(){
-  if(window.__ICT_V46_INPUT_API__) return;
-  window.__ICT_V46_INPUT_API__ = true;
-
-  const ready = fn => document.readyState === 'loading'
-    ? document.addEventListener('DOMContentLoaded', fn)
-    : fn();
-
-  ready(function(){
-
-    const input = window.ICTLabsInput = window.ICTLabsInput || {
-      moveX:0,
-      moveY:0,
-      magnitude:0,
-      angle:0,
-      fire:false,
-      select:false,
-      cancel:false,
-      pause:false,
-      close:false,
-      source:'console-v4.6'
-    };
-
-    function pushInput(){
-      input.ts = performance.now();
-      const frame = document.querySelector('iframe');
-      try{
-        if(frame && frame.contentWindow){
-          frame.contentWindow.ICTLabsInput = input;
-        }
-      }catch(e){}
-    }
-
-    // Keep iframe synchronized even after game iframe reloads.
-    setInterval(pushInput, 250);
-
-    const pad = document.getElementById('ictV41Joy');
-    const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
-
-    if(pad){
-      let pid = null;
-
-      function releasePad(){
-        input.moveX = 0;
-        input.moveY = 0;
-        input.magnitude = 0;
-        input.angle = 0;
-        if(knob) knob.style.transform = 'translate(0px,0px)';
-        pushInput();
-        pid = null;
-      }
-
-      function updatePad(clientX, clientY){
-        const r = pad.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const radius = r.width / 2;
-
-        let dx = clientX - cx;
-        let dy = clientY - cy;
-
-        const raw = Math.hypot(dx, dy);
-        const visualLimit = radius * 0.62;
-
-        if(raw > visualLimit && raw > 0){
-          const s = visualLimit / raw;
-          dx *= s;
-          dy *= s;
-        }
-
-        if(knob) knob.style.transform = `translate(${dx}px,${dy}px)`;
-
-        const nx = Math.max(-1, Math.min(1, (clientX - cx) / radius));
-        const ny = Math.max(-1, Math.min(1, (clientY - cy) / radius));
-        const mag = Math.min(1, Math.hypot(nx, ny));
-        const dead = 0.18;
-
-        if(mag < dead){
-          input.moveX = 0;
-          input.moveY = 0;
-          input.magnitude = 0;
-          input.angle = 0;
-        }else{
-          // normalize dead-zone out so motion begins cleanly after center
-          const scaled = (mag - dead) / (1 - dead);
-          input.moveX = nx * scaled / mag;
-          input.moveY = ny * scaled / mag;
-          input.magnitude = scaled;
-          input.angle = Math.atan2(ny, nx);
-        }
-
-        pushInput();
-      }
-
-      pad.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        pid = e.pointerId;
-        pad.setPointerCapture?.(pid);
-        updatePad(e.clientX, e.clientY);
+    const aCancel = document.getElementById('aCancel');
+    if(aCancel){
+      aCancel.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation(); pulse('cancel');
       }, true);
-
-      pad.addEventListener('pointermove', e=>{
-        if(pid !== e.pointerId) return;
-        e.preventDefault();
-        e.stopPropagation();
-        updatePad(e.clientX, e.clientY);
-      }, true);
-
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        pad.addEventListener(ev, e=>{
-          if(pid !== null && e.pointerId !== pid) return;
-          e.preventDefault();
-          e.stopPropagation();
-          releasePad();
-        }, true);
-      });
     }
-
-    const fire = document.getElementById('ictV41Fire');
-    if(fire){
-      fire.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        input.fire = true;
-        pushInput();
+    const aClose = document.getElementById('aClose');
+    if(aClose){
+      aClose.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation();
+        closePanel(); pulse('close');
       }, true);
-
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        fire.addEventListener(ev, e=>{
-          e.preventDefault();
-          e.stopPropagation();
-          input.fire = false;
-          pushInput();
-        }, true);
-      });
     }
-
-    // Optional V4.5 pause/select/cancel/close bridge
-    function bindStateButton(id, prop, pulse=false){
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener('pointerdown', e=>{
-        e.preventDefault();
-        e.stopPropagation();
-        input[prop] = true;
-        pushInput();
-        if(pulse){
-          setTimeout(()=>{
-            input[prop] = false;
-            pushInput();
-          }, 140);
-        }
-      }, true);
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-        el.addEventListener(ev, e=>{
-          e.preventDefault();
-          e.stopPropagation();
-          if(!pulse) input[prop] = false;
-          pushInput();
-        }, true);
-      });
-    }
-
-    bindStateButton('ictV45Pause','pause',true);
-    bindStateButton('ictV41Close','close',true);
-
+    window.addEventListener('resize', ()=>{ if(!isTouch()) closePanel(); });
     pushInput();
   });
 })();
 </script>
 
-<script>
-/* === ICTLABS CONSOLE V4.8 VERIFIED PATCH === */
-(function(){
- if(window.__ICT_V48__) return;
- window.__ICT_V48__ = true;
 
- const ready=fn=>document.readyState==='loading'
-   ? document.addEventListener('DOMContentLoaded',fn)
-   : fn();
 
- ready(function(){
 
-  // Visible runtime version
-  if(!document.getElementById('ictVersionTag')){
-    const v=document.createElement('div');
-    v.id='ictVersionTag';
-    v.textContent='CONSOLE v4.8';
-    document.body.appendChild(v);
-  }
-
-  function pushInput(){
-    const frame=document.querySelector('iframe');
-    try{
-      if(frame&&frame.contentWindow){
-        frame.contentWindow.ICTLabsInput=window.ICTLabsInput;
-      }
-    }catch(e){}
-  }
-
-  window.ICTLabsInput = window.ICTLabsInput || {
-    moveX:0,moveY:0,magnitude:0,angle:0,
-    fire:false,select:false,cancel:false,close:false,pause:false
-  };
-
-  function buildDiamond(){
-    const overlay=document.getElementById('ictV41Overlay');
-    const actions=document.querySelector('#ictV41Overlay .ict-v41-actions');
-    if(!overlay||!actions) return false;
-
-    // HARD REPLACE CONTENT
-    actions.innerHTML = `
-      <button id="ictV48Select" class="ict-v48-btn" type="button">SELECT</button>
-      <button id="ictV48Close" class="ict-v48-btn" type="button">CLOSE</button>
-      <button id="ictV48Fire" class="ict-v48-btn" type="button" aria-label="Fire">
-        <svg viewBox="0 0 64 64">
-          <path d="M32 4 L37 24 L56 14 L43 31 L61 38 L40 39 L50 58 L32 45 L14 58 L24 39 L3 38 L21 31 L8 14 L27 24 Z"/>
-        </svg>
-      </button>
-      <button id="ictV48Cancel" class="ict-v48-btn" type="button">CANCEL</button>
-    `;
-
-    function pulse(prop,time=120){
-      window.ICTLabsInput[prop]=true;
-      pushInput();
-      setTimeout(()=>{
-        window.ICTLabsInput[prop]=false;
-        pushInput();
-      },time);
-    }
-
-    // FIRE isolated state
-    let fireInt=null;
-    const fire=document.getElementById('ictV48Fire');
-
-    function stopFire(){
-      if(fireInt){
-        clearInterval(fireInt);
-        fireInt=null;
-      }
-      window.ICTLabsInput.fire=false;
-      pushInput();
-    }
-
-    function startFire(e){
-      e.preventDefault();
-      e.stopPropagation();
-
-      window.ICTLabsInput.fire=true;
-      pushInput();
-
-      stopFire();
-
-      window.ICTLabsInput.fire=true;
-      pushInput();
-
-      fireInt=setInterval(()=>{
-        window.ICTLabsInput.fire=true;
-        pushInput();
-      },80);
-    }
-
-    fire.addEventListener('pointerdown',startFire,true);
-    ['pointerup','pointercancel','pointerleave']
-      .forEach(ev=>fire.addEventListener(ev,stopFire,true));
-
-    document.getElementById('ictV48Select')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-        pulse('select');
-      },true);
-
-    document.getElementById('ictV48Cancel')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-        pulse('cancel');
-      },true);
-
-    document.getElementById('ictV48Close')
-      .addEventListener('pointerdown',e=>{
-        e.preventDefault();e.stopPropagation();
-
-        pulse('close');
-
-        overlay.classList.remove('show');
-        overlay.classList.remove('active');
-      },true);
-
-    window.__ICT_V48_DIAMOND_READY__=true;
-    return true;
-  }
-
-  // immediate + retries + mutation observer
-  if(buildDiamond()) return;
-
-  let tries=0;
-  const retry=setInterval(()=>{
-    tries++;
-    if(buildDiamond()||tries>50){
-      clearInterval(retry);
-    }
-  },100);
-
-  const mo=new MutationObserver(()=>{
-    buildDiamond();
-  });
-
-  mo.observe(document.body,{childList:true,subtree:true});
- });
-})();
-</script>
 
 </body>
 </html>
