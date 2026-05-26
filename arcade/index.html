@@ -722,19 +722,15 @@ body::after{
 
 </style>
 <style>
-/* === V4.4 TRACKPAD SURGICAL PATCH === */
+/* === V4.5 TRANSPORT ISOLATION PATCH === */
 
-/* Kill only rogue floating controls */
-.floating-control,
-.floating-controls,
-.overlay-control,
-.overlay-controls,
-#overlayControl,
-#overlayControls{
+/* Remove only rogue floating controls */
+.floating-control,.floating-controls,.overlay-control,.overlay-controls,
+#overlayControl,#overlayControls{
   display:none!important;
 }
 
-/* V4.4 overlay action ordering only */
+/* Maintain V4.2 geometry, only refine action hierarchy */
 #ictV41Overlay .ict-v41-actions{
   display:flex!important;
   flex-direction:column!important;
@@ -744,7 +740,7 @@ body::after{
   padding-right:10px!important;
 }
 
-/* FIRE closest to right thumb */
+/* FIRE primary */
 #ictV41Fire{
   order:1!important;
   width:74px!important;
@@ -753,7 +749,7 @@ body::after{
 }
 
 /* PAUSE secondary */
-#ictV44Pause{
+#ictV45Pause{
   order:2!important;
   width:70px!important;
   height:50px!important;
@@ -770,10 +766,8 @@ body::after{
   order:3!important;
 }
 
-/* Trackpad visual cleanup */
-#ictV41Joy{
-  border-color:#2f6bff!important;
-}
+/* Trackpad visual cleanup only */
+#ictV41Joy,
 #ictV41Joy::before{
   border-color:#2f6bff!important;
 }
@@ -1553,78 +1547,160 @@ loadGames();
 
 <script>
 (function(){
- if(window.__ICT_V44__) return;
- window.__ICT_V44__ = true;
+ if(window.__ICT_V45__) return;
+ window.__ICT_V45__ = true;
 
- const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
+ const ready=fn=>document.readyState==='loading'
+   ? document.addEventListener('DOMContentLoaded',fn)
+   : fn();
 
  ready(function(){
 
-  // add PAUSE button only if missing
+  // Dedicated transport channels
+  const movementState = {
+    up:false,
+    down:false,
+    left:false,
+    right:false
+  };
+
+  let fireInterval = null;
+
+  // Add PAUSE button if missing
   const actions = document.querySelector('#ictV41Overlay .ict-v41-actions');
-  if(actions && !document.getElementById('ictV44Pause')){
+
+  if(actions && !document.getElementById('ictV45Pause')){
     const pause = document.createElement('button');
-    pause.id = 'ictV44Pause';
+    pause.id = 'ictV45Pause';
     pause.textContent = 'PAUSE';
-    actions.insertBefore(pause, document.getElementById('ictV41Close'));
+
+    actions.insertBefore(
+      pause,
+      document.getElementById('ictV41Close')
+    );
 
     pause.addEventListener('click', ()=>{
-      const ev1 = new KeyboardEvent('keydown',{key:'p',code:'KeyP',bubbles:true});
-      const ev2 = new KeyboardEvent('keyup',{key:'p',code:'KeyP',bubbles:true});
-      document.dispatchEvent(ev1);
-      document.dispatchEvent(ev2);
-
-      const frame = document.querySelector('iframe');
-      try{
-        frame.contentWindow.document.dispatchEvent(ev1);
-        frame.contentWindow.document.dispatchEvent(ev2);
-      }catch(e){}
+      emitDiscrete('KeyP','p');
     });
   }
 
-  // surgical TRACKPAD math replacement
+  function emitToTargets(ev){
+    document.dispatchEvent(ev);
+
+    const frame = document.querySelector('iframe');
+
+    try{
+      if(frame && frame.contentWindow){
+        frame.contentWindow.dispatchEvent(ev);
+        frame.contentWindow.document.dispatchEvent(ev);
+      }
+    }catch(e){}
+  }
+
+  // DISCRETE transport channel
+  function emitDiscrete(code,key,duration=55){
+    const down = new KeyboardEvent('keydown',{
+      key:key,
+      code:code,
+      bubbles:true
+    });
+
+    const up = new KeyboardEvent('keyup',{
+      key:key,
+      code:code,
+      bubbles:true
+    });
+
+    emitToTargets(down);
+
+    setTimeout(()=>{
+      emitToTargets(up);
+    },duration);
+  }
+
+  // PERSISTENT movement transport channel
+  function setMovement(code,on){
+
+    const map = {
+      ArrowUp:'up',
+      ArrowDown:'down',
+      ArrowLeft:'left',
+      ArrowRight:'right'
+    };
+
+    const slot = map[code];
+
+    if(!slot) return;
+
+    if(movementState[slot] === on) return;
+
+    movementState[slot] = on;
+
+    const ev = new KeyboardEvent(
+      on ? 'keydown':'keyup',
+      {
+        key:code,
+        code:code,
+        bubbles:true
+      }
+    );
+
+    emitToTargets(ev);
+  }
+
+  // FIRE ISOLATED from movement channel
+  const fireBtn = document.getElementById('ictV41Fire');
+
+  if(fireBtn){
+
+    function firePulse(){
+      emitDiscrete('Space',' ');
+      emitDiscrete('KeyX','x');
+    }
+
+    fireBtn.addEventListener('pointerdown', e=>{
+      e.preventDefault();
+
+      firePulse();
+
+      if(fireInterval){
+        clearInterval(fireInterval);
+      }
+
+      fireInterval = setInterval(()=>{
+        firePulse();
+      },120);
+    });
+
+    ['pointerup','pointercancel','pointerleave']
+      .forEach(ev=>{
+        fireBtn.addEventListener(ev, ()=>{
+          if(fireInterval){
+            clearInterval(fireInterval);
+            fireInterval = null;
+          }
+        });
+      });
+  }
+
+  // TRACKPAD TRANSPORT ONLY
   const joy = document.getElementById('ictV41Joy');
   const knob = document.querySelector('#ictV41Joy .ict-joy-knob');
 
   if(!joy || !knob) return;
 
-  const active = {
-    ArrowUp:false,
-    ArrowDown:false,
-    ArrowLeft:false,
-    ArrowRight:false
-  };
-
   let pid = null;
 
-  function send(type, code){
-    const ev = new KeyboardEvent(type,{
-      key:code,
-      code:code,
-      bubbles:true
-    });
+  function clearMovement(){
+    setMovement('ArrowUp',false);
+    setMovement('ArrowDown',false);
+    setMovement('ArrowLeft',false);
+    setMovement('ArrowRight',false);
 
-    document.dispatchEvent(ev);
-
-    const frame = document.querySelector('iframe');
-    try{
-      frame.contentWindow.document.dispatchEvent(ev);
-    }catch(e){}
-  }
-
-  function setKey(code,on){
-    if(active[code] === on) return;
-    active[code] = on;
-    send(on ? 'keydown':'keyup', code);
-  }
-
-  function releaseAll(){
-    Object.keys(active).forEach(k=>setKey(k,false));
     knob.style.transform = 'translate(0px,0px)';
-    pid = null;
   }
 
-  function update(x,y){
+  function updateTrackpad(x,y){
 
     const r = joy.getBoundingClientRect();
 
@@ -1640,54 +1716,79 @@ loadGames();
 
     const raw = Math.hypot(dx,dy);
 
+    // visual knob only
     if(raw > limit && raw > 0){
       const s = limit/raw;
       dx *= s;
       dy *= s;
     }
 
-    knob.style.transform = `translate(${dx}px,${dy}px)`;
+    knob.style.transform =
+      `translate(${dx}px,${dy}px)`;
 
+    // REAL vector values
     const nx = (x-cx)/radius;
     const ny = (y-cy)/radius;
 
-    const dead = 0.18;
+    const mag = Math.hypot(nx,ny);
 
-    if(Math.hypot(nx,ny) < dead){
-      setKey('ArrowLeft',false);
-      setKey('ArrowRight',false);
-      setKey('ArrowUp',false);
-      setKey('ArrowDown',false);
+    // dead zone
+    if(mag < 0.18){
+      clearMovement();
       return;
     }
 
     const th = 0.22;
 
-    setKey('ArrowLeft', nx < -th);
-    setKey('ArrowRight', nx > th);
-    setKey('ArrowUp', ny < -th);
-    setKey('ArrowDown', ny > th);
+    // NO FIRE INTERACTION HERE
+    setMovement('ArrowLeft', nx < -th);
+    setMovement('ArrowRight', nx > th);
+    setMovement('ArrowUp', ny < -th);
+    setMovement('ArrowDown', ny > th);
+
+    // future analog payload
+    window.ICTLabsTrackpad = {
+      x:Math.max(-1,Math.min(1,nx)),
+      y:Math.max(-1,Math.min(1,ny)),
+      magnitude:mag,
+      angle:Math.atan2(ny,nx)
+    };
   }
 
   joy.addEventListener('pointerdown', e=>{
     e.preventDefault();
+
     pid = e.pointerId;
+
     joy.setPointerCapture?.(pid);
-    update(e.clientX,e.clientY);
+
+    updateTrackpad(
+      e.clientX,
+      e.clientY
+    );
   });
 
   joy.addEventListener('pointermove', e=>{
     if(pid !== e.pointerId) return;
+
     e.preventDefault();
-    update(e.clientX,e.clientY);
+
+    updateTrackpad(
+      e.clientX,
+      e.clientY
+    );
   });
 
-  ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
-    joy.addEventListener(ev, e=>{
-      if(pid !== null && e.pointerId !== pid) return;
-      releaseAll();
+  ['pointerup','pointercancel','pointerleave']
+    .forEach(ev=>{
+      joy.addEventListener(ev, e=>{
+        if(pid !== null && e.pointerId !== pid) return;
+
+        clearMovement();
+
+        pid = null;
+      });
     });
-  });
 
  });
 })();
