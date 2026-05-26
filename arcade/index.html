@@ -829,6 +829,37 @@ body::after{
 
 </style>
 <style>
+/* ==========================================================
+   ICTLabs Retro Console — V4.9.2 Touch Isolation Patch
+   Fixes: selection leakage, pointer-events on dpad children,
+   and prevents OS text-selection callout on wheel surface.
+   ========================================================== */
+
+/* Full touch isolation on the overlay and every descendant */
+#touchPanel,
+#touchPanel *,
+#dpad,
+#dpad *,
+#actionCluster,
+#actionCluster *,
+.clusterBtn,
+#aFire {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: none !important;
+}
+
+/* Arrow glyphs and track dot are visual only.
+   All pointer math resolves to #dpad exclusively. */
+#dpad span,
+#trackDot {
+  pointer-events: none !important;
+}
+
+</style>
+<style>
 /* === V4.5 TRANSPORT ISOLATION PATCH === */
 
 /* Remove only rogue floating controls */
@@ -1547,19 +1578,19 @@ CONTINUE removed — SELECT absorbs continue/confirm/start
     }
     if(dpad){
       dpad.addEventListener('pointerdown', e=>{
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault(); e.stopImmediatePropagation();
         pid = e.pointerId; dpad.setPointerCapture?.(pid);
         updatePad(e.clientX, e.clientY);
       }, true);
       dpad.addEventListener('pointermove', e=>{
         if(pid !== e.pointerId) return;
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault(); e.stopImmediatePropagation();
         updatePad(e.clientX, e.clientY);
       }, true);
       ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
         dpad.addEventListener(ev, e=>{
           if(pid !== null && e.pointerId !== pid) return;
-          e.preventDefault(); releasePad();
+          e.preventDefault(); e.stopImmediatePropagation(); releasePad();
         }, true);
       });
     }
