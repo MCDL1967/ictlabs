@@ -1625,7 +1625,11 @@ Touch isolation: stopImmediatePropagation on all #dpad handlers
         e.preventDefault(); e.stopImmediatePropagation();
         updatePad(e.clientX, e.clientY);
       }, true);
-      ['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+      /* pointerleave intentionally excluded: with setPointerCapture active,
+         pointerleave fires when finger crosses the visual circle edge even
+         while the gesture is still live — that would reset pid and kill
+         tracking mid-drag. Only pointerup/cancel truly end the gesture. */
+      ['pointerup','pointercancel'].forEach(ev=>{
         dpad.addEventListener(ev, e=>{
           if(pid !== null && e.pointerId !== pid) return;
           e.preventDefault(); e.stopImmediatePropagation(); releasePad();

@@ -82,9 +82,13 @@ function shoot(){ if(fireCd>0)return; fireCd=11; shots.push({x:ship.x+Math.cos(s
 function damageShip(){ if(inv>0)return; if(shield>20 && (keys.ShiftLeft||keys.ShiftRight)){ shield-=28; inv=38; sfxShield(); return; } lives--; sfxHit(); explode(ship.x,ship.y,34,'#ff0'); if(lives<=0){ gameOver(); } else { newShip(); } updateUI(); }
 function gameOver(){ state='gameover'; if(score>hi){hi=score; try{localStorage.setItem('vector_vortex_hi',hi)}catch(e){} } updateUI(); overlay.innerHTML='<h1>GAME OVER</h1><h2>SCORE '+score+'</h2><p>Press ENTER or SPACE to launch again.</p><button class="btn" id="again">PLAY AGAIN</button>'; overlay.style.display='flex'; document.getElementById('again').onclick=()=>startGame('1p'); }
 function splitRock(r){ score += r.size===3?50:r.size===2?100:200; explode(r.x,r.y,12+r.size*5,r.size===1?'#ff0':'#0ff'); sfxBoom(); if(r.size>1){ rocks.push(makeRock(r.x,r.y,r.size-1),makeRock(r.x,r.y,r.size-1)); } updateUI(); }
-function update(){ 
- const ict=getICTInput(); 
+function update(){
+ const ict=getICTInput();
  pollICTPause(ict);
+ // Mobile overlay SELECT or FIRE starts / restarts the game from start screen
+ if((state==='idle'||state==='gameover') && ict && (ict.select||ict.fire)){
+   startGame('1p'); return;
+ }
  if(state!=='playing'||paused)return; fireCd=Math.max(0,fireCd-1); inv=Math.max(0,inv-1); shieldCd=Math.max(0,shieldCd-1); if(shield<100)shield+=.08;
  const mx=ict?ict.moveX:0, my=ict?ict.moveY:0, mm=ict?ict.magnitude:0;
  const left=keys.ArrowLeft||keys.KeyA||mx<-0.18,right=keys.ArrowRight||keys.KeyD||mx>0.18,up=keys.ArrowUp||keys.KeyW||my<-0.18,down=keys.ArrowDown||keys.KeyS||my>0.18;
