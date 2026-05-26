@@ -60,7 +60,7 @@ function draw(){ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba
 // Keyboard controls remain primary fallback — nothing here touches them.
 function getICTInput(){return window.ICTLabsInput||(window.parent&&window.parent.ICTLabsInput)||null;}
 // Edge-detection state (one-shot inputs: select, fire, cancel)
-let ictLSel=false,ictLFire=false,ictLCancel=false;
+let ictLSel=false,ictLFire=false,ictLCancel=false,ictLUp=false;
 // DAS — Delayed Auto Shift: standard Tetris feel for held directions.
 // 160 ms initial delay before auto-repeat, then one move per 50 ms.
 const DAS_DELAY=160,DAS_RATE=50;
@@ -89,7 +89,7 @@ function pollICTInput(){
   }
   ictLCancel=!!ict.cancel;
   // Sync remaining edge states and bail if not in active play
-  if(state!=='playing'){ictLSel=!!ict.select;ictLFire=!!ict.fire;return;}
+  if(state!=='playing'){ictLSel=!!ict.select;ictLFire=!!ict.fire;ictLUp=ict.moveY<-0.35;return;}
   // ── SELECT = rotate (wall-kick on collision) ──────────────────────────
   if(ict.select&&!ictLSel){
     const r=rotate(piece.m);
@@ -102,8 +102,17 @@ function pollICTInput(){
   // ── FIRE = hard drop ──────────────────────────────────────────────────
   if(ict.fire&&!ictLFire){hardDrop();}
   ictLFire=!!ict.fire;
+  // ── Trackpad UP = rotate (edge-detected, same wall-kick as SELECT) ───────
+  const my=ict.moveY;
+  if(my<-0.35&&!ictLUp){
+    const r=rotate(piece.m);
+    if(!collide(piece,piece.x,piece.y,r)){piece.m=r;sfx.rot();}
+    else if(!collide(piece,piece.x-1,piece.y,r)){piece.x--;piece.m=r;sfx.rot();}
+    else if(!collide(piece,piece.x+1,piece.y,r)){piece.x++;piece.m=r;sfx.rot();}
+  }
+  ictLUp=my<-0.35;
   // ── Directional movement with DAS ─────────────────────────────────────
-  const mx=ict.moveX,my=ict.moveY;
+  const mx=ict.moveX;
   // Left
   if(mx<-0.18){
     if(!dasL.on){if(!collide(piece,piece.x-1,piece.y)){piece.x--;sfx.move();}dasL={on:true,t:now+DAS_DELAY};}
