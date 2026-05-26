@@ -861,26 +861,6 @@ body,
   pointer-events: none !important;
 }
 
-/* ── Game frame lift when overlay is open ──
-   Shifts the game upward so the active play area clears the
-   controller panel. Applied on touch/mobile only (≤1024px).
-   Phone gets a slightly larger nudge than iPad.
-   Does NOT resize the panel or modify wheel math. */
-@media (max-width: 600px) {
-  body.touch-panel-open #gameFrame,
-  body.touch-panel-open iframe#gameFrame {
-    transform: translateY(-10%);
-    transform-origin: top center;
-  }
-}
-@media (min-width: 601px) and (max-width: 1024px) {
-  body.touch-panel-open #gameFrame,
-  body.touch-panel-open iframe#gameFrame {
-    transform: translateY(-8%);
-    transform-origin: top center;
-  }
-}
-
 /* ── Phone-only overlay sizing (max 600px / portrait phones) ──
    Reduces overlay height to ~165–185px so it occupies no more
    than ~22–25% of visible portrait phone height.
@@ -1583,12 +1563,10 @@ Touch isolation: stopImmediatePropagation on all #dpad handlers
     function openPanel(){
       if(!panel || !isTouch()) return;
       open = true; panel.classList.add('show');
-      document.body.classList.add('touch-panel-open');
     }
     function closePanel(){
       if(!panel) return;
       open = false; panel.classList.remove('show');
-      document.body.classList.remove('touch-panel-open');
       input.moveX=0; input.moveY=0; input.magnitude=0;
       input.fire=false; pushInput();
     }
