@@ -415,6 +415,7 @@ function updatePower(){
 // ── Draw ───────────────────────────────────────────────────────
 function draw(){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  if(!map||!pac) return; // not yet initialized (overlay showing)
 
   // Map
   map.forEach((row,ry)=>{
@@ -495,10 +496,6 @@ function draw(){
     ctx.fillStyle='rgba(255,255,0,0.15)';ctx.fillRect(0,H-4,W,4);
     ctx.fillStyle='#ff0';ctx.fillRect(0,H-4,(powerTimer/300)*W,4);
   }
-
-  // Mouth animation
-  pac.mouthAngle+=0.06*pac.mouthDir;
-  if(pac.mouthAngle>0.28||pac.mouthAngle<0.01)pac.mouthDir*=-1;
 }
 
 function updateUI(){hiEl.textContent=hiScore;scEl.textContent=score;lvEl.textContent=level;lfEl.textContent=lives;}
@@ -544,27 +541,37 @@ function pollICTInput(){
 }
 
 // ── Loop ───────────────────────────────────────────────────────
-function loop(){
+let lastTime=0,accumulator=0;
+const TICK_MS=1000/60; // fixed 60fps-equivalent game logic tick
+function loop(ts){
   requestAnimationFrame(loop);
-  frameCount++;
+  if(!lastTime){lastTime=ts;draw();return;} // first frame: anchor time, no ticks
+  const dt=Math.min(ts-lastTime,100);lastTime=ts; // clamp guards tab-hide recovery
+  accumulator+=dt;
   pollICTInput();
-  if(gstate==='playing'&&!paused){
-    if(pac.dead){
-      pac.deadTimer--;
-      if(pac.deadTimer<=0) killPac();
-    } else {
-      if(pac.invincible>0) pac.invincible--;
-      stepPac();
-      checkCollisions();
+  while(accumulator>=TICK_MS){
+    accumulator-=TICK_MS;
+    frameCount++;
+    if(gstate==='playing'&&!paused){
+      if(pac.dead){
+        pac.deadTimer--;
+        if(pac.deadTimer<=0) killPac();
+      } else {
+        if(pac.invincible>0) pac.invincible--;
+        stepPac();
+        checkCollisions();
+      }
+      ghosts.forEach(g=>stepGhost(g));
+      updatePower();
+      pac.mouthAngle+=0.06*pac.mouthDir;
+      if(pac.mouthAngle>0.28||pac.mouthAngle<0.01)pac.mouthDir*=-1;
     }
-    ghosts.forEach(g=>stepGhost(g));
-    updatePower();
   }
   draw();
 }
 
 // ── Boot ───────────────────────────────────────────────────────
-updateUI();loop();
+updateUI();requestAnimationFrame(loop);
 
 // Touch overlay postMessage bridge
 window.addEventListener('message',function(e){
