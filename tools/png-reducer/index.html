@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PNG Reducer — ICTLabs Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090d;--surface:#0d1117;--surface2:#111820;
+  --border:#1a2535;--border2:#243044;
+  --accent:#00aaff;--accent2:#0066cc;--accent-glow:rgba(0,170,255,0.12);
+  --amber:#f5a623;--green:#22c55e;--red:#ef4444;
+  --text:#e2eaf5;--text2:#7a9ab8;--text3:#3d5a78;
+  --mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif;
+  --radius:10px;--radius-sm:6px;--bw:1px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6}
+
+/* ── NAV ── */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,9,13,0.94);border-bottom:var(--bw) solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;height:54px;padding:0 28px;}
+.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:28px}
+.nav-logo-ict{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:0.12em;color:#fff}
+.nav-logo-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 3px}
+.nav-logo-labs{font-family:var(--mono);font-size:14px;font-weight:400;letter-spacing:0.12em;color:var(--accent)}
+.nav-divider{width:1px;height:22px;background:var(--border2);margin:0 16px}
+.nav-tool-label{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase}
+.nav-links{display:flex;gap:4px;margin-left:auto;align-items:center}
+.nav-link{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--text2);padding:5px 12px;border-radius:var(--radius-sm);border:var(--bw) solid transparent;text-decoration:none;cursor:pointer;transition:all 0.15s;}
+.nav-link:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
+.lang-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.15em;background:var(--surface2);border:var(--bw) solid var(--border2);border-radius:var(--radius-sm);color:var(--accent);padding:5px 12px;cursor:pointer;transition:all 0.15s;margin-left:8px;}
+.lang-btn:hover{background:var(--accent-glow);border-color:var(--accent)}
+
+/* ── LAYOUT ── */
+.app{margin-top:54px;display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--surface);border-right:var(--bw) solid var(--border);padding:24px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
+.sidebar-section{padding:0 16px;margin-bottom:28px}
+.sidebar-heading{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;color:var(--text3);text-transform:uppercase;padding:0 10px;margin-bottom:10px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;margin-bottom:2px;border:var(--bw) solid transparent;}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.7}
+.nav-item.active{background:rgba(0,102,204,0.15);border-color:rgba(0,170,255,0.2);color:var(--accent)}
+.nav-item.active svg{opacity:1}
+.nav-item:hover:not(.active){background:var(--surface2);color:var(--text)}
+.sdot{width:6px;height:6px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.sdot.on{background:var(--green)}.sdot.off{background:var(--border2)}
+.live-box{margin:0 16px;background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:14px;}
+.live-title{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;color:var(--text3);margin-bottom:10px;text-transform:uppercase}
+.live-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.live-key{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.live-val{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent)}
+.live-fname{margin-top:10px;padding-top:10px;border-top:var(--bw) solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3);word-break:break-all;}
+.live-fname span{color:var(--amber)}
+
+/* ── MAIN ── */
+.main{padding:32px 36px 80px;max-width:900px}
+
+/* ── TABS ── */
+.tabs{display:flex;margin-bottom:32px;border-bottom:var(--bw) solid var(--border)}
+.tab{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--text2);padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;margin-bottom:-1px;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ── SECTION LABEL ── */
+.slabel{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;color:var(--text3);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.slabel::after{content:'';flex:1;height:1px;background:var(--border)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.pgrid.one{grid-template-columns:1fr}
+
+/* ── PARAM CARDS ── */
+.pcard{background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color 0.2s;}
+.pcard:hover{border-color:var(--border2)}
+.pcard.full{grid-column:1/-1}
+.phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pname{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.08em;display:flex;align-items:center;gap:6px;}
+.pval{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+.punit{font-family:var(--mono);font-size:10px;color:var(--text2);margin-left:2px}
+.pdesc{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.55}
+
+/* ── TOOLTIP ── */
+.tipico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:var(--bw) solid var(--text3);color:var(--text3);font-family:var(--mono);font-size:9px;cursor:help;flex-shrink:0;position:relative;}
+.tipico:hover{border-color:var(--accent);color:var(--accent)}
+.tipbub{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0d1a2e;border:var(--bw) solid var(--border2);border-radius:7px;padding:9px 12px;width:230px;font-family:var(--sans);font-size:11px;color:var(--text2);line-height:1.5;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:300;white-space:normal;box-shadow:0 4px 20px rgba(0,0,0,0.6);}
+.tipbub::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#0d1a2e;}
+.tipico:hover .tipbub{opacity:1}
+
+/* ── SLIDERS ── */
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(0,170,255,0.18);cursor:pointer;}
+.rends{display:flex;justify-content:space-between;margin-top:5px}
+.rend{font-family:var(--mono);font-size:9px;color:var(--text3)}
+
+/* ── EST SIZE BAR ── */
+.estbar{margin-top:14px;background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.estlbl{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;color:var(--text3);text-transform:uppercase;flex-shrink:0;}
+.esttrack{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.estfill{height:100%;border-radius:2px;background:var(--accent2);transition:width 0.25s,background 0.25s}
+.estval{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);min-width:60px;text-align:right;}
+.estrange{font-family:var(--mono);font-size:9px;color:var(--text3);min-width:90px;text-align:right;}
+
+/* ── TEXT / FIELD ── */
+.tf{width:100%;background:var(--surface3);border:var(--bw) solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--accent);outline:none;transition:border-color 0.2s,background 0.2s;}
+.tf:focus{border-color:var(--accent);background:var(--surface2)}
+.tf::placeholder{color:var(--text3);font-style:normal}
+
+/* ── FOLDER ROW ── */
+.frow{display:flex;align-items:center;gap:8px}
+.frow .tf{flex:1}
+.fbtn{background:transparent;border:var(--bw) solid var(--accent);border-radius:var(--radius-sm);padding:8px 11px;cursor:pointer;color:var(--accent);transition:all 0.2s;flex-shrink:0;display:flex;align-items:center;}
+.fbtn:hover{background:var(--accent-glow)}
+.fbtn.filled{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.fbtn svg{width:16px;height:16px}
+.dirsel{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:6px;display:none;}
+
+/* ── SWITCHES ── */
+.swrow{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sw{width:40px;height:22px;background:var(--border2);border-radius:11px;cursor:pointer;position:relative;transition:background 0.2s;border:none;flex-shrink:0;}
+.sw.on{background:var(--accent2)}
+.sw::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;}
+.sw.on::after{transform:translateX(18px)}
+.swlbl{font-size:13px;color:var(--text)}
+
+/* ── ALGO ── */
+.agrid{display:flex;flex-direction:column;gap:0}
+.arow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:var(--bw) solid var(--border)}
+.arow:last-child{border-bottom:none}
+.aname{font-family:var(--mono);font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.asw{width:36px;height:20px;background:var(--border2);border-radius:10px;cursor:pointer;position:relative;transition:background 0.2s;border:none;flex-shrink:0;}
+.asw.on{background:var(--accent2)}
+.asw::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;}
+.asw.on::after{transform:translateX(16px)}
+
+/* ── COLOR ── */
+.crow{display:flex;align-items:center;gap:10px}
+input[type=color]{width:38px;height:34px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0}
+.chex{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;flex:1;}
+
+/* ── NAMING PREVIEW ── */
+.nprev{font-family:var(--mono);font-size:11px;color:var(--amber);background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;margin-top:6px;}
+
+/* ── PROCESS PANEL ── */
+.proc-zone{
+  background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);
+  padding:20px;margin-top:24px;
+}
+.proc-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.proc-title{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;color:var(--text2);text-transform:uppercase;}
+.proc-folder-display{font-family:var(--mono);font-size:11px;color:var(--amber);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* progress bar */
+.prog-wrap{margin-bottom:12px}
+.prog-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;border-radius:3px;background:var(--accent2);width:0%;transition:width 0.2s}
+.prog-meta{display:flex;justify-content:space-between}
+.prog-txt{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.prog-pct{font-family:var(--mono);font-size:10px;color:var(--accent);font-weight:700}
+
+/* log */
+.log-box{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;height:160px;overflow-y:auto;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--text2);}
+.log-box .lok{color:var(--green)}.log-box .lskip{color:var(--amber)}.log-box .lerr{color:var(--red)}.log-box .linfo{color:var(--text3)}
+
+/* summary */
+.summary{display:none;margin-top:12px;background:rgba(34,197,94,0.06);border:var(--bw) solid rgba(34,197,94,0.2);border-radius:var(--radius-sm);padding:12px 16px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.summary-key{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.summary-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green)}
+
+/* ── ACTION BAR ── */
+.abar{display:flex;gap:10px;margin-top:0;padding-top:16px;align-items:center}
+.btn-run{flex:1;background:var(--accent2);color:#fff;border:none;border-radius:var(--radius);padding:10px 20px;font-family:var(--mono);font-size:11px;letter-spacing:0.12em;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;max-height:42px;}
+.btn-run:hover{opacity:0.85}
+.btn-run:disabled{opacity:0.4;cursor:not-allowed}
+.btn-run.running{background:#1a3a1a;border:var(--bw) solid var(--green);color:var(--green)}
+.btn-sec{background:var(--surface2);color:var(--text2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:13px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.btn-sec:hover{border-color:var(--border2);color:var(--text)}
+.btn-dl{background:rgba(0,170,255,0.06);color:var(--accent);border:var(--bw) solid rgba(0,170,255,0.2);border-radius:var(--radius);padding:13px 14px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-dl:hover{background:rgba(0,170,255,0.12)}
+.bico svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── STYLES TAB ── */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.scard{background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:16px;}
+.scard label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.18em;color:var(--text3);margin-bottom:8px;text-transform:uppercase}
+.sprev{background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;}
+.sprev-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.18em}
+.sprev-title{font-size:20px;font-weight:600;margin-bottom:4px}
+.sprev-sub{font-size:13px;color:var(--text2);margin-bottom:12px}
+.sprev-badge{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:0.14em;background:rgba(0,170,255,0.1);border:var(--bw) solid rgba(0,170,255,0.25);border-radius:4px;padding:3px 10px;color:var(--accent);}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.swat{display:flex;align-items:center;gap:8px;background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;}
+.swat-dot{width:20px;height:20px;border-radius:4px;flex-shrink:0}
+.swat-name{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.swat-hex{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* ── COPY TAB ── */
+.csubtabs{display:flex;margin-bottom:20px;border-bottom:var(--bw) solid var(--border)}
+.cst{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--text2);padding:8px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;margin-bottom:-1px;}
+.cst.active{color:var(--accent);border-bottom-color:var(--accent)}
+.cst:hover:not(.active){color:var(--text)}
+.csp{display:none}.csp.active{display:block}
+.cblock{background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+.cblock-head{padding:9px 16px;border-bottom:var(--bw) solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.08em}
+.cblock-body{display:grid;grid-template-columns:1fr 1fr}
+.clang{padding:12px 16px;border-right:var(--bw) solid var(--border)}
+.clang:last-child{border-right:none}
+.clang-lbl{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--text3);margin-bottom:6px;text-transform:uppercase}
+textarea.cfield{width:100%;background:transparent;border:none;outline:none;resize:none;font-family:var(--sans);font-size:13px;color:var(--text);line-height:1.6;min-height:48px;padding:0;}
+
+/* ── STATUS BAR ── */
+.sbar{position:fixed;bottom:0;left:220px;right:0;background:var(--surface);border-top:var(--bw) solid var(--border);display:flex;align-items:center;gap:16px;padding:7px 24px;z-index:50;}
+.spip{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.spip.busy{background:var(--amber);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.stxt{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.08em}
+.sright{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+@media(max-width:700px){
+  .app{grid-template-columns:1fr}.sidebar{display:none}.sbar{left:0}
+  .pgrid{grid-template-columns:1fr}.sgrid{grid-template-columns:1fr}
+  .cblock-body{grid-template-columns:1fr}.clang{border-right:none;border-bottom:var(--bw) solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="https://ict-labs.com" class="nav-logo" target="_blank">
+    <span class="nav-logo-ict">ICT</span>
+    <span class="nav-logo-dot"></span>
+    <span class="nav-logo-labs">Labs</span>
+  </a>
+  <div class="nav-divider"></div>
+  <span class="nav-tool-label" data-es="HERRAMIENTAS" data-en="TOOLS">HERRAMIENTAS</span>
+  <div class="nav-links">
+    <a href="https://ict-labs.com" class="nav-link" target="_blank" data-es="Inicio" data-en="Home">Inicio</a>
+    <a href="#" class="nav-link" data-es="Herramientas" data-en="Tools">Herramientas</a>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+</nav>
+
+<input type="file" id="folder-input-hidden" webkitdirectory multiple style="display:none" onchange="onFolderSelected(this)">
+<div class="app">
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-heading" data-es="MÓDULO ACTIVO" data-en="ACTIVE MODULE">MÓDULO ACTIVO</div>
+    <div class="nav-item active" onclick="setTab('tool',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      <span data-es="Parámetros" data-en="Parameters">Parámetros</span>
+      <span class="sdot on"></span>
+    </div>
+    <div class="nav-item" onclick="setTab('styles',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 18v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2m18 0h-2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span data-es="Estilos" data-en="Styles">Estilos</span>
+      <span class="sdot off"></span>
+    </div>
+    <div class="nav-item" onclick="setTab('copy',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6"/></svg>
+      <span data-es="Textos" data-en="Copy">Textos</span>
+      <span class="sdot off"></span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-heading" data-es="CONFIG EN VIVO" data-en="LIVE CONFIG">CONFIG EN VIVO</div>
+    <div class="live-box">
+      <div class="live-title">OUTPUT</div>
+      <div class="live-row"><span class="live-key">MAX_SIDE</span><span class="live-val" id="lv-max" style="color:#fff">1600px</span></div>
+      <div class="live-row"><span class="live-key">QUALITY</span><span class="live-val" id="lv-qual" style="color:#fff">88%</span></div>
+      <div class="live-row"><span class="live-key">EST. SIZE</span><span class="live-val" id="lv-est" style="color:#fff">~180 KB</span></div>
+      <div class="live-row"><span class="live-key">PREFIX</span><span class="live-val" id="lv-prefix" style="color:var(--text3)">ICT</span></div>
+      <div class="live-row"><span class="live-key">ALGO</span><span class="live-val" id="lv-algo" style="color:#fff">LANCZOS</span></div>
+      <div class="live-row"><span class="live-key">RECURSIVE</span><span class="live-val" id="lv-rec" style="color:#fff">ON</span></div>
+      <div class="live-fname"><span id="lv-fname" style="color:var(--text3)">Pendiente_0001.jpg</span></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="tabs">
+    <div class="tab active" id="tab-tool" onclick="setTab('tool')"><span data-es="PARÁMETROS" data-en="PARAMETERS">PARÁMETROS</span></div>
+    <div class="tab" id="tab-styles" onclick="setTab('styles')"><span data-es="ESTILOS" data-en="STYLES">ESTILOS</span></div>
+    <div class="tab" id="tab-copy" onclick="setTab('copy')"><span data-es="TEXTOS / COPIA" data-en="COPY &amp; TEXT">TEXTOS / COPIA</span></div>
+  </div>
+
+  <!-- ══ PARAMETERS ══ -->
+  <div class="tab-panel active" id="panel-tool">
+
+    <div class="slabel" data-es="SALIDA DE IMAGEN" data-en="IMAGE OUTPUT">SALIDA DE IMAGEN</div>
+    <div class="pgrid">
+
+      <div class="pcard">
+        <div class="phead">
+          <span class="pname">MAX_SIDE <span class="tipico">?<span class="tipbub" id="tb-max"></span></span></span>
+          <span><span class="pval" id="v-max">1600</span><span class="punit">px</span></span>
+        </div>
+        <p class="pdesc" data-es="Límite del lado más largo. Proporcionalmente." data-en="Longest side cap. Applied proportionally.">Límite del lado más largo. Proporcionalmente.</p>
+        <input type="range" min="400" max="4000" step="100" value="1600" id="sl-max"
+          oninput="upd('v-max',this.value);upd('lv-max',this.value+'px');updTrack(this);updEst()">
+        <div class="rends"><span class="rend">400px</span><span class="rend">4000px</span></div>
+      </div>
+
+      <div class="pcard">
+        <div class="phead">
+          <span class="pname">QUALITY <span class="tipico">?<span class="tipbub" id="tb-qual"></span></span></span>
+          <span><span class="pval" id="v-qual">88</span><span class="punit">%</span></span>
+        </div>
+        <p class="pdesc" data-es="Compresión JPEG. 85–92 ideal para LoRA." data-en="JPEG compression. 85–92 ideal for LoRA.">Compresión JPEG. 85–92 ideal para LoRA.</p>
+        <input type="range" min="60" max="100" step="1" value="88" id="sl-qual"
+          oninput="upd('v-qual',this.value);upd('lv-qual',this.value+'%');updTrack(this);updEst()">
+        <div class="rends"><span class="rend">60%</span><span class="rend">100%</span></div>
+      </div>
+
+      <div class="pcard full" style="padding:12px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span class="pname">ESTIMATED OUTPUT SIZE <span class="tipico">?<span class="tipbub" id="tb-est"></span></span></span>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text3)" data-es="para imagen típica 1600×1200" data-en="for typical 1600×1200 source">para imagen típica 1600×1200</span>
+        </div>
+        <div class="estbar">
+          <span class="estlbl" data-es="TAMAÑO" data-en="SIZE">TAMAÑO</span>
+          <div class="esttrack"><div class="estfill" id="est-fill" style="width:52%"></div></div>
+          <span class="estval" id="est-val">~180 KB</span>
+          <span class="estrange" id="est-range">90–300 KB</span>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="phead">
+          <span class="pname">RESIZE_ALGORITHM <span class="tipico">?<span class="tipbub" id="tb-algo"></span></span></span>
+          <span class="pval" id="v-algo" style="font-size:12px">LANCZOS</span>
+        </div>
+        <p class="pdesc" data-es="Filtro de redimensionado. Solo uno activo." data-en="Resize filter. Only one active at a time.">Filtro de redimensionado. Solo uno activo.</p>
+        <div class="agrid">
+          <div class="arow"><span class="aname">LANCZOS <span class="tipico">?<span class="tipbub" id="tb-lanczos"></span></span></span><button class="asw on" data-algo="LANCZOS" onclick="pickAlgo(this)"></button></div>
+          <div class="arow"><span class="aname">BICUBIC <span class="tipico">?<span class="tipbub" id="tb-bicubic"></span></span></span><button class="asw" data-algo="BICUBIC" onclick="pickAlgo(this)"></button></div>
+          <div class="arow"><span class="aname">BILINEAR <span class="tipico">?<span class="tipbub" id="tb-bilinear"></span></span></span><button class="asw" data-algo="BILINEAR" onclick="pickAlgo(this)"></button></div>
+          <div class="arow"><span class="aname">BOX <span class="tipico">?<span class="tipbub" id="tb-box"></span></span></span><button class="asw" data-algo="BOX" onclick="pickAlgo(this)"></button></div>
+          <div class="arow"><span class="aname">NEAREST <span class="tipico">?<span class="tipbub" id="tb-nearest"></span></span></span><button class="asw" data-algo="NEAREST" onclick="pickAlgo(this)"></button></div>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="phead">
+          <span class="pname">BG_COLOR <span class="tipico">?<span class="tipbub" id="tb-bgcolor"></span></span></span>
+          <span class="pval" id="v-bgcol" style="font-size:12px">#ffffff</span>
+        </div>
+        <p class="pdesc" data-es="Relleno para PNGs con transparencia." data-en="Fill for transparent PNGs before JPEG export.">Relleno para PNGs con transparencia.</p>
+        <div class="crow">
+          <input type="color" value="#ffffff" id="bg-color" oninput="upd('v-bgcol',this.value);document.getElementById('bg-hex').textContent=this.value">
+          <span class="chex" id="bg-hex">#ffffff</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="slabel" data-es="NOMBRES DE ARCHIVO" data-en="FILE NAMING">NOMBRES DE ARCHIVO</div>
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="phead"><span class="pname">PREFIX <span class="tipico">?<span class="tipbub" id="tb-prefix"></span></span></span></div>
+        <p class="pdesc" data-es="Etiqueta inicial + contador de 4 dígitos." data-en="Leading label + 4-digit padded counter.">Etiqueta inicial + contador de 4 dígitos.</p>
+        <input type="text" class="tf" value="" id="prefix-in" maxlength="12" placeholder="Pendiente" data-placeholder-es="Pendiente" data-placeholder-en="Pending" oninput="updPrefix(this.value)">
+        <div class="nprev" style="color:var(--amber)" id="name-prev" style="color:var(--text3)">→ Pendiente_0001.jpg</div>
+      </div>
+      <div class="pcard">
+        <div class="phead"><span class="pname">OUTPUT_FOLDER_NAME <span class="tipico">?<span class="tipbub" id="tb-folder"></span></span></span></div>
+        <p class="pdesc" data-es="Nombre de subcarpeta de salida. Excluida del escaneo." data-en="Output subfolder name. Excluded from scan.">Nombre de subcarpeta de salida. Excluida del escaneo.</p>
+        <input type="text" class="tf" value="" id="folder-in" oninput="updFullPath()" placeholder="Pendiente" data-placeholder-es="Pendiente" data-placeholder-en="Pending">
+        <div class="swrow" style="margin-top:10px">
+          <button class="sw on" id="sw-mkdir" onclick="flipSw(this,null,null,null,'sw-mkdir-lbl',{on:{es:'Crear subcarpeta si no existe',en:'Create subfolder if not found'},off:{es:'No crear subcarpeta',en:'Do not create subfolder'}})"></button>
+          <span class="swlbl" id="sw-mkdir-lbl" data-es="Crear subcarpeta si no existe" data-en="Create subfolder if not found">Crear subcarpeta si no existe</span>
+        </div>
+      </div>
+      <div class="pcard full">
+        <div class="phead"><span class="pname">DIRECTORIO DE ENTRADA <span class="tipico">?<span class="tipbub" id="tb-outdir"></span></span></span></div>
+        <p class="pdesc" data-es="Carpeta raíz con las imágenes a procesar." data-en="Root folder containing the images to process.">Carpeta raíz con las imágenes a procesar.</p>
+        <div id="proc-mode" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:0.08em"></div>
+        <div class="frow">
+          <input type="text" class="tf" id="dir-in" style="color:var(--text2)" placeholder="Pendiente" data-placeholder-es="Pendiente" data-placeholder-en="Pending" readonly>
+          <button class="fbtn" onclick="pickFolder()" id="btn-pick" style="color:var(--accent)">
+            <svg id="folder-icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="full-path-preview" style="background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);padding:12px 18px;margin-bottom:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.16em;color:var(--text3);margin-bottom:8px;text-transform:uppercase">RUTA DE SALIDA</div>
+      <div style="font-family:var(--mono);font-size:11px;line-height:2;word-break:break-all">
+        <span style="color:var(--text2)" id="fpp-dir">[ selecciona carpeta ]</span><span style="color:var(--text3)"> / </span><span style="color:var(--text3)" id="fpp-folder">Pendiente</span><span style="color:var(--text3)"> / </span><span style="color:var(--text3)" id="fpp-file">Pendiente_0001.jpg</span>
+      </div>
+    </div>
+
+    <div class="slabel" data-es="COMPORTAMIENTO DE ESCANEO" data-en="SCAN BEHAVIOR">COMPORTAMIENTO DE ESCANEO</div>
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="phead"><span class="pname">RECURSIVE_SCAN <span class="tipico">?<span class="tipbub" id="tb-recursive"></span></span></span></div>
+        <p class="pdesc" data-es="Busca en subcarpetas. Desactiva para escaneo plano." data-en="Searches subfolders. Disable for flat scan only.">Busca en subcarpetas. Desactiva para escaneo plano.</p>
+        <div class="swrow"><button class="sw on" id="sw-rec" onclick="flipSw(this,'lv-rec','ON','OFF','sw-rec-lbl',{on:{es:'Activado (recursivo)',en:'Enabled (recursive)'},off:{es:'Desactivado (plano)',en:'Disabled (flat)'}})"></button><span class="swlbl" id="sw-rec-lbl" data-es="Activado (recursivo)" data-en="Enabled (recursive)">Activado (recursivo)</span></div>
+      </div>
+      <div class="pcard">
+        <div class="phead"><span class="pname">EXIF_TRANSPOSE <span class="tipico">?<span class="tipbub" id="tb-exif"></span></span></span></div>
+        <p class="pdesc" data-es="Rota según orientación EXIF antes de redimensionar." data-en="Auto-rotates from EXIF orientation before resizing.">Rota según orientación EXIF antes de redimensionar.</p>
+        <div class="swrow"><button class="sw on" id="sw-exif" onclick="flipSw(this,null,null,null,'sw-exif-lbl',{on:{es:'Activado',en:'Enabled'},off:{es:'Desactivado',en:'Disabled'}})"></button><span class="swlbl" id="sw-exif-lbl" data-es="Activado" data-en="Enabled">Activado</span></div>
+      </div>
+      <div class="pcard">
+        <div class="phead"><span class="pname">SKIP_IF_SMALLER <span class="tipico">?<span class="tipbub" id="tb-skip"></span></span></span></div>
+        <p class="pdesc" data-es="Omite resize si ya es ≤ MAX_SIDE. Convierte igual." data-en="Skips resize if longest side ≤ MAX_SIDE. Still converts.">Omite resize si ya es ≤ MAX_SIDE. Convierte igual.</p>
+        <div class="swrow"><button class="sw" id="sw-skip" onclick="flipSw(this,null,null,null,'sw-skip-lbl',{on:{es:'Activado',en:'Enabled'},off:{es:'Desactivado',en:'Disabled'}})"></button><span class="swlbl" id="sw-skip-lbl" data-es="Desactivado" data-en="Disabled">Desactivado</span></div>
+      </div>
+      <div class="pcard">
+        <div class="phead"><span class="pname">INCLUDE_JPEG <span class="tipico">?<span class="tipbub" id="tb-incjpg"></span></span></span></div>
+        <p class="pdesc" data-es="También procesa .jpg/.jpeg en la misma secuencia." data-en="Also processes .jpg/.jpeg in the same sequence.">También procesa .jpg/.jpeg en la misma secuencia.</p>
+        <div class="swrow"><button class="sw on" id="sw-jpg" class="sw on" onclick="flipSw(this,null,null,null,'sw-jpg-lbl',{on:{es:'Activado',en:'Enabled'},off:{es:'Desactivado',en:'Disabled'}})"></button><span class="swlbl" id="sw-jpg-lbl" data-es="Activado" data-en="Enabled">Activado</span></div>
+      </div>
+    </div>
+
+    <!-- ══ RUN ZONE ══ -->
+    <div class="proc-zone">
+
+      <!-- progress -->
+      <div class="prog-wrap" id="prog-wrap" style="display:none">
+        <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="prog-meta">
+          <span class="prog-txt" id="prog-txt">0 / 0</span>
+          <span class="prog-pct" id="prog-pct">0%</span>
+        </div>
+      </div>
+
+      <!-- log -->
+      <div class="log-box" id="log-box" style="display:none"></div>
+
+      <!-- summary -->
+      <div class="summary" id="summary">
+        <div class="summary-row"><span class="summary-key" data-es="Archivos procesados" data-en="Files processed">Archivos procesados</span><span class="summary-val" id="sum-count" style="color:#fff">0</span></div>
+        <div class="summary-row"><span class="summary-key" data-es="Archivos saltados" data-en="Skipped">Archivos saltados</span><span class="summary-val" id="sum-skip" style="color:var(--amber)">0</span></div>
+        <div class="summary-row"><span class="summary-key" data-es="Tamaño total" data-en="Total size">Tamaño total</span><span class="summary-val" id="sum-size" style="color:#fff">0 KB</span></div>
+        <div class="summary-row"><span class="summary-key" data-es="Carpeta de salida" data-en="Output folder">Carpeta de salida</span><span class="summary-val" id="sum-folder" style="color:var(--accent);font-size:10px"></span></div>
+      </div>
+
+      <!-- action buttons -->
+      <div class="abar">
+        <button class="btn-run" id="btn-run" onclick="runProcess()">
+          <svg class="bico" viewBox="0 0 24 24" fill="currentColor" stroke="none" width="14" height="14" style="flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="btn-run-lbl" data-es="REDUCIR IMÁGENES" data-en="REDUCE IMAGES">REDUCIR IMÁGENES</span>
+        </button>
+        <button class="btn-sec" onclick="resetAll()">
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.02"/></svg>
+          <span data-es="Reset" data-en="Reset">Reset</span>
+        </button>
+        <button class="btn-dl" onclick="dlScript()" title="Descargar script .py">
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          .py
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /panel-tool -->
+
+  <!-- ══ STYLES ══ -->
+  <div class="tab-panel" id="panel-styles">
+    <div class="slabel" data-es="APARIENCIA" data-en="APPEARANCE">APARIENCIA</div>
+    <div class="sprev">
+      <div class="sprev-lbl" data-es="VISTA PREVIA" data-en="PREVIEW">VISTA PREVIA</div>
+      <div class="sprev-title" id="prev-title">ICT PNG Reducer</div>
+      <div class="sprev-sub" id="prev-sub">Herramienta de compresión de imágenes · ICTLabs</div>
+      <div class="sprev-badge" id="prev-badge">CONFIG UI</div>
+      <div class="swatches">
+        <div class="swat"><div class="swat-dot" id="sw-acc-dot" style="background:#0066cc"></div><span class="swat-name">Accent</span><span class="swat-hex" id="sw-acc-hex">#0066cc</span></div>
+        <div class="swat"><div class="swat-dot" id="sw-txt-dot" style="background:#e2eaf5"></div><span class="swat-name">Text</span><span class="swat-hex" id="sw-txt-hex">#e2eaf5</span></div>
+        <div class="swat"><div class="swat-dot" style="background:#07090d"></div><span class="swat-name">BG</span><span class="swat-hex">#07090d</span></div>
+        <div class="swat"><div class="swat-dot" id="sw-brd-dot" style="background:#1a2535"></div><span class="swat-name">Border</span><span class="swat-hex" id="sw-brd-hex">#1a2535</span></div>
+      </div>
+    </div>
+    <div class="sgrid">
+      <div class="scard"><label data-es="TÍTULO" data-en="TITLE">TÍTULO</label><input type="text" class="tf" style="color:var(--text)" value="ICT PNG Reducer" oninput="document.getElementById('prev-title').textContent=this.value"></div>
+      <div class="scard"><label data-es="SUBTÍTULO" data-en="SUBTITLE">SUBTÍTULO</label><input type="text" class="tf" style="color:var(--text)" value="Herramienta de reducción de imágenes · ICTLabs" oninput="document.getElementById('prev-sub').textContent=this.value"></div>
+      <div class="scard"><label data-es="BADGE" data-en="BADGE">BADGE</label><input type="text" class="tf" style="color:var(--text)" value="CONFIG UI" oninput="document.getElementById('prev-badge').textContent=this.value"></div>
+      <div class="scard"><label data-es="COLOR DE ACENTO" data-en="ACCENT COLOR">COLOR DE ACENTO</label>
+        <div class="crow"><input type="color" value="#0066cc" oninput="setV('--accent2',this.value);setV('--accent',this.value);document.getElementById('sw-acc-hex').textContent=this.value;document.getElementById('sw-acc-dot').style.background=this.value"><span class="chex">#0066cc</span></div></div>
+      <div class="scard"><label data-es="COLOR TEXTO PRINCIPAL" data-en="MAIN TEXT COLOR">COLOR TEXTO PRINCIPAL</label>
+        <div class="crow"><input type="color" value="#e2eaf5" oninput="setV('--text',this.value);document.getElementById('sw-txt-hex').textContent=this.value;document.getElementById('sw-txt-dot').style.background=this.value"><span class="chex">#e2eaf5</span></div></div>
+      <div class="scard"><label data-es="COLOR TEXTO SECUNDARIO" data-en="SECONDARY TEXT COLOR">COLOR TEXTO SECUNDARIO</label>
+        <div class="crow"><input type="color" value="#7a9ab8" oninput="setV('--text2',this.value)"><span class="chex">#7a9ab8</span></div></div>
+    </div>
+    <div class="slabel" data-es="BORDES" data-en="BORDERS">BORDES</div>
+    <div class="sgrid">
+      <div class="scard"><label data-es="COLOR DE BORDE PRINCIPAL" data-en="MAIN BORDER COLOR">COLOR DE BORDE PRINCIPAL</label>
+        <div class="crow">
+          <input type="color" value="#1a2535" id="bc-border" oninput="setV('--border',this.value);this.nextElementSibling.textContent=this.value;document.getElementById('sw-brd-hex').textContent=this.value;document.getElementById('sw-brd-dot').style.background=this.value">
+          <span class="chex">#1a2535</span>
+        </div>
+      </div>
+      <div class="scard"><label data-es="COLOR DE BORDE SECUNDARIO" data-en="SECONDARY BORDER COLOR">COLOR DE BORDE SECUNDARIO</label>
+        <div class="crow">
+          <input type="color" value="#243044" id="bc-border2" oninput="setV('--border2',this.value);this.nextElementSibling.textContent=this.value">
+          <span class="chex">#243044</span>
+        </div>
+      </div>
+      <div class="scard"><label data-es="GROSOR DE BORDE" data-en="BORDER WIDTH">GROSOR DE BORDE</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <input type="range" min="0" max="4" step="0.5" value="1" id="bc-bw" style="flex:1"
+            oninput="setV('--bw',this.value+'px');document.getElementById('bc-bw-val').textContent=this.value+'px';updTrack(this)">
+          <span class="chex" id="bc-bw-val" style="min-width:40px;text-align:center">1px</span>
+        </div>
+        <div class="rends"><span class="rend">0px</span><span class="rend">4px</span></div>
+      </div>
+      <div class="scard"><label data-es="COLOR DE ACENTO DE BORDE" data-en="BORDER ACCENT COLOR">COLOR DE ACENTO DE BORDE</label>
+        <div class="crow">
+          <input type="color" value="#243044" id="bc-border-accent" oninput="setV('--border2',this.value);this.nextElementSibling.textContent=this.value">
+          <span class="chex">#243044</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="slabel" data-es="TIPOGRAFÍA" data-en="TYPOGRAPHY">TIPOGRAFÍA</div>
+    <div class="sgrid">
+      <div class="scard"><label data-es="FUENTE PRINCIPAL" data-en="MAIN FONT">FUENTE PRINCIPAL</label>
+        <select class="tf" style="color:var(--text)" onchange="setV('--sans',this.value)">
+          <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+          <option value="'DM Sans',sans-serif">DM Sans</option>
+          <option value="'Inter',sans-serif">Inter</option>
+          <option value="system-ui,sans-serif">System UI</option>
+        </select></div>
+      <div class="scard"><label data-es="FUENTE MONO" data-en="MONO FONT">FUENTE MONO</label>
+        <select class="tf" style="color:var(--text)" onchange="setV('--mono',this.value)">
+          <option value="'Space Mono',monospace">Space Mono</option>
+          <option value="'JetBrains Mono',monospace">JetBrains Mono</option>
+          <option value="'Fira Mono',monospace">Fira Mono</option>
+          <option value="'Courier New',monospace">Courier New</option>
+        </select></div>
+    </div>
+  </div>
+
+  <!-- ══ COPY ══ -->
+  <div class="tab-panel" id="panel-copy">
+    <div class="csubtabs">
+      <div class="cst active" id="cst-ui" onclick="setCopySub('ui')"><span data-es="INTERFAZ" data-en="UI LABELS">INTERFAZ</span></div>
+      <div class="cst" id="cst-tt" onclick="setCopySub('tt')"><span data-es="TOOLTIPS" data-en="TOOLTIPS">TOOLTIPS</span></div>
+    </div>
+    <div class="csp active" id="csp-ui"></div>
+    <div class="csp" id="csp-tt"></div>
+  </div>
+
+</main>
+</div>
+
+<div class="sbar">
+  <span class="spip" id="spip"></span>
+  <span class="stxt" id="stxt">ICT PNG Reducer · ICTLabs Tools · v2.4</span>
+  <span class="sright" id="sright">Canvas API · LANCZOS</span>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// TOOLTIP CONTENT
+// ─────────────────────────────────────────────
+const TIPS={
+  'tb-max':{es:'Limita el lado más largo de cada imagen. La escala se aplica proporcionalmente — 3200×2400 → 1600×1200. Las imágenes más pequeñas no se amplían.',en:'Caps the longest edge. Scale applied proportionally — 3200×2400 → 1600×1200. Images smaller than this are not upscaled.'},
+  'tb-qual':{es:'Nivel de compresión JPEG (60–100). 85–92 es el rango ideal: excelente calidad visual con tamaño razonable.',en:'JPEG compression level (60–100). 85–92 is the sweet spot: excellent visual quality with reasonable file size.'},
+  'tb-est':{es:'Estimación aproximada del peso de un JPG típico de 1600×1200 con los parámetros actuales. El tamaño real varía según el contenido.',en:'Rough estimate for a typical 1600×1200 JPG at current settings. Actual size varies by image content.'},
+  'tb-algo':{es:'Filtro matemático para redimensionar. Lanczos da la imagen más nítida; los filtros más rápidos producen resultados más suaves.',en:'Math filter used when resizing. Lanczos gives the sharpest result; faster filters produce softer output.'},
+  'tb-bgcolor':{es:'Color de fondo para PNGs con transparencia (RGBA/LA). Los píxeles transparentes se rellenan con este color antes de exportar a JPEG.',en:'Background fill for transparent PNGs (RGBA/LA mode). Transparent pixels are filled with this color before JPEG export.'},
+  'tb-prefix':{es:'Texto inicial de cada archivo de salida. Solo letras, números y guiones bajos. ICT → ICT_0001.jpg, ICT_0002.jpg...',en:'Leading text of every output file. Letters, numbers, underscores only. ICT → ICT_0001.jpg, ICT_0002.jpg...'},
+  'tb-folder':{es:'Nombre de la subcarpeta creada dentro del directorio seleccionado. El procesador la excluye del escaneo para no reprocesar salidas anteriores.',en:'Name of the subfolder created inside the selected directory. Excluded from scanning to avoid reprocessing previous output.'},
+  'tb-recursive':{es:'Activado: busca PNGs en todas las subcarpetas. Desactivado: solo el nivel raíz del directorio seleccionado.',en:'On: finds PNGs in all subfolders. Off: only the root level of the selected directory.'},
+  'tb-exif':{es:'Lee la etiqueta de orientación EXIF y rota/voltea la imagen antes de procesar. Sin esto, fotos tomadas en vertical pueden quedar de lado.',en:'Reads EXIF orientation tag and rotates/flips before processing. Without this, portrait photos may save sideways.'},
+  'tb-skip':{es:'Activado: las imágenes con lado más largo ≤ MAX_SIDE no se redimensionan. Se convierten a JPG y se renombran igual.',en:'On: images with longest side ≤ MAX_SIDE skip resize. They are still converted to JPG and renamed.'},
+  'tb-incjpg':{es:'Activado: también procesa archivos .jpg y .jpeg de la carpeta fuente en la misma secuencia de numeración.',en:'On: also processes .jpg and .jpeg source files into the same numbering sequence.'},
+  'tb-lanczos':{es:'Más nítido. Recomendado para LoRA y revisión de detalle fino.',en:'Sharpest result. Recommended for LoRA and fine-detail review.'},
+  'tb-bicubic':{es:'Ligeramente más suave que Lanczos, más rápido. Difícil de distinguir a 1600px.',en:'Slightly softer than Lanczos, faster. Hard to tell apart at 1600px.'},
+  'tb-bilinear':{es:'Más rápido. Bordes más suaves — visible en detalle fino.',en:'Faster. Noticeably softer on fine edges.'},
+  'tb-box':{es:'Promedio básico de píxeles. Rápido. Apropiado para miniaturas.',en:'Basic pixel averaging. Fast. Fine for thumbnails.'},
+  'tb-nearest':{es:'Sin interpolación. Pixelado. Solo para pixel art o bordes duros.',en:'No interpolation. Blocky. For pixel art or hard-edge graphics only.'},
+};
+
+const UI_COPY={
+  toolTitle:{es:'ICT PNG Reducer',en:'ICT PNG Reducer'},
+  toolSub:{es:'Herramienta de compresión de imágenes para revisión LoRA · ICTLabs',en:'Image compression tool for LoRA review · ICTLabs'},
+  sectionImage:{es:'Salida de imagen',en:'Image output'},
+  sectionNaming:{es:'Nombres de archivo',en:'File naming'},
+  sectionScan:{es:'Comportamiento de escaneo',en:'Scan behavior'},
+  processTitle:{es:'Procesar imágenes',en:'Process images'},
+  statusReady:{es:'Listo · ICTLabs Tools',en:'Ready · ICTLabs Tools'},
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let S={lang:'es', folderHandle:null, processing:false};
+
+// ─────────────────────────────────────────────
+// LANG
+// ─────────────────────────────────────────────
+function toggleLang(){
+  S.lang=S.lang==='es'?'en':'es';
+  document.getElementById('langBtn').textContent=S.lang==='es'?'EN':'ES';
+  document.querySelectorAll('[data-es]').forEach(el=>{
+    const v=el.getAttribute('data-'+S.lang);
+    if(v!==null) el.textContent=v;
+  });
+  // Swap placeholders
+  document.querySelectorAll('[data-placeholder-es]').forEach(el=>{
+    el.placeholder = el.getAttribute('data-placeholder-'+S.lang);
+  });
+  // Update Pendiente/Pending in path preview and sidebar
+  updPrefix(document.getElementById('prefix-in').value);
+  updFullPath();
+  applyAllTips();
+  buildCopyUI(); buildCopyTT();
+}
+
+function setV(k,v){document.documentElement.style.setProperty(k,v)}
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function setTab(name,si){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');const d=n.querySelector('.sdot');if(d){d.classList.remove('on');d.classList.add('off')}});
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(si){si.classList.add('active');const d=si.querySelector('.sdot');if(d){d.classList.remove('off');d.classList.add('on')}}
+}
+function setCopySub(n){
+  document.querySelectorAll('.cst').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.csp').forEach(p=>p.classList.remove('active'));
+  document.getElementById('cst-'+n).classList.add('active');
+  document.getElementById('csp-'+n).classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// SLIDERS
+// ─────────────────────────────────────────────
+function updTrack(el){
+  const p=((el.value-el.min)/(el.max-el.min))*100;
+  el.style.background=`linear-gradient(to right,var(--accent) ${p}%,var(--border2) ${p}%)`;
+}
+function upd(id,v){document.getElementById(id).textContent=v}
+
+// ─────────────────────────────────────────────
+// ESTIMATED SIZE
+// ─────────────────────────────────────────────
+function updEst(){
+  const ms=parseInt(document.getElementById('sl-max').value);
+  const q=parseInt(document.getElementById('sl-qual').value);
+  const kb=Math.round(180*Math.pow(ms/1600,1.8)*Math.pow(q/88,2.2));
+  const lo=Math.round(kb*0.5), hi=Math.round(kb*1.7);
+  const pct=Math.min(100,Math.max(4,(kb/700)*100));
+  const f=document.getElementById('est-fill');
+  f.style.width=pct+'%';
+  f.style.background=pct>75?'#ef4444':pct>45?'#f5a623':'var(--accent2)';
+  document.getElementById('est-val').textContent=kb>1024?'~'+(kb/1024).toFixed(1)+' MB':'~'+kb+' KB';
+  document.getElementById('est-range').textContent=lo+' – '+hi+' KB';
+  document.getElementById('lv-est').textContent=kb>1024?'~'+(kb/1024).toFixed(1)+'MB':'~'+kb+'KB';
+}
+
+// ─────────────────────────────────────────────
+// PREFIX
+// ─────────────────────────────────────────────
+function updPrefix(v){
+  const c = v.replace(/[^A-Za-z0-9_]/g,'').toUpperCase();
+  const isEmpty = c === '';
+  const pending = S.lang==='es' ? 'Pendiente' : 'Pending';
+  const display = isEmpty ? pending : c;
+  const fname = display+'_0001.jpg';
+  const prev = document.getElementById('name-prev');
+  if(prev){ prev.textContent = '→ '+fname; prev.style.color = isEmpty ? 'var(--text3)' : 'var(--amber)'; }
+  const lp = document.getElementById('lv-prefix');
+  if(lp){ lp.textContent = display; lp.style.color = isEmpty ? 'var(--text3)' : '#fff'; }
+  const lf = document.getElementById('lv-fname');
+  if(lf){ lf.textContent = fname; lf.style.color = isEmpty ? 'var(--text3)' : '#fff'; }
+  updFullPath();
+}
+
+function updFullPath(){
+  const dir  = document.getElementById('dir-in').value;
+  const fold = document.getElementById('folder-in').value;
+  const pre  = document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'').toUpperCase();
+  const prev = document.getElementById('full-path-preview');
+  const edir = document.getElementById('fpp-dir');
+  const efold = document.getElementById('fpp-folder');
+  const efile = document.getElementById('fpp-file');
+  if(!prev || !edir || !efold || !efile) return;
+  const dirLabel = dir || '[ selecciona carpeta ]';
+  edir.textContent  = dirLabel;
+  edir.style.color  = dirLabel === '[ selecciona carpeta ]' ? 'var(--text3)' : 'var(--text2)';
+  efold.textContent = fold;
+  efile.textContent = pre ? pre+'_0001.jpg' : '[ ingresa un prefix ]';
+  efile.style.color = pre ? '#ffffff' : 'var(--text3)';
+  prev.style.display = 'block';
+}
+
+
+
+// ─────────────────────────────────────────────
+// ALGO
+// ─────────────────────────────────────────────
+function pickAlgo(btn){
+  document.querySelectorAll('.asw').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const v=btn.getAttribute('data-algo');
+  document.getElementById('v-algo').textContent=v;
+  document.getElementById('lv-algo').textContent=v;
+  document.getElementById('sright').textContent='Canvas API · '+v;
+}
+
+// ─────────────────────────────────────────────
+// SWITCH
+// ─────────────────────────────────────────────
+function flipSw(btn,liveId,onV,offV,labelId,texts){
+  btn.classList.toggle('on');
+  const on=btn.classList.contains('on');
+  if(liveId) document.getElementById(liveId).textContent=on?(onV||'ON'):(offV||'OFF');
+  if(labelId&&texts){
+    const el=document.getElementById(labelId);
+    const t=on?texts.on:texts.off;
+    el.setAttribute('data-es',t.es);el.setAttribute('data-en',t.en);
+    el.textContent=t[S.lang];
+  }
+}
+
+// ─────────────────────────────────────────────
+// FOLDER PICKER — Safari + Chrome compatible
+// Uses hidden <input webkitdirectory> to read files
+// Writes via File System Access API if available (Chrome/Edge)
+// Falls back to ZIP download (Safari / Firefox)
+// ─────────────────────────────────────────────
+let S_files = [];        // [{file|handle, name}]
+let S_useFS = false;     // true = can write directly to disk
+let S_folderHandle = null; // FileSystemDirectoryHandle
+
+// ── UTILITIES ──
+function setStatus(msg, type){
+  document.getElementById('stxt').textContent = msg;
+  const pip = document.getElementById('spip');
+  pip.className = 'spip' + (type === 'busy' ? ' busy' : '');
+}
+
+function clearLog(){
+  document.getElementById('log-box').innerHTML = '';
+}
+
+function log(msg, cls){
+  const b = document.getElementById('log-box');
+  const d = document.createElement('div');
+  if(cls) d.className = cls;
+  d.textContent = msg;
+  b.appendChild(d);
+  b.scrollTop = b.scrollHeight;
+}
+
+function setProgress(done, total){
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+}
+
+async function pickFolder(){
+  if(typeof window.showDirectoryPicker !== 'function'){
+    const inp = document.getElementById('folder-input-hidden');
+    inp.value = ''; inp.click(); return;
+  }
+  try {
+    const handle = await window.showDirectoryPicker({mode:'readwrite'});
+    await onHandleSelected(handle);
+  } catch(e){ if(e.name !== 'AbortError') setStatus('Error: '+e.message); }
+}
+
+async function onFolderSelected(inp){
+  const allFiles = Array.from(inp.files);
+  if(!allFiles.length) return;
+  S_folderHandle = null; S_useFS = false;
+  const folderName = document.getElementById('folder-in').value || '_ICT_REDUCED_JPG_FOR_REVIEW';
+  const recursive  = document.getElementById('sw-rec').classList.contains('on');
+  S_files = allFiles
+    .filter(f => {
+      const parts = f.webkitRelativePath.split('/');
+      if(parts.includes(folderName)) return false;
+      if(!recursive && parts.length > 2) return false;
+      return ['.png','.jpg','.jpeg'].includes('.'+f.name.split('.').pop().toLowerCase());
+    })
+    .map(f => ({file: f, name: f.name}))
+    .sort((a,b) => a.name.localeCompare(b.name));
+  finalizeFolderSelection(allFiles[0].webkitRelativePath.split('/')[0]);
+}
+
+async function onHandleSelected(handle){
+  const modeEl = document.getElementById('proc-mode');
+  modeEl.style.color = 'var(--text2)';
+  modeEl.textContent = S.lang==='es' ? 'Leyendo carpeta...' : 'Reading folder...';
+  S_folderHandle = handle; S_useFS = true; S_files = [];
+  const folderName = document.getElementById('folder-in').value || '_ICT_REDUCED_JPG_FOR_REVIEW';
+  const recursive  = document.getElementById('sw-rec').classList.contains('on');
+  const exts = ['.png','.jpg','.jpeg'];
+  async function scanDir(dirHandle, depth){
+    for await(const entry of dirHandle.values()){
+      if(entry.kind === 'directory'){
+        if(entry.name === folderName) continue;
+        if(recursive && depth < 4) await scanDir(entry, depth+1);
+      } else {
+        const ext = '.'+entry.name.split('.').pop().toLowerCase();
+        if(exts.includes(ext)){
+          try { const f = await entry.getFile(); S_files.push({file:f, name:entry.name}); }
+          catch(e){ console.warn('skip',entry.name,e.message); }
+        }
+      }
+    }
+  }
+  try { await scanDir(handle, 0); }
+  catch(e){
+    modeEl.style.color='var(--red)';
+    modeEl.textContent='⚠ Error: '+e.message;
+    return;
+  }
+  S_files.sort((a,b) => a.name.localeCompare(b.name));
+  finalizeFolderSelection(handle.name);
+}
+
+function finalizeFolderSelection(rootName){
+  document.getElementById('dir-in').value = rootName;
+  document.getElementById('folder-icon').setAttribute('fill','white');
+  document.getElementById('folder-icon').setAttribute('stroke','white');
+  document.getElementById('btn-pick').classList.add('filled');
+  updFullPath();
+  const modeEl = document.getElementById('proc-mode');
+  if(S_files.length === 0){
+    modeEl.style.color='var(--amber)';
+    modeEl.textContent=S.lang==='es'?'⚠ Sin imágenes PNG/JPG en esta carpeta':'⚠ No PNG/JPG images found';
+  } else {
+    modeEl.style.color=S_useFS?'var(--green)':'var(--amber)';
+    modeEl.textContent=S_files.length+(S.lang==='es'?' imagen(es) · ':' image(s) · ')+(S_useFS?(S.lang==='es'?'escribe directo al disco':'writes to disk'):(S.lang==='es'?'descarga ZIP':'ZIP download'));
+  }
+  setStatus((S.lang==='es'?'Listo: ':'Ready: ')+rootName+' · '+S_files.length+(S.lang==='es'?' imagen(es)':' image(s)'));
+}
+
+async function runProcess(){
+  if(S.processing) return;
+  if(!S_folderHandle && !S_files.length){ await pickFolder(); if(!S_folderHandle && !S_files.length) return; }
+  if(!S_files.length){
+    document.getElementById('log-box').style.display='block'; clearLog();
+    log(S.lang==='es'?'⚠ No hay imágenes para procesar.':'⚠ No images to process.','lskip'); return;
+  }
+  S.processing = true;
+  const maxSide=parseInt(document.getElementById('sl-max').value);
+  const quality=parseInt(document.getElementById('sl-qual').value);
+  const prefix=document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'').toUpperCase() || 'OUTPUT';
+  const folderName=document.getElementById('folder-in').value||'_ICT_REDUCED_JPG_FOR_REVIEW';
+  const skipIfSmaller=document.getElementById('sw-skip').classList.contains('on');
+  const bgHex=document.getElementById('v-bgcol').textContent;
+  const mkdir=document.getElementById('sw-mkdir').classList.contains('on');
+  const runBtn=document.getElementById('btn-run');
+  runBtn.classList.add('running');
+  document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'PROCESANDO...':'PROCESSING...';
+  clearLog();
+  document.getElementById('log-box').style.display='block';
+  document.getElementById('prog-wrap').style.display='block';
+  document.getElementById('summary').style.display='none';
+  document.getElementById('spip').classList.add('busy');
+  setStatus(S.lang==='es'?'Procesando...':'Processing...','busy');
+  log(S.lang==='es'?'Iniciando...':'Starting...','linfo');
+  await new Promise(r=>setTimeout(r,30));
+  const total=S_files.length;
+  let count=1,skipped=0,totalBytes=0,outDir=null,zip=null;
+  if(S_useFS && S_folderHandle){
+    try {
+      outDir=await S_folderHandle.getDirectoryHandle(folderName,{create:mkdir});
+      log((S.lang==='es'?'Carpeta de salida: ':'Output: ')+S_folderHandle.name+'/'+folderName,'linfo');
+    } catch(e){ log('⚠ '+e.message+' — cambiando a ZIP','lskip'); S_useFS=false; }
+  }
+  if(!S_useFS){ zip=new JSZip(); log(S.lang==='es'?'Modo ZIP.':'ZIP mode.','linfo'); }
+  log(total+(S.lang==='es'?' imagen(es) encontrada(s).':' image(s) found.'),'linfo');
+  setProgress(0,total);
+  await new Promise(r=>setTimeout(r,30));
+  for(let i=0;i<S_files.length;i++){
+    const f=S_files[i];
+    try {
+      const blob=await processImage(f.file,maxSide,quality,bgHex,skipIfSmaller);
+      const outName=prefix+'_'+String(count).padStart(4,'0')+'.jpg';
+      if(S_useFS && outDir){
+        const fh=await outDir.getFileHandle(outName,{create:true});
+        const w=await fh.createWritable(); await w.write(blob); await w.close();
+      } else if(zip){ zip.file(folderName+'/'+outName,blob); }
+      totalBytes+=blob.size;
+      log('['+(i+1)+'/'+total+'] ✓ '+outName+' ← '+f.name,'lok');
+      count++;
+    } catch(e){ log('['+(i+1)+'/'+total+'] ↷ SKIP: '+f.name+' | '+e.message,'lskip'); skipped++; }
+    setProgress(i+1,total);
+    document.getElementById('prog-txt').textContent=(i+1)+' / '+total;
+    await new Promise(r=>setTimeout(r,0));
+  }
+  const done=count-1;
+  const kb=Math.round(totalBytes/1024);
+  const sizeStr=kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB';
+  if(!S_useFS && zip){
+    log(S.lang==='es'?'Generando ZIP...':'Generating ZIP...','linfo');
+    const zipBlob=await zip.generateAsync({type:'blob',compression:'STORE'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(zipBlob);
+    a.download=folderName+'.zip'; a.click(); URL.revokeObjectURL(a.href);
+    log('✓ '+folderName+'.zip','lok');
+  }
+  log('','');
+  log((S.lang==='es'?'✓ Listo. ':'✓ Done. ')+done+(S.lang==='es'?' procesada(s).':' processed.'),'lok');
+  document.getElementById('sum-count').textContent=done;
+  document.getElementById('sum-skip').textContent=skipped;
+  document.getElementById('sum-size').textContent=sizeStr;
+  document.getElementById('sum-folder').textContent=S_useFS?S_folderHandle.name+'/'+folderName:folderName+'.zip';
+  document.getElementById('summary').style.display='block';
+  document.getElementById('spip').classList.remove('busy');
+  setStatus((S.lang==='es'?'Listo · ':'Done · ')+done+(S.lang==='es'?' imagen(es)':' image(s)'));
+  runBtn.classList.remove('running');
+  document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'REDUCIR DE NUEVO':'REDUCE AGAIN';
+  S.processing=false;
+}
+
+// ─────────────────────────────────────────────
+// IMAGE PROCESSING (Canvas — works in all browsers)
+// ─────────────────────────────────────────────
+function getAlgoName(){ return document.getElementById('v-algo').textContent; }
+
+function processImage(file, maxSide, quality, bgHex, skipIfSmaller){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const longest = Math.max(w, h);
+      if(!(skipIfSmaller && longest <= maxSide) && longest > maxSide){
+        const scale = maxSide / longest;
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = bgHex;
+      ctx.fillRect(0, 0, w, h);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        if(!blob) reject(new Error('toBlob failed'));
+        else resolve(blob);
+      }, 'image/jpeg', quality / 100);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('load failed')); };
+    img.src = url;
+  });
+}
+
+// ─────────────────────────────────────────────
+// MAIN PROCESS
+// ─────────────────────────────────────────────
+
+function resetRunBtn(done){
+  const btn = document.getElementById('btn-run');
+  btn.classList.remove('running');
+  const lbl = S.lang==='es' ? (done?'PROCESAR DE NUEVO':'PROCESAR CARPETA') : (done?'PROCESS AGAIN':'PROCESS FOLDER');
+  document.getElementById('btn-run-lbl').textContent = lbl;
+}
+
+// ─────────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────────
+function resetAll(){
+  document.getElementById('sl-max').value=1600; upd('v-max','1600'); upd('lv-max','1600px');
+  document.getElementById('sl-qual').value=88; upd('v-qual','88'); upd('lv-qual','88%');
+  document.getElementById('prefix-in').value='ICT'; updPrefix('');
+  document.getElementById('folder-in').value='';
+  document.getElementById('dir-in').value='';
+  document.getElementById('dir-in').value='';
+  document.getElementById('proc-mode').textContent='';
+  document.getElementById('folder-icon').setAttribute('fill','none');
+  document.getElementById('folder-icon').setAttribute('stroke','var(--accent)');
+  document.getElementById('btn-pick').classList.remove('filled');
+  document.getElementById('full-path-preview').style.display='none';
+  document.getElementById('bg-color').value='#ffffff'; upd('v-bgcol','#ffffff'); document.getElementById('bg-hex').textContent='#ffffff';
+  pickAlgo(document.querySelector('.asw[data-algo="LANCZOS"]'));
+  S.folderHandle=null; S.processing=false;
+  const btn=document.getElementById('btn-run');
+  btn.disabled=true; btn.classList.remove('running');
+  document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'SELECCIONA UNA CARPETA':'SELECT A FOLDER';
+  document.getElementById('log-box').style.display='none';
+  document.getElementById('prog-wrap').style.display='none';
+  document.getElementById('summary').style.display='none';
+  clearLog();
+  document.querySelectorAll('input[type=range]').forEach(updTrack);
+  updEst();
+}
+
+// ─────────────────────────────────────────────
+// TOOLTIPS
+// ─────────────────────────────────────────────
+function applyAllTips(){
+  Object.keys(TIPS).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=TIPS[id][S.lang];
+  });
+}
+
+// ─────────────────────────────────────────────
+// COPY TABS
+// ─────────────────────────────────────────────
+function buildCopyUI(){
+  const keys=[
+    {k:'toolTitle',l:{es:'Título',en:'Title'}},
+    {k:'toolSub',l:{es:'Subtítulo',en:'Subtitle'}},
+    {k:'sectionImage',l:{es:'Sección: Imagen',en:'Section: Image'}},
+    {k:'sectionNaming',l:{es:'Sección: Nombres',en:'Section: Naming'}},
+    {k:'sectionScan',l:{es:'Sección: Escaneo',en:'Section: Scan'}},
+    {k:'processTitle',l:{es:'Sección: Procesar',en:'Section: Process'}},
+    {k:'statusReady',l:{es:'Barra de estado',en:'Status bar'}},
+  ];
+  document.getElementById('csp-ui').innerHTML=keys.map(({k,l})=>`
+    <div class="cblock"><div class="cblock-head">${l[S.lang]}</div>
+    <div class="cblock-body">
+      <div class="clang"><div class="clang-lbl">ESPAÑOL</div><textarea class="cfield" oninput="UI_COPY['${k}'].es=this.value">${UI_COPY[k].es}</textarea></div>
+      <div class="clang"><div class="clang-lbl">ENGLISH</div><textarea class="cfield" oninput="UI_COPY['${k}'].en=this.value">${UI_COPY[k].en}</textarea></div>
+    </div></div>`).join('');
+}
+function buildCopyTT(){
+  const map={'tb-max':'MAX_SIDE','tb-qual':'QUALITY','tb-est':'EST. SIZE','tb-algo':'RESIZE_ALGO','tb-bgcolor':'BG_COLOR','tb-prefix':'PREFIX','tb-folder':'OUTPUT_FOLDER','tb-recursive':'RECURSIVE_SCAN','tb-exif':'EXIF_TRANSPOSE','tb-skip':'SKIP_IF_SMALLER','tb-incjpg':'INCLUDE_JPEG','tb-lanczos':'LANCZOS','tb-bicubic':'BICUBIC','tb-bilinear':'BILINEAR','tb-box':'BOX','tb-nearest':'NEAREST'};
+  document.getElementById('csp-tt').innerHTML=Object.keys(TIPS).map(id=>`
+    <div class="cblock"><div class="cblock-head">${map[id]||id}</div>
+    <div class="cblock-body">
+      <div class="clang"><div class="clang-lbl">ESPAÑOL</div><textarea class="cfield" rows="3" oninput="TIPS['${id}'].es=this.value;applyAllTips()">${TIPS[id].es}</textarea></div>
+      <div class="clang"><div class="clang-lbl">ENGLISH</div><textarea class="cfield" rows="3" oninput="TIPS['${id}'].en=this.value;applyAllTips()">${TIPS[id].en}</textarea></div>
+    </div></div>`).join('');
+}
+
+// ── INIT ──
+document.querySelectorAll('input[type=range]').forEach(updTrack);
+updEst();
+updPrefix('');
+updFullPath();
+applyAllTips();
+buildCopyUI();
+buildCopyTT();
+
+if(!window.showDirectoryPicker){
+  document.getElementById('btn-pick').title='File System Access API not supported. Use Chrome or Edge.';
+  document.getElementById('btn-pick').style.opacity='0.4';
+  setStatus('\u26a0 Usa Chrome o Edge para acceso directo al sistema de archivos');
+}
+</script>
+</body>
+</html>
