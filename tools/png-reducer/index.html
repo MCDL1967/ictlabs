@@ -35,7 +35,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .lang-btn:hover{background:var(--accent-glow);border-color:var(--accent)}
 
 /* ── LAYOUT ── */
-.app{margin-top:54px;display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px)}
+.page-wrap{max-width:1200px;margin:54px auto 0;position:relative}
+.app{margin-top:0;display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px)}
 
 /* ── SIDEBAR ── */
 .sidebar{background:var(--surface);border-right:var(--bw) solid var(--border);padding:24px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
@@ -244,7 +245,7 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 </nav>
 
 <input type="file" id="folder-input-hidden" webkitdirectory multiple style="display:none" onchange="onFolderSelected(this)">
-<div class="app">
+<div class="page-wrap"><div class="app">
 <aside class="sidebar">
   <div class="sidebar-section">
     <div class="sidebar-heading" data-es="MÓDULO ACTIVO" data-en="ACTIVE MODULE">MÓDULO ACTIVO</div>
@@ -548,9 +549,10 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 </main>
 </div>
 
+</div><!-- /page-wrap -->
 <div class="sbar">
   <span class="spip" id="spip"></span>
-  <span class="stxt" id="stxt">ICT PNG Reducer · ICTLabs Tools · v2.4</span>
+  <span class="stxt" id="stxt">ICT PNG Reducer · ICTLabs Tools · v2.5</span>
   <span class="sright" id="sright">Canvas API · LANCZOS</span>
 </div>
 
