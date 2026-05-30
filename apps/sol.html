@@ -212,7 +212,18 @@ html[lang="en"] [data-es]{display:none;}
 html[lang="en"] [data-en]{display:revert;}
 
 @media(max-width:900px){
-  .site-nav{padding:12px 20px;}.nav-logo img{height:50px;}
+  .site-nav{
+    display:grid;grid-template-columns:auto auto;grid-template-areas:'logo lang' 'back back';
+    align-items:center;gap:10px 14px;padding:12px 20px;
+  }
+  .nav-logo{grid-area:logo;}
+  .nav-logo img{height:50px;}
+  .nav-right{display:contents;}
+  .back{
+    grid-area:back;justify-self:center;white-space:nowrap;text-align:center;
+    font-size:11px;letter-spacing:2.4px;line-height:1;
+  }
+  .lang-toggle{grid-area:lang;justify-self:end;}
   .sec-inner{padding:64px 20px;}
   .intro-grid,.benefits-grid,.diff-grid{grid-template-columns:1fr;gap:24px;}
   .features-grid{grid-template-columns:1fr;}

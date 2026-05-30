@@ -176,8 +176,18 @@ html[lang="en"] [data-es]{display:none;}
 html[lang="en"] [data-en]{display:revert;}
 
 @media(max-width:900px){
-  header{padding:14px 20px;}
-  .header-logo img{height:90px;}
+  header{
+    display:grid;grid-template-columns:auto auto;grid-template-areas:'logo lang' 'back back';
+    align-items:center;gap:12px 16px;padding:14px 20px;
+  }
+  .header-logo{grid-area:logo;}
+  .header-logo img{height:74px;}
+  .header-right{display:contents;}
+  .back{
+    grid-area:back;justify-self:center;white-space:nowrap;text-align:center;
+    font-size:12px;letter-spacing:2.4px;line-height:1;
+  }
+  .lang-toggle{grid-area:lang;justify-self:end;}
   main{padding:40px 20px;}
   .apps-grid{grid-template-columns:1fr;}
 }
