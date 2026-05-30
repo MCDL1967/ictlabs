@@ -941,6 +941,10 @@ function setTab(name,si){
   const tab = document.getElementById('tab-'+name);
   if(tab) tab.classList.add('active');
   if(si){si.classList.add('active');const d=si.querySelector('.sdot');if(d){d.classList.remove('off');d.classList.add('on')}}
+  if(['tool','ialpha','styles','copy'].includes(name)){
+    const targetHash = name === 'tool' ? '' : '#'+name;
+    if(window.location.hash !== targetHash) history.replaceState(null,'',window.location.pathname + targetHash);
+  }
 }
 function setCopySub(n){
   document.querySelectorAll('.cst').forEach(t=>t.classList.remove('active'));
@@ -2398,6 +2402,10 @@ if(!window.showDirectoryPicker){
   document.getElementById('btn-pick').title='File System Access API not supported. Use Chrome or Edge.';
   document.getElementById('btn-pick').style.opacity='0.4';
   setStatus('\u26a0 Usa Chrome o Edge para acceso directo al sistema de archivos');
+}
+const initialTool = (window.location.hash || '').replace('#','');
+if(['ialpha','styles','copy'].includes(initialTool)){
+  setTab(initialTool, document.getElementById('nav-'+initialTool));
 }
 </script>
 <!-- i-Alpha Preview Modal -->
