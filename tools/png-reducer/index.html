@@ -23,10 +23,9 @@ body{padding-top:54px}
 
 /* ── NAV ── */
 .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,9,13,0.94);border-bottom:var(--bw) solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;height:54px;padding:0 28px;}
-.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:28px}
-.nav-logo-ict{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:0.12em;color:#fff}
-.nav-logo-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 3px}
-.nav-logo-labs{font-family:var(--mono);font-size:14px;font-weight:400;letter-spacing:0.12em;color:var(--accent)}
+.nav-logo{display:flex;align-items:baseline;gap:0;text-decoration:none;margin-right:28px}
+.nav-logo-ict{font-family:var(--sans);font-size:20px;font-weight:700;letter-spacing:0;color:var(--accent)}
+.nav-logo-labs{font-family:var(--sans);font-size:18px;font-weight:600;letter-spacing:0;color:#fff;text-transform:none}
 .nav-divider{width:1px;height:22px;background:var(--border2);margin:0 16px}
 .nav-tool-label{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase}
 .nav-links{display:flex;gap:4px;margin-left:auto;align-items:center}
@@ -313,14 +312,13 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 <nav class="topnav">
   <a href="https://ict-labs.com" class="nav-logo" target="_blank">
     <span class="nav-logo-ict">ICT</span>
-    <span class="nav-logo-dot"></span>
     <span class="nav-logo-labs">Labs</span>
   </a>
   <div class="nav-divider"></div>
   <span class="nav-tool-label" data-es="HERRAMIENTAS" data-en="TOOLS">HERRAMIENTAS</span>
   <div class="nav-links">
     <a href="https://ict-labs.com" class="nav-link" target="_blank" data-es="Inicio" data-en="Home">Inicio</a>
-    <a href="#" class="nav-link" data-es="Herramientas" data-en="Tools">Herramientas</a>
+    <a href="../" class="nav-link" data-es="Herramientas" data-en="Tools">Herramientas</a>
     <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
   </div>
 </nav>

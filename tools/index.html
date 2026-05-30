@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ICTLabs — Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;--black-2:#05080f;
+  --blue:#1a4fd6;--blue-glow:#3b82f6;
+  --steel:#94a3b8;--muted:rgba(148,163,184,0.7);
+  --border-b:rgba(37,99,235,0.3);
+  --white:#fff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Barlow',sans-serif;background:var(--black);color:var(--white);min-height:100vh;
+  background-image:linear-gradient(rgba(26,79,214,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(26,79,214,0.05) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 48px;background:rgba(0,0,0,0.97);
+  border-bottom:1px solid var(--border-b);position:sticky;top:0;z-index:50;
+}
+.text-logo{display:flex;align-items:baseline;text-decoration:none}
+.text-logo .ict{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;letter-spacing:0;color:var(--blue-glow)}
+.text-logo .labs{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;letter-spacing:0;color:#fff;text-transform:none}
+.header-right{display:flex;align-items:center;gap:20px}
+.back{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--steel);text-decoration:none;transition:color 0.2s;
+}
+.back::before{content:'← '}
+.back:hover{color:var(--blue-glow)}
+.lang-toggle{display:flex;gap:6px}
+.lang-btn{
+  background:transparent;border:1px solid rgba(148,163,184,0.2);
+  color:var(--muted);padding:4px 10px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;
+}
+.lang-btn.active{border-color:var(--blue-glow);color:var(--blue-glow);box-shadow:0 0 8px rgba(37,99,235,0.3)}
+main{max-width:1200px;margin:0 auto;padding:64px 48px}
+.page-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:5px;text-transform:uppercase;
+  color:var(--blue-glow);margin-bottom:12px;display:flex;align-items:center;gap:12px;
+}
+.page-label::before{content:'';width:18px;height:1px;background:var(--blue);box-shadow:0 0 5px var(--blue)}
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(42px,6vw,76px);font-weight:900;
+  letter-spacing:3px;text-transform:uppercase;color:var(--white);margin-bottom:20px;line-height:1;
+}
+.page-copy{max-width:680px;color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:46px}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.tool-card{
+  background:var(--black-2);border:1px solid var(--border-b);
+  display:flex;flex-direction:column;min-height:260px;position:relative;overflow:hidden;
+  transition:border-color 0.3s,box-shadow 0.3s;
+}
+.tool-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 8px var(--blue);
+}
+.tool-card:hover{border-color:rgba(37,99,235,0.6);box-shadow:0 0 32px rgba(26,79,214,0.12)}
+.tool-body{padding:24px 24px 18px;flex:1}
+.tool-cat{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:4px;text-transform:uppercase;
+  color:#6b8ccc;margin-bottom:12px;
+}
+.tool-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
+  color:var(--blue-glow);margin-bottom:10px;filter:drop-shadow(0 0 4px rgba(59,130,246,0.2));
+}
+.tool-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.tool-actions{display:grid;grid-template-columns:1fr;background:var(--border-b);border-top:1px solid var(--border-b);margin-top:auto}
+.tool-btn{
+  padding:15px;text-align:center;text-decoration:none;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;
+  background:var(--black);color:var(--blue-glow);transition:all 0.2s;
+}
+.tool-btn:hover{background:rgba(26,79,214,0.16);color:#fff}
+.footer-note{
+  margin-top:56px;padding-top:24px;border-top:1px solid var(--border-b);
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(148,163,184,0.25);text-align:center;
+}
+[data-en]{display:none}
+html[lang="en"] [data-es]{display:none}
+html[lang="en"] [data-en]{display:revert}
+@media(max-width:900px){
+  header{padding:14px 20px}
+  main{padding:40px 20px}
+  .tools-grid{grid-template-columns:1fr}
+  .text-logo .ict{font-size:36px}
+  .text-logo .labs{font-size:32px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="text-logo" href="../index.html" aria-label="ICTLabs">
+    <span class="ict">ICT</span><span class="labs">Labs</span>
+  </a>
+  <div class="header-right">
+    <a class="back" href="../index.html" data-es>Volver al Sitio</a>
+    <a class="back" href="../index.html" data-en>Back to Site</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-label" data-es>Herramientas</div>
+  <div class="page-label" data-en>Tools</div>
+  <h1 class="page-title" data-es>Suite de Herramientas</h1>
+  <h1 class="page-title" data-en>Tools Suite</h1>
+  <p class="page-copy" data-es>Acceso directo a utilidades internas y demos operacionales de ICTLabs.</p>
+  <p class="page-copy" data-en>Direct access to ICTLabs internal utilities and operational demos.</p>
+
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-body">
+        <div class="tool-cat" data-es>01 · Imágenes</div>
+        <div class="tool-cat" data-en>01 · Images</div>
+        <div class="tool-name">ICT i-Compress</div>
+        <p class="tool-desc" data-es>Compresión, renombrado y preparación de imágenes en lote, con utilidades de transparencia y exportación.</p>
+        <p class="tool-desc" data-en>Batch image compression, renaming and preparation, with transparency and export utilities.</p>
+      </div>
+      <div class="tool-actions">
+        <a href="png-reducer/" class="tool-btn" data-es>Abrir Herramienta</a>
+        <a href="png-reducer/" class="tool-btn" data-en>Open Tool</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">© 2026 ICTLabs · ict-labs.com</p>
+</main>
+
+<script>
+function setLang(lang){
+  document.getElementById('html-root').lang=lang;
+  document.getElementById('btn-es').classList.toggle('active',lang==='es');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  localStorage.setItem('ictlabs-lang',lang);
+}
+const saved=localStorage.getItem('ictlabs-lang')||'es';
+setLang(saved);
+</script>
+</body>
+</html>

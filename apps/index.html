@@ -62,6 +62,15 @@ main{max-width:1200px;margin:0 auto;padding:64px 48px;}
   color:var(--white);margin-bottom:56px;line-height:1;
 }
 .page-title span{color:var(--blue-glow);filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));}
+.brand-word{
+  display:inline-flex;align-items:baseline;gap:0;
+  filter:drop-shadow(0 0 8px rgba(59,130,246,0.4));
+}
+.brand-word .brand-ict{color:var(--blue-glow);}
+.brand-word .brand-labs{
+  color:var(--white);font-size:0.92em;font-weight:700;text-transform:none;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,0.16));
+}
 
 /* CARDS GRID */
 .apps-grid{
@@ -97,6 +106,24 @@ main{max-width:1200px;margin:0 auto;padding:64px 48px;}
   display:block;transition:transform 0.4s;
 }
 .app-card:hover .card-img img{transform:scale(1.03);}
+.sol-video-window{
+  position:absolute;inset:0;z-index:4;
+  display:none;background:#000;
+  border:1px solid rgba(201,168,76,0.8);
+  box-shadow:inset 0 0 28px rgba(201,168,76,0.16),0 0 22px rgba(0,0,0,0.8);
+}
+.app-card.video-open .sol-video-window{display:block;}
+.sol-video-window video{
+  width:100%;height:100%;display:block;object-fit:contain;background:#000;
+}
+.video-close{
+  position:absolute;top:8px;right:8px;z-index:5;
+  width:32px;height:32px;border:1px solid rgba(255,255,255,0.35);
+  background:rgba(0,0,0,0.72);color:#fff;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.video-close:hover{border-color:var(--blue-glow);color:var(--blue-glow);}
 
 /* CARD BODY */
 .card-body{padding:20px 22px 16px;}
@@ -132,6 +159,8 @@ main{max-width:1200px;margin:0 auto;padding:64px 48px;}
 .card-btn.demo{border-left:1px solid var(--border-b);}
 .card-btn.soon-demo{color:rgba(148,163,184,0.3);cursor:default;pointer-events:none;}
 .card-btn.soon-demo:hover{background:var(--black);color:rgba(148,163,184,0.3);}
+.card-btn.demo.live-demo{color:var(--blue-glow);}
+.card-btn.demo.live-demo:hover{background:rgba(26,79,214,0.16);color:#fff;}
 
 .footer-note{
   margin-top:56px;padding-top:24px;
@@ -175,15 +204,19 @@ html[lang="en"] [data-en]{display:revert;}
 <main>
   <div class="page-label" data-es>Área de Pruebas</div>
   <div class="page-label" data-en>Test Area</div>
-  <h1 class="page-title" data-es>Aplicaciones <span>ICTLabs</span></h1>
-  <h1 class="page-title" data-en>ICTLabs <span>Applications</span></h1>
+  <h1 class="page-title" data-es>Aplicaciones <span class="brand-word"><span class="brand-ict">ICT</span><span class="brand-labs">Labs</span></span></h1>
+  <h1 class="page-title" data-en><span class="brand-word"><span class="brand-ict">ICT</span><span class="brand-labs">Labs</span></span> Applications</h1>
 
   <div class="apps-grid">
 
     <!-- SOL -->
-    <div class="app-card">
+    <div class="app-card" id="sol-card">
       <div class="card-img">
         <img src="assets/img/sol-card.png" alt="SOL AI Concierge"/>
+        <div class="sol-video-window" aria-hidden="true">
+          <button class="video-close" type="button" onclick="closeSolDemo()" aria-label="Close SOL demo">×</button>
+          <video id="sol-demo-video" src="assets/video/SOL_demo.mp4" controls preload="metadata" playsinline></video>
+        </div>
       </div>
       <div class="card-body">
         <div class="card-cat" data-es>01 · Atención al Cliente</div>
@@ -196,10 +229,9 @@ html[lang="en"] [data-en]{display:revert;}
         <a href="sol.html" class="card-btn info">
           <span>APP-INFO</span>
         </a>
-        <div class="card-btn demo soon-demo">
-          <span data-es>PRÓXIMAMENTE</span>
-          <span data-en>COMING SOON</span>
-        </div>
+        <button class="card-btn demo live-demo" type="button" onclick="openSolDemo()">
+          <span>DEMO</span>
+        </button>
       </div>
     </div>
 
@@ -261,6 +293,18 @@ function setLang(lang){
 }
 const saved=localStorage.getItem('ictlabs-lang')||'es';
 setLang(saved);
+
+const solCard=document.getElementById('sol-card');
+const solVideo=document.getElementById('sol-demo-video');
+function openSolDemo(){
+  solCard.classList.add('video-open');
+  solVideo.currentTime=0;
+  solVideo.play().catch(()=>{});
+}
+function closeSolDemo(){
+  solVideo.pause();
+  solCard.classList.remove('video-open');
+}
 </script>
 </body>
 </html>
