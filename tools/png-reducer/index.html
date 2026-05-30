@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PNG Reducer — ICTLabs Tools</title>
+<title>ICT i-Compress — ICTLabs Suite v5.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
   --radius:10px;--radius-sm:6px;--bw:1px;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6}
+body{padding-top:54px}
 
 /* ── NAV ── */
 .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,9,13,0.94);border-bottom:var(--bw) solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;height:54px;padding:0 28px;}
@@ -35,11 +36,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .lang-btn:hover{background:var(--accent-glow);border-color:var(--accent)}
 
 /* ── LAYOUT ── */
-.page-wrap{max-width:1200px;margin:54px auto 0;position:relative}
-.app{margin-top:0;display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px)}
+.page-wrap{max-width:1200px;margin:0 auto;position:relative}
+.app{margin-top:0;display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px);align-items:start}
 
 /* ── SIDEBAR ── */
-.sidebar{background:var(--surface);border-right:var(--bw) solid var(--border);padding:24px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
+.sidebar{background:var(--surface);border-right:var(--bw) solid var(--border);padding:24px 0;position:sticky;top:0;height:calc(100vh - 54px);overflow-y:auto;}
 .sidebar-section{padding:0 16px;margin-bottom:28px}
 .sidebar-heading{font-family:var(--mono);font-size:9px;letter-spacing:0.22em;color:var(--text3);text-transform:uppercase;padding:0 10px;margin-bottom:10px;}
 .nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;margin-bottom:2px;border:var(--bw) solid transparent;}
@@ -145,6 +146,11 @@ input[type=color]{width:38px;height:34px;border:none;border-radius:6px;cursor:po
 .nprev{font-family:var(--mono);font-size:11px;color:var(--amber);background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;margin-top:6px;}
 
 /* ── PROCESS PANEL ── */
+.quick-drop{border:1.5px dashed rgba(245,166,35,0.45);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:14px;background:rgba(245,166,35,0.07)}
+.quick-drop:hover,.quick-drop.dragover{border-color:rgba(245,166,35,0.8);background:rgba(245,166,35,0.12)}
+.quick-drop svg{flex-shrink:0;color:rgba(245,166,35,0.75)}
+.quick-drop-text{font-family:var(--mono);font-size:11px;color:#c8d8e8;letter-spacing:0.1em;margin-bottom:3px}
+.quick-drop-sub{font-family:var(--mono);font-size:9px;color:#6a8aaa;letter-spacing:0.08em}
 .proc-zone{
   background:var(--surface2);border:var(--bw) solid var(--border);border-radius:var(--radius);
   padding:20px;margin-top:24px;
@@ -225,6 +231,81 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
   .pgrid{grid-template-columns:1fr}.sgrid{grid-template-columns:1fr}
   .cblock-body{grid-template-columns:1fr}.clang{border-right:none;border-bottom:var(--bw) solid var(--border)}
 }
+
+/* ── DROPZONE ── */
+.alpha-dropzone-wrap{position:relative;border:1.5px dashed rgba(245,166,35,0.45);border-radius:var(--radius);min-height:260px;background:rgba(245,166,35,0.07);transition:all 0.2s;overflow:hidden}
+.alpha-dropzone-wrap:hover{border-color:rgba(245,166,35,0.85);background:rgba(245,166,35,0.13)}
+.alpha-dropzone-wrap.dragover{border-color:rgba(245,166,35,0.85);background:rgba(245,166,35,0.13)}
+.alpha-dropzone-wrap label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.alpha-dropzone-wrap input[type=file]{position:absolute;width:1px;height:1px;opacity:0;left:-9999px}
+
+/* ── FLOATING LOG PANEL ── */
+.float-log{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:460px;max-width:92vw;max-height:48vh;background:#0d1117;border:2px solid #22c55e;border-radius:10px;box-shadow:0 8px 40px rgba(34,197,94,0.15);display:none;flex-direction:column;z-index:1500;user-select:none}
+.float-log-head{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:2px solid #22c55e;flex-shrink:0;cursor:grab;background:rgba(34,197,94,0.06);border-radius:8px 8px 0 0}
+.float-log-head:active{cursor:grabbing}
+.float-log-title{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:#ffffff;text-transform:uppercase}
+.float-log-close{background:none;border:none;color:#22c55e;cursor:pointer;font-family:var(--mono);font-size:10px;padding:0}
+.float-log-prog{padding:7px 14px;flex-shrink:0}
+.float-log-track{height:3px;background:rgba(34,197,94,0.2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.float-log-fill{height:100%;border-radius:2px;background:#22c55e;width:0%;transition:width 0.25s}
+.float-log-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px}
+.float-log-box{flex:1;overflow-y:auto;padding:0 14px 10px;font-family:var(--mono);font-size:10px;line-height:1.8;color:#e2eaf5}
+.float-log-box .lok{color:#22c55e}
+.float-log-box .lskip{color:var(--amber)}
+.float-log-box .lerr{color:#ef4444}
+.float-log-box .linfo{color:#5a7a99}
+
+/* ── DOWNLOAD CONFIRM ── */
+.dl-confirm{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;max-width:92vw;background:#0d1117;border:2px solid #00aaff;border-radius:10px;box-shadow:0 8px 40px rgba(0,170,255,0.15);display:none;flex-direction:column;z-index:2200;padding:0;user-select:none}
+.dl-confirm-drag{cursor:grab;padding:10px 16px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #00aaff;background:rgba(0,170,255,0.06);border-radius:8px 8px 0 0}
+.dl-confirm-drag:active{cursor:grabbing}
+.dl-confirm-body{padding:16px 20px 20px}
+.dl-confirm-title{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:#00aaff;text-transform:uppercase}
+.dl-confirm-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dl-confirm-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:#3d5a78;text-transform:uppercase;min-width:72px}
+.dl-confirm-val{font-family:var(--mono);font-size:11px;color:#e2eaf5}
+.dl-confirm-val.accent{color:#00aaff}
+.dl-py{background:#0a1520;border:1px solid #1a2535;border-radius:7px;padding:10px 12px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:#7a9ab8;line-height:1.9;display:none}
+.dl-confirm-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+
+/* ── IMAGE / ALPHA PREVIEW MODALS ── */
+.img-preview-modal,.alpha-modal{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1800;display:none;grid-template-rows:minmax(0,1fr) auto;gap:16px;padding:22px 22px 28px;align-items:stretch;justify-items:center}
+.img-preview-stage,.alpha-modal-stage{width:100%;height:100%;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-out;touch-action:none}
+.img-preview-canvas,.alpha-modal-canvas{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;max-width:92vw;max-height:calc(100vh - 150px);border-radius:10px;background-color:#1a1a1a;background-image:linear-gradient(45deg,#3a3a3a 25%,transparent 25%),linear-gradient(-45deg,#3a3a3a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#3a3a3a 75%),linear-gradient(-45deg,transparent 75%,#3a3a3a 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;cursor:default;touch-action:none;user-select:none}
+.img-preview-canvas.is-zoomed,.alpha-modal-canvas.is-zoomed{cursor:grab}
+.img-preview-canvas.is-dragging,.alpha-modal-canvas.is-dragging{cursor:grabbing}
+.alpha-modal-canvas.refine-on{cursor:none;box-shadow:0 0 0 1px rgba(34,197,94,0.45),0 0 28px rgba(34,197,94,0.14)}
+.alpha-modal-canvas.refine-on.mod-pan{cursor:grab}
+.alpha-modal-canvas.refine-on.mod-pan.is-dragging{cursor:grabbing}
+.img-preview-canvas.inspect-on,.alpha-modal-canvas.inspect-on{cursor:grab;box-shadow:0 0 0 1px rgba(0,170,255,0.35),0 0 28px rgba(0,170,255,0.12)}
+.img-preview-canvas img,.alpha-modal-canvas img{position:relative;z-index:1;display:block;max-width:92vw;max-height:calc(100vh - 150px);object-fit:contain;border-radius:8px;transform-origin:center;transition:transform 0.12s;pointer-events:none;will-change:transform}
+.alpha-refine-overlay{position:absolute;z-index:2;left:50%;top:50%;transform-origin:center;pointer-events:none;border-radius:8px;display:none;mix-blend-mode:screen}
+.alpha-refine-cursor{position:fixed;z-index:2000;width:28px;height:28px;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--brush-ring,#22c55e),0 0 0 6px rgba(0,0,0,.72),0 0 18px var(--brush-glow,rgba(34,197,94,.38));background:var(--brush-fill,rgba(34,197,94,.18))}
+.alpha-refine-cursor.remove{--brush-ring:#ef4444;--brush-glow:rgba(239,68,68,.45);--brush-fill:rgba(239,68,68,.22)}
+.alpha-refine-cursor.keep{--brush-ring:#22c55e;--brush-glow:rgba(34,197,94,.42);--brush-fill:rgba(34,197,94,.18)}
+.img-preview-controls,.alpha-modal-controls{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;background:rgba(13,17,23,0.98);border:1px solid #1a2535;border-radius:10px;padding:10px 16px;position:relative;z-index:5;box-shadow:0 4px 24px rgba(0,0,0,0.7);pointer-events:auto}
+.img-preview-controls button,.alpha-modal-controls button{background:#111820;border:1px solid #1a2535;color:#e2eaf5;border-radius:6px;padding:8px 12px;cursor:pointer;font-family:var(--mono);font-size:13px;min-width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.alpha-tool-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.alpha-modal-controls button.active{border-color:#00aaff;color:#00aaff;box-shadow:0 0 0 2px rgba(0,170,255,0.18)}
+.alpha-modal-controls button.keep-tool{border-color:#22c55e;color:#22c55e;background:#111820}
+.alpha-modal-controls button.keep-active{background:#22c55e;border-color:#22c55e;color:#fff;box-shadow:0 0 0 2px rgba(34,197,94,0.18)}
+.alpha-modal-controls button.remove-tool{border-color:#ef4444;color:#ef4444;background:#111820}
+.alpha-modal-controls button.remove-active{background:#ef4444;border-color:#ef4444;color:#fff;box-shadow:0 0 0 2px rgba(239,68,68,0.18)}
+.alpha-brush-wrap{display:flex;align-items:center;gap:7px;background:#0b121a;border:1px solid #1a2535;border-radius:8px;padding:6px 8px;height:42px}
+.alpha-brush-slider{width:64px;accent-color:#00aaff}
+.alpha-brush-readout{font-family:var(--mono);font-size:11px;color:var(--text2);min-width:38px;text-align:right}
+.alpha-color-menu-wrap{position:relative}
+.alpha-color-chip{width:20px;height:20px;border-radius:5px;border:1px solid #1a2535;background:linear-gradient(45deg,#333 25%,transparent 25%),linear-gradient(-45deg,#333 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#333 75%),linear-gradient(-45deg,transparent 75%,#333 75%);background-size:10px 10px;background-position:0 0,0 5px,5px -5px,-5px 0;cursor:pointer}
+.alpha-color-drop{font-size:10px;color:var(--text2);margin-left:2px}
+.alpha-remove-color-on{box-shadow:0 0 0 2px rgba(239,68,68,0.35)}
+.alpha-color-menu{display:none;position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#0d1117;border:1px solid #1a2535;border-radius:9px;padding:6px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.65);min-width:150px}
+.alpha-color-menu.show{display:block}
+.alpha-color-menu button{width:100%;height:34px;min-width:0;border-radius:6px;justify-content:flex-start;font-size:11px;color:var(--text2);background:#111820;border:1px solid #1a2535;padding:6px 9px}
+.alpha-color-menu button:hover{color:#fff;border-color:#243044}
+.alpha-modal-controls input[type=color]{width:1px;height:1px;opacity:0;position:absolute;pointer-events:none}
+.img-preview-controls .btn-dl-png,.alpha-modal-controls .btn-dl-png{background:#0066cc;border:none;color:#fff;font-size:11px;letter-spacing:0.1em;padding:8px 16px;min-width:62px}
+.img-preview-controls .btn-close,.alpha-modal-controls .btn-close{color:#7a9ab8;font-size:11px;min-width:64px}
+.img-preview-sep{width:1px;height:18px;background:#1a2535}
 </style>
 </head>
 <body>
@@ -248,12 +329,20 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 <div class="page-wrap"><div class="app">
 <aside class="sidebar">
   <div class="sidebar-section">
-    <div class="sidebar-heading" data-es="MÓDULO ACTIVO" data-en="ACTIVE MODULE">MÓDULO ACTIVO</div>
-    <div class="nav-item active" onclick="setTab('tool',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
-      <span data-es="Parámetros" data-en="Parameters">Parámetros</span>
+    <div class="sidebar-heading" data-es="HERRAMIENTAS" data-en="TOOLS">HERRAMIENTAS</div>
+    <div class="nav-item active" onclick="setTab('tool',this)" id="nav-icompress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span data-es="ICT i-Compress" data-en="ICT i-Compress">ICT i-Compress</span>
       <span class="sdot on"></span>
     </div>
+    <div class="nav-item" onclick="setTab('ialpha',this)" id="nav-ialpha">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <span data-es="ICT i-Alpha" data-en="ICT i-Alpha">ICT i-Alpha</span>
+      <span class="sdot off"></span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-heading" data-es="SUITE" data-en="SUITE">SUITE</div>
     <div class="nav-item" onclick="setTab('styles',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 18v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2m18 0h-2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       <span data-es="Estilos" data-en="Styles">Estilos</span>
@@ -265,7 +354,7 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
       <span class="sdot off"></span>
     </div>
   </div>
-  <div class="sidebar-section">
+  <div class="sidebar-section" id="live-compress-config">
     <div class="sidebar-heading" data-es="CONFIG EN VIVO" data-en="LIVE CONFIG">CONFIG EN VIVO</div>
     <div class="live-box">
       <div class="live-title">OUTPUT</div>
@@ -278,14 +367,33 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
       <div class="live-fname"><span id="lv-fname" style="color:var(--text3)">Pendiente_0001.jpg</span></div>
     </div>
   </div>
+  <div class="sidebar-section" id="live-alpha-config" style="display:none">
+    <div class="sidebar-heading" data-es="CONFIG EN VIVO" data-en="LIVE CONFIG">CONFIG EN VIVO</div>
+    <div class="live-box">
+      <div class="live-title">ICT i-Alpha</div>
+      <div class="live-row"><span class="live-key" data-es="MÉTODO" data-en="METHOD">MÉTODO</span><span class="live-val" id="la-method" style="color:#fff">ML LOCAL</span></div>
+      <div class="live-row"><span class="live-key" data-es="REFINAMIENTO" data-en="REFINEMENT">REFINAMIENTO</span><span class="live-val" id="la-refine" style="color:#fff">SUAVE</span></div>
+      <div class="live-row"><span class="live-key">THRESHOLD</span><span class="live-val" id="la-threshold" style="color:#fff">40</span></div>
+      <div class="live-row"><span class="live-key">EDGE</span><span class="live-val" id="la-edge" style="color:#fff">MED</span></div>
+      <div class="live-fname"><span data-es="SESSION TALLY" data-en="SESSION TALLY" style="color:var(--text3)">SESSION TALLY</span></div>
+      <div class="live-row"><span class="live-key" data-es="Procesado" data-en="Processed">Procesado</span><span class="live-val" id="la-total" style="color:#fff">0</span></div>
+      <div class="live-row"><span class="live-key" data-es="Reprocesado" data-en="Reprocessed">Reprocesado</span><span class="live-val" id="la-reprocessed" style="color:#fff">0</span></div>
+      <div class="live-row"><span class="live-key">ML Local</span><span class="live-val" id="la-local" style="color:var(--text3)">0</span></div>
+      <div class="live-row"><span class="live-key">MediaPipe</span><span class="live-val" id="la-mediapipe" style="color:var(--text3)">0</span></div>
+      <div class="live-row"><span class="live-key">remove.bg</span><span class="live-val" id="la-removebg" style="color:var(--text3)">0</span></div>
+    </div>
+  </div>
 </aside>
 
 <main class="main">
-  <div class="tabs">
-    <div class="tab active" id="tab-tool" onclick="setTab('tool')"><span data-es="PARÁMETROS" data-en="PARAMETERS">PARÁMETROS</span></div>
-    <div class="tab" id="tab-styles" onclick="setTab('styles')"><span data-es="ESTILOS" data-en="STYLES">ESTILOS</span></div>
-    <div class="tab" id="tab-copy" onclick="setTab('copy')"><span data-es="TEXTOS / COPIA" data-en="COPY &amp; TEXT">TEXTOS / COPIA</span></div>
+  <!-- Tool header -->
+  <div style="margin-bottom:24px">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--text3);margin-bottom:6px" id="suite-tool-label" data-es="HERRAMIENTA ACTIVA" data-en="ACTIVE TOOL">HERRAMIENTA ACTIVA</div>
+    <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:4px" id="suite-tool-name">ICT i-Compress</div>
+    <div style="font-size:13px;color:var(--text2)" id="suite-tool-desc" data-es="Reduce y renombra imágenes en lote para revisión y entrega" data-en="Batch reduces and renames images for review and delivery">Reduce y renombra imágenes en lote para revisión y entrega</div>
   </div>
+
+
 
   <!-- ══ PARAMETERS ══ -->
   <div class="tab-panel active" id="panel-tool">
@@ -423,16 +531,21 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
     <div class="proc-zone">
 
       <!-- progress -->
-      <div class="prog-wrap" id="prog-wrap" style="display:none">
-        <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
-        <div class="prog-meta">
-          <span class="prog-txt" id="prog-txt">0 / 0</span>
-          <span class="prog-pct" id="prog-pct">0%</span>
+      <!-- Quick Drop Zone -->
+      <div class="quick-drop" id="quick-drop-zone"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="quickDrop(event)"
+        onclick="document.getElementById('quick-drop-input').click()">
+        <input type="file" id="quick-drop-input" webkitdirectory multiple style="display:none" onchange="quickDropFiles(this.files)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(245,166,35,0.75)" stroke-width="1.5" width="24" height="24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>
+        <div>
+          <div class="quick-drop-text" data-es="QUICK DROP — arrastra una carpeta para procesar al instante" data-en="QUICK DROP — drag a folder to process instantly">QUICK DROP — arrastra una carpeta para procesar al instante</div>
+          <div class="quick-drop-sub" data-es="Guarda en Desktop / Quick_i-Compress /" data-en="Saves to Desktop / Quick_i-Compress /">Guarda en Desktop / Quick_i-Compress /</div>
         </div>
       </div>
 
-      <!-- log -->
-      <div class="log-box" id="log-box" style="display:none"></div>
+
 
       <!-- summary -->
       <div class="summary" id="summary">
@@ -444,6 +557,10 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 
       <!-- action buttons -->
       <div class="abar">
+        <button class="btn-run" id="btn-reprocess" onclick="setBtnState('btn-run','btn-reprocess','initial');runProcess()" style="opacity:0.3" disabled>
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.02"/></svg>
+          <span data-es="REPROCESAR" data-en="REPROCESS">REPROCESAR</span>
+        </button>
         <button class="btn-run" id="btn-run" onclick="runProcess()">
           <svg class="bico" viewBox="0 0 24 24" fill="currentColor" stroke="none" width="14" height="14" style="flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           <span id="btn-run-lbl" data-es="REDUCIR IMÁGENES" data-en="REDUCE IMAGES">REDUCIR IMÁGENES</span>
@@ -460,6 +577,179 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
     </div>
 
   </div><!-- /panel-tool -->
+
+  <!-- ══ i-ALPHA ══ -->
+  <div class="tab-panel" id="panel-ialpha">
+
+    <!-- METHOD -->
+    <div class="slabel" data-es="MÉTODO DE PROCESAMIENTO" data-en="PROCESSING METHOD">MÉTODO DE PROCESAMIENTO</div>
+    <div class="pgrid" style="margin-bottom:14px">
+      <div class="pcard">
+        <div class="phead"><span class="pname">MÉTODO <span class="tipico">?<span class="tipbub" id="tb-method"></span></span></span><span class="pval" id="v-method" style="font-size:11px">ML LOCAL</span></div>
+        <p class="pdesc" data-es="Selecciona el motor de remoción de fondo." data-en="Select the background removal engine.">Selecciona el motor de remoción de fondo.</p>
+        <div class="agrid">
+          <div class="arow"><span class="aname" data-es="ML Local AUTO SAFE v4.3 — fondos/objetos" data-en="ML Local AUTO SAFE — backgrounds/objects">ML Local AUTO SAFE v4.3 — fondos/objetos</span><button class="asw on" data-method="local" onclick="pickMethod(this)"></button></div>
+          <div class="arow"><span class="aname" data-es="MediaPipe — personas y retratos" data-en="MediaPipe — people and portraits">MediaPipe — personas y retratos</span><button class="asw" data-method="mediapipe" onclick="pickMethod(this)"></button></div>
+          <div class="arow"><span class="aname">remove.bg — calidad profesional</span><button class="asw" data-method="removebg" onclick="pickMethod(this)"></button></div>
+        </div>
+      </div>
+      <!-- Dynamic method description panel -->
+      <div class="pcard" id="method-desc-card" style="border-color:rgba(0,170,255,0.2);background:rgba(0,102,204,0.06)">
+        <div class="phead"><span class="pname" data-es="CUÁNDO USAR ESTE MÉTODO" data-en="WHEN TO USE THIS METHOD">CUÁNDO USAR ESTE MÉTODO</span></div>
+        <div id="method-desc-content" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
+      </div>
+    </div>
+    <!-- API Key (remove.bg only) -->
+    <div class="pcard full" id="card-apikey" style="display:none;margin-bottom:14px">
+      <div class="phead"><span class="pname">REMOVE.BG API KEY</span></div>
+      <p class="pdesc" data-es="Obtén tu key gratis en remove.bg — 50 imágenes/mes incluidas." data-en="Get your free key at remove.bg — 50 images/month included.">Obtén tu key gratis en remove.bg — 50 imágenes/mes incluidas.</p>
+      <input type="password" class="tf" id="rbg-apikey" placeholder="Pendiente" data-placeholder-es="Pendiente" data-placeholder-en="Pending">
+      <div style="margin-top:8px"><a href="https://www.remove.bg/api" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none">→ remove.bg/api ↗</a></div>
+    </div>
+    <!-- Dynamic controls per method -->
+    <div id="ctrl-local">
+      <div class="pgrid" style="margin-bottom:24px">
+        <div class="pcard">
+          <div class="phead"><span class="pname">COLOR DE FONDO <span class="tipico">?<span class="tipbub" id="tb-picker"></span></span></span><span class="pval" id="v-picker-hex" style="font-size:11px">#ffffff</span></div>
+          <p class="pdesc" data-es="AUTO detecta el fondo desde los bordes. Muestra es opcional." data-en="AUTO detects background from image edges. Sample is optional.">AUTO detecta el fondo desde los bordes. Muestra opcional.</p>
+          <div class="crow" style="margin-bottom:10px">
+            <input type="color" value="#ffffff" id="local-bg-color" oninput="upd('v-picker-hex',this.value);document.getElementById('local-hex-disp').textContent=this.value">
+            <span class="chex" id="local-hex-disp">#ffffff</span>
+            <button onclick="activateEyedropper()" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;color:var(--accent);cursor:pointer;font-family:var(--mono);font-size:10px;display:flex;align-items:center;gap:5px">
+              <svg viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+  <!-- bulb top — filled -->
+  <ellipse cx="17" cy="4.5" rx="3" ry="3.5" fill="currentColor"/>
+  <path d="M14.5 6.5 L13 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <!-- tube — outline -->
+  <line x1="13" y1="8" x2="6" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="6" y1="15" x2="4" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- tip -->
+  <path d="M4 17 L3 20 L6 19 Z" fill="currentColor"/>
+</svg>
+              <span data-es="Muestra" data-en="Sample">Muestra</span>
+            </button>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:4px" data-es="TOLERANCIA" data-en="TOLERANCE">TOLERANCIA</div>
+          <input type="range" min="5" max="120" step="5" value="25" id="sl-tolerance" oninput="upd('v-tolerance',this.value);updTrack(this);updateAlphaLive()">
+          <div class="rends"><span class="rend" data-es="Exacto" data-en="Exact">Exacto</span><span class="rend" data-es="Amplio" data-en="Wide">Amplio</span></div>
+          <div style="text-align:right;margin-top:4px"><span class="pval" id="v-tolerance" style="font-size:12px">25</span><span class="punit">/120</span></div>
+        </div>
+        <div class="pcard">
+          <div class="phead"><span class="pname">REFINAMIENTO <span class="tipico">?<span class="tipbub" id="tb-refine-local"></span></span></span><span class="pval" id="v-refine" style="font-size:11px">SUAVE</span></div>
+          <p class="pdesc" data-es="Tipo de borde en la máscara." data-en="Edge type for the mask.">Tipo de borde en la máscara.</p>
+          <div class="agrid">
+            <div class="arow"><span class="aname" data-es="Suave (cabello, piel)" data-en="Soft (hair, skin)">Suave (cabello, piel)</span><button class="asw on" data-refine="soft" onclick="pickRefine(this)"></button></div>
+            <div class="arow"><span class="aname" data-es="Duro (objetos, logos)" data-en="Hard (objects, logos)">Duro (objetos, logos)</span><button class="asw" data-refine="hard" onclick="pickRefine(this)"></button></div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="phead"><span class="pname">PREVIEW BG</span></div>
+            <div class="crow" style="margin-top:6px">
+              <input type="color" value="#1a1a2e" id="alpha-preview-bg" oninput="document.getElementById('alpha-preview-result').style.background=this.value">
+              <span class="chex">#1a1a2e</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard full" style="margin-bottom:24px">
+        <div class="phead"><span class="pname" data-es="LIMPIEZA DE BORDE" data-en="EDGE CLEANUP">LIMPIEZA DE BORDE</span><span class="pval" id="v-edge-cleanup" style="font-size:11px">MED</span></div>
+        <p class="pdesc" data-es="Reduce halo claro suavizando el borde. Usa Bajo si empieza a comerse ropa o detalles." data-en="Reduces light halo by softening the edge. Use Low if it starts eating clothing or details.">Reduce halo claro suavizando el borde. Usa Bajo si empieza a comerse ropa o detalles.</p>
+        <div class="agrid">
+          <div class="arow"><span class="aname" data-es="Bajo — protege detalles" data-en="Low — protects details">Bajo — protege detalles</span><button class="asw" data-cleanup="low" onclick="pickCleanup(this)"></button></div>
+          <div class="arow"><span class="aname" data-es="Medio — balance recomendado" data-en="Medium — recommended balance">Medio — balance recomendado</span><button class="asw on" data-cleanup="med" onclick="pickCleanup(this)"></button></div>
+          <div class="arow"><span class="aname" data-es="Alto — más anti-halo" data-en="High — stronger anti-halo">Alto — más anti-halo</span><button class="asw" data-cleanup="high" onclick="pickCleanup(this)"></button></div>
+        </div>
+      </div>
+    </div>
+    <div id="ctrl-mediapipe" style="display:none">
+      <div class="pgrid" style="margin-bottom:24px">
+        <div class="pcard">
+          <div class="phead"><span class="pname">CONFIANZA MÍNIMA <span class="tipico">?<span class="tipbub" id="tb-confidence"></span></span></span><span><span class="pval" id="v-confidence">70</span><span class="punit">%</span></span></div>
+          <p class="pdesc" data-es="Probabilidad mínima para clasificar un píxel como persona." data-en="Minimum probability to classify a pixel as person.">Umbral de confianza del modelo.</p>
+          <input type="range" min="30" max="95" step="5" value="70" id="sl-confidence" oninput="upd('v-confidence',this.value);updTrack(this);updateAlphaLive()">
+          <div class="rends"><span class="rend" data-es="Inclusivo" data-en="Inclusive">Inclusivo</span><span class="rend" data-es="Preciso" data-en="Precise">Preciso</span></div>
+        </div>
+        <div class="pcard">
+          <div class="phead"><span class="pname">REFINAMIENTO <span class="tipico">?<span class="tipbub" id="tb-refine-mp"></span></span></span><span class="pval" id="v-refine-mp" style="font-size:11px">SUAVE</span></div>
+          <p class="pdesc" data-es="Tipo de borde en la máscara de segmentación." data-en="Edge type for segmentation mask.">Tipo de borde.</p>
+          <div class="agrid">
+            <div class="arow"><span class="aname" data-es="Suave (retratos)" data-en="Soft (portraits)">Suave (retratos)</span><button class="asw on" data-refine-mp="soft" onclick="pickRefineMp(this)"></button></div>
+            <div class="arow"><span class="aname" data-es="Duro (silueta)" data-en="Hard (silhouette)">Duro (silueta)</span><button class="asw" data-refine-mp="hard" onclick="pickRefineMp(this)"></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="ctrl-removebg" style="display:none">
+      <div class="pgrid" style="margin-bottom:24px">
+        <div class="pcard full">
+          <div class="phead"><span class="pname">REFINAMIENTO <span class="tipico">?<span class="tipbub" id="tb-refine-rbg"></span></span></span><span class="pval" id="v-refine-rbg" style="font-size:11px">SUAVE</span></div>
+          <p class="pdesc" data-es="Tipo de borde en el resultado." data-en="Edge type in the result.">Tipo de borde en el resultado.</p>
+          <div class="agrid">
+            <div class="arow"><span class="aname" data-es="Suave — personas, animales" data-en="Soft — people, animals">Suave — personas, animales</span><button class="asw on" data-refine-rbg="soft" onclick="pickRefineRbg(this)"></button></div>
+            <div class="arow"><span class="aname" data-es="Duro — productos, logos" data-en="Hard — products, logos">Duro — productos, logos</span><button class="asw" data-refine-rbg="hard" onclick="pickRefineRbg(this)"></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DROP ZONE + PREVIEW -->
+    <div class="slabel" data-es="IMAGEN" data-en="IMAGE">IMAGEN</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+
+      <!-- DROP ZONE — label trick: no JS needed for click -->
+      <div class="alpha-dropzone-wrap" id="alpha-dropzone"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="this.classList.remove('dragover');alphaOnDrop(event)">
+        <input type="file" id="alpha-file-input" accept="image/*,image/webp" onchange="alphaLoadFile(this.files[0])">
+        <label for="alpha-file-input" id="alpha-drop-label-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(245,166,35,0.7)" stroke-width="1.5" width="40" height="40" id="alpha-drop-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-family:var(--mono);font-size:11px;color:#c8d8e8;letter-spacing:0.1em;text-align:center" id="alpha-drop-label" data-es="ARRASTRA O CLICK" data-en="DRAG OR CLICK">ARRASTRA O CLICK</div>
+          <div style="font-family:var(--mono);font-size:9px;color:#6a8aaa" data-es="JPG · PNG · WEBP" data-en="JPG · PNG · WEBP">JPG · PNG · WEBP</div>
+        </label>
+        <img id="alpha-preview-orig" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:var(--radius);padding:8px">
+      </div>
+
+      <!-- RESULT ZONE -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;overflow:hidden">
+        <!-- checkerboard bg for alpha preview -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(45deg,#2a2a2a 25%,transparent 25%),linear-gradient(-45deg,#2a2a2a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a2a 75%),linear-gradient(-45deg,transparent 75%,#2a2a2a 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;opacity:0.4;border-radius:var(--radius)"></div>
+        <img id="alpha-preview-result" style="display:none;max-width:100%;max-height:220px;object-fit:contain;position:relative;z-index:1;border-radius:6px;cursor:zoom-in" onclick="alphaModalOpen()" title="Click para ampliar">
+        <div id="alpha-result-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.12em" data-es="RESULTADO" data-en="RESULT">RESULTADO</div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ACTION BAR -->
+    <div class="proc-zone">
+      <div class="prog-wrap" id="alpha-prog-wrap" style="display:none">
+        <div class="prog-track"><div class="prog-fill" id="alpha-prog-fill"></div></div>
+        <div class="prog-meta"><span class="prog-txt" id="alpha-prog-txt"></span><span class="prog-pct" id="alpha-prog-pct"></span></div>
+      </div>
+
+      <div class="abar">
+        <button class="btn-run" id="alpha-btn-reprocess" onclick="setBtnState('alpha-btn-run','alpha-btn-reprocess','initial');alphaRun()" style="opacity:0.3" disabled>
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.02"/></svg>
+          <span data-es="REPROCESAR" data-en="REPROCESS">REPROCESAR</span>
+        </button>
+        <button class="btn-run" id="alpha-btn-run" onclick="alphaRun()">
+          <svg class="bico" viewBox="0 0 24 24" fill="currentColor" stroke="none" width="14" height="14" style="flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="alpha-btn-lbl" data-es="REMOVER FONDO" data-en="REMOVE BACKGROUND">REMOVER FONDO</span>
+        </button>
+        <button class="btn-dl" id="alpha-btn-dl" style="display:none" onclick="alphaDownload()">
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PNG
+        </button>
+        <button class="btn-sec" onclick="alphaReset()">
+          <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.02"/></svg>
+          <span data-es="Reset" data-en="Reset">Reset</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ STYLES ══ -->
   <div class="tab-panel" id="panel-styles">
@@ -552,7 +842,7 @@ textarea.cfield{width:100%;background:transparent;border:none;outline:none;resiz
 </div><!-- /page-wrap -->
 <div class="sbar">
   <span class="spip" id="spip"></span>
-  <span class="stxt" id="stxt">ICT PNG Reducer · ICTLabs Tools · v2.5</span>
+  <span class="stxt" id="stxt">ICT i-Compress · ICTLabs Suite · v4.2 Local Upgrade</span>
   <span class="sright" id="sright">Canvas API · LANCZOS</span>
 </div>
 
@@ -613,6 +903,7 @@ function toggleLang(){
   updFullPath();
   applyAllTips();
   buildCopyUI(); buildCopyTT();
+  updateAlphaLive();
 }
 
 function setV(k,v){document.documentElement.style.setProperty(k,v)}
@@ -620,12 +911,37 @@ function setV(k,v){document.documentElement.style.setProperty(k,v)}
 // ─────────────────────────────────────────────
 // TABS
 // ─────────────────────────────────────────────
+const TOOL_INFO = {
+  tool:    {name:'ICT i-Compress', es:'Reduce y renombra imágenes en lote para revisión y entrega', en:'Batch reduces and renames images for review and delivery'},
+  ialpha: {name:'ICT i-Alpha',   es:'Elimina el fondo y exporta PNG con transparencia',           en:'Removes background and exports PNG with transparency'},
+  styles:  {name:'Estilos · Suite', es:'Personaliza el aspecto visual de toda la suite',             en:'Customize the visual appearance of the entire suite'},
+  copy:    {name:'Textos · Suite',  es:'Edita los textos de la interfaz en español e inglés',        en:'Edit interface text in Spanish and English'},
+};
+
 function setTab(name,si){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');const d=n.querySelector('.sdot');if(d){d.classList.remove('on');d.classList.add('off')}});
-  document.getElementById('panel-'+name).classList.add('active');
-  document.getElementById('tab-'+name).classList.add('active');
+
+  // For tool panels, show the tab bar; for ialpha, hide it
+  const tabBar = document.querySelector('.tabs');
+  const toolHeader = document.getElementById('suite-tool-name');
+  const toolDesc = document.getElementById('suite-tool-desc');
+  if(tabBar) tabBar.style.display = (name==='ialpha') ? 'none' : 'flex';
+  const liveCompress = document.getElementById('live-compress-config');
+  const liveAlpha = document.getElementById('live-alpha-config');
+  if(liveCompress) liveCompress.style.display = (name==='ialpha') ? 'none' : 'block';
+  if(liveAlpha) liveAlpha.style.display = (name==='ialpha') ? 'block' : 'none';
+
+  // Update tool header
+  const info = TOOL_INFO[name] || TOOL_INFO['tool'];
+  if(toolHeader) toolHeader.textContent = info.name;
+  if(toolDesc){ toolDesc.textContent = info[S.lang]; toolDesc.setAttribute('data-es', info.es); toolDesc.setAttribute('data-en', info.en); }
+
+  const panel = document.getElementById('panel-'+name);
+  if(panel) panel.classList.add('active');
+  const tab = document.getElementById('tab-'+name);
+  if(tab) tab.classList.add('active');
   if(si){si.classList.add('active');const d=si.querySelector('.sdot');if(d){d.classList.remove('off');d.classList.add('on')}}
 }
 function setCopySub(n){
@@ -744,23 +1060,12 @@ function setStatus(msg, type){
 }
 
 function clearLog(){
-  document.getElementById('log-box').innerHTML = '';
+  document.getElementById('float-log-box').innerHTML = '';
 }
 
-function log(msg, cls){
-  const b = document.getElementById('log-box');
-  const d = document.createElement('div');
-  if(cls) d.className = cls;
-  d.textContent = msg;
-  b.appendChild(d);
-  b.scrollTop = b.scrollHeight;
-}
+function log(msg, cls){ floatLogAppend(msg, cls); }
 
-function setProgress(done, total){
-  const pct = total > 0 ? Math.round((done/total)*100) : 0;
-  document.getElementById('prog-fill').style.width = pct+'%';
-  document.getElementById('prog-pct').textContent = pct+'%';
-}
+function setProgress(done, total){ floatLogProgress(done, total); }
 
 async function pickFolder(){
   if(typeof window.showDirectoryPicker !== 'function'){
@@ -844,13 +1149,13 @@ async function runProcess(){
   if(S.processing) return;
   if(!S_folderHandle && !S_files.length){ await pickFolder(); if(!S_folderHandle && !S_files.length) return; }
   if(!S_files.length){
-    document.getElementById('log-box').style.display='block'; clearLog();
-    log(S.lang==='es'?'⚠ No hay imágenes para procesar.':'⚠ No images to process.','lskip'); return;
+    floatLogShow('ICT i-Compress');
+    floatLogAppend(S.lang==='es'?'⚠ No hay imágenes para procesar.':'⚠ No images to process.','lskip'); return;
   }
   S.processing = true;
   const maxSide=parseInt(document.getElementById('sl-max').value);
   const quality=parseInt(document.getElementById('sl-qual').value);
-  const prefix=document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'').toUpperCase() || 'OUTPUT';
+  const prefix=document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'') || 'i-Compress';
   const folderName=document.getElementById('folder-in').value||'_ICT_REDUCED_JPG_FOR_REVIEW';
   const skipIfSmaller=document.getElementById('sw-skip').classList.contains('on');
   const bgHex=document.getElementById('v-bgcol').textContent;
@@ -858,25 +1163,23 @@ async function runProcess(){
   const runBtn=document.getElementById('btn-run');
   runBtn.classList.add('running');
   document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'PROCESANDO...':'PROCESSING...';
-  clearLog();
-  document.getElementById('log-box').style.display='block';
-  document.getElementById('prog-wrap').style.display='block';
   document.getElementById('summary').style.display='none';
   document.getElementById('spip').classList.add('busy');
   setStatus(S.lang==='es'?'Procesando...':'Processing...','busy');
-  log(S.lang==='es'?'Iniciando...':'Starting...','linfo');
+  floatLogShow('ICT i-Compress');
+  floatLogAppend(S.lang==='es'?'Iniciando...':'Starting...','linfo');
   await new Promise(r=>setTimeout(r,30));
   const total=S_files.length;
   let count=1,skipped=0,totalBytes=0,outDir=null,zip=null;
   if(S_useFS && S_folderHandle){
     try {
       outDir=await S_folderHandle.getDirectoryHandle(folderName,{create:mkdir});
-      log((S.lang==='es'?'Carpeta de salida: ':'Output: ')+S_folderHandle.name+'/'+folderName,'linfo');
+      floatLogAppend((S.lang==='es'?'Carpeta de salida: ':'Output: ')+S_folderHandle.name+'/'+folderName,'linfo');
     } catch(e){ log('⚠ '+e.message+' — cambiando a ZIP','lskip'); S_useFS=false; }
   }
-  if(!S_useFS){ zip=new JSZip(); log(S.lang==='es'?'Modo ZIP.':'ZIP mode.','linfo'); }
-  log(total+(S.lang==='es'?' imagen(es) encontrada(s).':' image(s) found.'),'linfo');
-  setProgress(0,total);
+  if(!S_useFS){ zip=new JSZip(); floatLogAppend(S.lang==='es'?'Modo ZIP.':'ZIP mode.','linfo'); }
+  floatLogAppend(total+(S.lang==='es'?' imagen(es) encontrada(s).':' image(s) found.'),'linfo');
+  floatLogProgress(0,total);
   await new Promise(r=>setTimeout(r,30));
   for(let i=0;i<S_files.length;i++){
     const f=S_files[i];
@@ -888,25 +1191,23 @@ async function runProcess(){
         const w=await fh.createWritable(); await w.write(blob); await w.close();
       } else if(zip){ zip.file(folderName+'/'+outName,blob); }
       totalBytes+=blob.size;
-      log('['+(i+1)+'/'+total+'] ✓ '+outName+' ← '+f.name,'lok');
+      floatLogAppend('['+(i+1)+'/'+total+'] ✓ '+outName+' ← '+f.name,'lok');
       count++;
-    } catch(e){ log('['+(i+1)+'/'+total+'] ↷ SKIP: '+f.name+' | '+e.message,'lskip'); skipped++; }
-    setProgress(i+1,total);
-    document.getElementById('prog-txt').textContent=(i+1)+' / '+total;
+    } catch(e){ floatLogAppend('['+(i+1)+'/'+total+'] ↷ SKIP: '+f.name+' | '+e.message,'lskip'); skipped++; }
+    floatLogProgress(i+1,total);
     await new Promise(r=>setTimeout(r,0));
   }
   const done=count-1;
   const kb=Math.round(totalBytes/1024);
   const sizeStr=kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB';
   if(!S_useFS && zip){
-    log(S.lang==='es'?'Generando ZIP...':'Generating ZIP...','linfo');
+    floatLogAppend(S.lang==='es'?'Generando ZIP...':'Generating ZIP...','linfo');
     const zipBlob=await zip.generateAsync({type:'blob',compression:'STORE'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(zipBlob);
-    a.download=folderName+'.zip'; a.click(); URL.revokeObjectURL(a.href);
-    log('✓ '+folderName+'.zip','lok');
+    showDownload({blob:zipBlob,filename:folderName+'.zip',size:Math.round(zipBlob.size/1024)+' KB',isPy:false});
+    floatLogAppend('✓ '+folderName+'.zip','lok');
   }
-  log('','');
-  log((S.lang==='es'?'✓ Listo. ':'✓ Done. ')+done+(S.lang==='es'?' procesada(s).':' processed.'),'lok');
+  floatLogAppend('');
+  floatLogAppend((S.lang==='es'?'✓ Listo. ':'✓ Done. ')+done+(S.lang==='es'?' procesada(s).':' processed.'),'lok');
   document.getElementById('sum-count').textContent=done;
   document.getElementById('sum-skip').textContent=skipped;
   document.getElementById('sum-size').textContent=sizeStr;
@@ -915,7 +1216,8 @@ async function runProcess(){
   document.getElementById('spip').classList.remove('busy');
   setStatus((S.lang==='es'?'Listo · ':'Done · ')+done+(S.lang==='es'?' imagen(es)':' image(s)'));
   runBtn.classList.remove('running');
-  document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'REDUCIR DE NUEVO':'REDUCE AGAIN';
+  document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'REDUCIR IMÁGENES':'REDUCE IMAGES';
+  setBtnState('btn-run','btn-reprocess','done');
   S.processing=false;
 }
 
@@ -969,6 +1271,73 @@ function resetRunBtn(done){
 // ─────────────────────────────────────────────
 // RESET
 // ─────────────────────────────────────────────
+// ── QUICK DROP (i-Compress) ──
+async function quickDrop(e){
+  e.preventDefault();
+  document.getElementById('quick-drop-zone').classList.remove('dragover');
+  const items = e.dataTransfer.items;
+  const files = [];
+  for(const item of items){
+    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+    if(entry && entry.isDirectory){
+      await collectEntries(entry, files);
+    } else if(item.kind === 'file'){
+      const f = item.getAsFile();
+      if(f) files.push({file:f, name:f.name});
+    }
+  }
+  if(files.length) await quickProcess(files);
+}
+
+async function collectEntries(dirEntry, files){
+  const reader = dirEntry.createReader();
+  const entries = await new Promise(res => reader.readEntries(res));
+  for(const entry of entries){
+    if(entry.isFile){
+      const f = await new Promise(res => entry.file(res));
+      const ext = '.'+f.name.split('.').pop().toLowerCase();
+      if(['.png','.jpg','.jpeg'].includes(ext)) files.push({file:f, name:f.name});
+    } else if(entry.isDirectory){
+      await collectEntries(entry, files);
+    }
+  }
+}
+
+async function quickDropFiles(fileList){
+  const files = Array.from(fileList)
+    .filter(f => ['.png','.jpg','.jpeg'].includes('.'+f.name.split('.').pop().toLowerCase()))
+    .map(f => ({file:f, name:f.name}));
+  if(files.length) await quickProcess(files);
+}
+
+async function quickProcess(files){
+  const maxSide = parseInt(document.getElementById('sl-max').value);
+  const quality = parseInt(document.getElementById('sl-qual').value);
+  const prefix  = document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'')||'i-Compress';
+  const bgHex   = document.getElementById('v-bgcol').textContent;
+  const zip = new JSZip();
+  const folderName = 'Quick_i-Compress';
+  floatLogShow('QUICK DROP'); floatLogAppend('Quick Drop: '+files.length+(S.lang==='es'?' archivo(s)...':' file(s)...'),'linfo');
+  floatLogProgress(0, files.length);
+  let count = 1;
+  for(let i=0; i<files.length; i++){
+    try{
+      const blob = await processImage(files[i].file, maxSide, quality, bgHex, false);
+      const outName = prefix+'_'+String(count).padStart(4,'0')+'.jpg';
+      zip.file(folderName+'/'+outName, blob);
+      floatLogAppend('✓ '+outName+' ← '+files[i].name,'lok');
+      count++;
+    } catch(e){ log('↷ SKIP: '+files[i].name,'lskip'); }
+    floatLogProgress(i+1, files.length);
+    await new Promise(r=>setTimeout(r,0));
+  }
+  floatLogAppend(S.lang==='es'?'Generando ZIP...':'Generating ZIP...','linfo');
+  const zipBlob = await zip.generateAsync({type:'blob',compression:'STORE'});
+  showDownload({blob:zipBlob,filename:'Quick_i-Compress.zip',size:Math.round(zipBlob.size/1024)+' KB',isPy:false});
+  floatLogAppend('✓ Quick_i-Compress.zip','lok');
+  setProgress(files.length, files.length);
+}
+
 function resetAll(){
   document.getElementById('sl-max').value=1600; upd('v-max','1600'); upd('lv-max','1600px');
   document.getElementById('sl-qual').value=88; upd('v-qual','88'); upd('lv-qual','88%');
@@ -987,11 +1356,8 @@ function resetAll(){
   const btn=document.getElementById('btn-run');
   btn.disabled=true; btn.classList.remove('running');
   document.getElementById('btn-run-lbl').textContent=S.lang==='es'?'SELECCIONA UNA CARPETA':'SELECT A FOLDER';
-  document.getElementById('log-box').style.display='none';
-  document.getElementById('prog-wrap').style.display='none';
   document.getElementById('summary').style.display='none';
-  clearLog();
-  document.querySelectorAll('input[type=range]').forEach(updTrack);
+    document.querySelectorAll('input[type=range]').forEach(updTrack);
   updEst();
 }
 
@@ -1035,6 +1401,987 @@ function buildCopyTT(){
     </div></div>`).join('');
 }
 
+// ── i-ALPHA ──
+let alphaFile = null;
+let alphaResultBlob = null;
+let alphaBaseBlob = null;
+let alphaRefine = {mode:'inspect', brush:null, size:28, strokes:[], drawing:false, currentStrokeId:0, lastPoint:null, removeColor:null, removeTolerance:38};
+let alphaTally = {total:0,reprocessed:0,local:0,mediapipe:0,removebg:0};
+window.alphaManualBgPicked = false;
+
+function alphaLabelFromValue(v){
+  return v === 'soft' ? (S.lang==='es'?'SUAVE':'SOFT') : (S.lang==='es'?'DURO':'HARD');
+}
+function getAlphaRefine(){
+  const method = document.querySelector('[data-method].on')?.getAttribute('data-method') || 'local';
+  const sel = method === 'mediapipe' ? '[data-refine-mp].on' : method === 'removebg' ? '[data-refine-rbg].on' : '[data-refine].on';
+  const attr = method === 'mediapipe' ? 'data-refine-mp' : method === 'removebg' ? 'data-refine-rbg' : 'data-refine';
+  return document.querySelector(sel)?.getAttribute(attr) || 'soft';
+}
+function getAlphaThreshold(){
+  const method = document.querySelector('[data-method].on')?.getAttribute('data-method') || 'local';
+  if(method === 'mediapipe') return (document.getElementById('sl-confidence')?.value || '70') + '%';
+  if(method === 'removebg') return 'API';
+  return document.getElementById('sl-tolerance')?.value || '25';
+}
+function getAlphaCleanup(){
+  return document.querySelector('[data-cleanup].on')?.getAttribute('data-cleanup') || 'med';
+}
+function alphaCleanupLabel(v){
+  if(v==='low') return S.lang==='es'?'BAJO':'LOW';
+  if(v==='high') return S.lang==='es'?'ALTO':'HIGH';
+  return S.lang==='es'?'MED':'MED';
+}
+function pickCleanup(btn){
+  document.querySelectorAll('[data-cleanup]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const v = getAlphaCleanup();
+  const lbl = alphaCleanupLabel(v);
+  const ve = document.getElementById('v-edge-cleanup'); if(ve) ve.textContent = lbl;
+  updateAlphaLive();
+}
+function updateAlphaLive(){
+  const method = document.querySelector('[data-method].on')?.getAttribute('data-method') || 'local';
+  const info = METHOD_DESC[method] || METHOD_DESC.local;
+  const refine = getAlphaRefine();
+  const map = {
+    'la-method': info.name,
+    'la-refine': alphaLabelFromValue(refine),
+    'la-threshold': getAlphaThreshold(),
+    'la-edge': alphaCleanupLabel(getAlphaCleanup()),
+    'la-total': alphaTally.total,
+    'la-reprocessed': alphaTally.reprocessed,
+    'la-local': alphaTally.local,
+    'la-mediapipe': alphaTally.mediapipe,
+    'la-removebg': alphaTally.removebg
+  };
+  Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
+}
+function bumpAlphaTally(method,wasReprocess){
+  alphaTally.total++;
+  if(wasReprocess) alphaTally.reprocessed++;
+  if(alphaTally[method] !== undefined) alphaTally[method]++;
+  updateAlphaLive();
+}
+
+const METHOD_DESC = {
+  local: {
+    name: 'ML AUTO',
+    es: '✓ Gratis y offline — no requiere internet ni API key.<br>✓ AUTO detecta el fondo desde los bordes; no tienes que configurar nada.<br>✓ Mejor para objetos, logos, renders y productos con fondo claro o relativamente uniforme.<br>⚠ Para fondos muy complejos, usa remove.bg; para retratos humanos, MediaPipe.',
+    en: '✓ Free and offline — no internet or API key required.<br>✓ AUTO SAFE removes only edge-connected background; no setup required.<br>✓ More conservative to protect clothing, face and subject details.<br>⚠ For very complex backgrounds use remove.bg; for human portraits use MediaPipe.'
+  },
+  mediapipe: {
+    name: 'MEDIAPIPE',
+    es: '✓ Gratis y offline — motor de IA de Google, corre en tu browser.<br>✓ Ideal para personas, retratos y selfies — detecta silueta humana.<br>✓ Funciona bien con cabello, ropa y bordes complejos.<br>⚠ No ideal para objetos, productos o animales.',
+    en: '✓ Free and offline — Google AI engine, runs in your browser.<br>✓ Best for people, portraits and selfies — detects human silhouette.<br>✓ Handles hair, clothing and complex edges well.<br>⚠ Not ideal for objects, products or animals.'
+  },
+  removebg: {
+    name: 'REMOVE.BG',
+    es: '✓ Calidad profesional — IA entrenada para cualquier tipo de imagen.<br>✓ Ideal para productos, personas, animales, logos y escenas complejas.<br>✓ Maneja cabello fino, transparencias y sombras.<br>⚠ Requiere API key gratuita (50 imágenes/mes) o plan de pago.',
+    en: '✓ Professional quality — AI trained for any type of image.<br>✓ Best for products, people, animals, logos and complex scenes.<br>✓ Handles fine hair, transparency and shadows.<br>⚠ Requires free API key (50 images/month) or paid plan.'
+  }
+};
+
+function pickMethod(btn){
+  document.querySelectorAll('[data-method]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const v = btn.getAttribute('data-method');
+  const info = METHOD_DESC[v];
+  document.getElementById('v-method').textContent = info.name;
+  document.getElementById('card-apikey').style.display = v === 'removebg' ? 'block' : 'none';
+  const desc = document.getElementById('method-desc-content');
+  if(desc) desc.innerHTML = info[S.lang];
+  updateAlphaLive();
+}
+
+function pickRefine(btn){
+  document.querySelectorAll('[data-refine]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const v = btn.getAttribute('data-refine');
+  document.getElementById('v-refine').textContent = v === 'soft' ? (S.lang==='es'?'SUAVE':'SOFT') : (S.lang==='es'?'DURO':'HARD');
+  updateAlphaLive();
+}
+
+function alphaOnDrop(e){
+  e.preventDefault();
+  e.currentTarget.style.borderColor = 'var(--border2)';
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')) alphaLoadFile(file);
+}
+
+function alphaLoadFile(file){
+  if(!file) return;
+  alphaFile = file;
+  const url = URL.createObjectURL(file);
+  const img = document.getElementById('alpha-preview-orig');
+  img.src = url; img.style.display = 'block';
+  document.getElementById('alpha-drop-icon').style.display = 'none';
+  document.getElementById('alpha-drop-label').style.display = 'none';
+  document.getElementById('alpha-btn-dl').style.display = 'none';
+  document.getElementById('alpha-preview-result').style.display = 'none';
+  document.getElementById('alpha-result-placeholder').style.display = 'flex';
+  alphaResultBlob = null;
+  alphaBaseBlob = null;
+  alphaRefine.strokes = [];
+}
+
+
+async function alphaRun(){
+  if(!alphaFile){ 
+      floatLogShow('ICT i-Alpha');
+    floatLogAppend('⚠ '+(S.lang==='es'?'Selecciona una imagen primero':'Select an image first'),'lskip');
+    return;
+  }
+  const method = document.querySelector('[data-method].on')?.getAttribute('data-method') || 'local';
+  const wasReprocess = alphaHasProcessed;
+  const btn = document.getElementById('alpha-btn-run');
+  btn.classList.add('running');
+  document.getElementById('alpha-btn-lbl').textContent=S.lang==='es'?'PROCESANDO...':'PROCESSING...';
+  setBtnState('alpha-btn-run','alpha-btn-reprocess','processing');
+  floatLogShow('ICT i-Alpha');
+  function alog(msg,cls){ floatLogAppend(msg,cls); }
+
+  try {
+    alog(S.lang==='es'?'Cargando imagen...':'Loading image...','linfo');
+    
+    if(method === 'removebg'){
+      const apiKey = document.getElementById('rbg-apikey').value.trim();
+      if(!apiKey){ alog('⚠ '+(S.lang==='es'?'Ingresa tu API key de remove.bg':'Enter your remove.bg API key'),'lskip'); btn.classList.remove('running'); document.getElementById('alpha-btn-lbl').textContent=S.lang==='es'?'REMOVER FONDO':'REMOVE BACKGROUND'; return; }
+      alog('remove.bg API...','linfo');
+      const formData = new FormData();
+      formData.append('image_file', alphaFile);
+      formData.append('size', 'auto');
+      const resp = await fetch('https://api.remove.bg/v1.0/removebg', {
+        method:'POST', headers:{'X-Api-Key': apiKey}, body: formData
+      });
+      if(!resp.ok){ const err=await resp.json(); throw new Error(err.errors?.[0]?.title || resp.statusText); }
+      alphaResultBlob = await resp.blob();
+      alog('✓ '+(S.lang==='es'?'Fondo removido con remove.bg':'Background removed via remove.bg'),'lok');
+    } else if(method === 'mediapipe'){
+      alog(S.lang==='es'?'Cargando MediaPipe Selfie Segmentation...':'Loading MediaPipe Selfie Segmentation...','linfo');
+      alphaResultBlob = await alphaMediaPipeRemove(alphaFile);
+      alog('✓ '+(S.lang==='es'?'Procesado con MediaPipe':'Processed with MediaPipe'),'lok');
+    } else {
+      alog(S.lang==='es'?'Procesando con ML local...':'Processing with local ML...','linfo');
+      alphaResultBlob = await alphaLocalRemove(alphaFile);
+      alog('✓ '+(S.lang==='es'?'Procesado localmente':'Processed locally'),'lok');
+    }
+
+    alphaBaseBlob = alphaResultBlob;
+    alphaRefine.strokes = [];
+    // Show result
+    const resultUrl = URL.createObjectURL(alphaResultBlob);
+    const resultImg = document.getElementById('alpha-preview-result');
+    resultImg.src = resultUrl;
+    resultImg.style.display = 'block';
+    document.getElementById('alpha-result-placeholder').style.display = 'none';
+    document.getElementById('alpha-btn-dl').style.display = 'flex';
+    alphaHasProcessed=true;
+    bumpAlphaTally(method, wasReprocess);
+    setBtnState('alpha-btn-run','alpha-btn-reprocess','done');
+    alog(S.lang==='es'?'Listo. Usa el botón PNG para descargar.':'Done. Use the PNG button to download.','lok');
+
+  } catch(e){
+    alog('⚠ Error: '+e.message,'lerr');
+  }
+
+  btn.classList.remove('running');
+  document.getElementById('alpha-btn-lbl').textContent=S.lang==='es'?'REMOVER FONDO':'REMOVE BACKGROUND';
+  if(!alphaHasProcessed) setBtnState('alpha-btn-run','alpha-btn-reprocess','initial');
+}
+
+async function alphaLocalRemove(file){
+  // ICT i-Alpha v4.3 SAFE local engine: conservative edge-connected flood-fill + cleanup + feather. Protects subject regions better when clothing/skin are close to background color.
+  // Designed to stay single-file/offline. No AI model download required.
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d', {willReadFrequently:true});
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const w = canvas.width, h = canvas.height, n = w*h;
+      const refine = document.querySelector('[data-refine].on')?.getAttribute('data-refine') || 'soft';
+      const tolRaw = parseInt(document.getElementById('sl-tolerance')?.value || 25);
+      // SAFE v4.3: v4.2 was too aggressive (55 * 1.85 ~= 102), which could invade shirts/faces.
+      // Keep the AUTO default conservative; user can raise tolerance only if background remains.
+      const tol = Math.max(8, Math.min(70, tolRaw));
+
+      function distAt(idx, c){
+        const p = idx*4;
+        const dr=data[p]-c[0], dg=data[p+1]-c[1], db=data[p+2]-c[2];
+        return Math.sqrt(dr*dr + dg*dg + db*db);
+      }
+      function distIdx(a,b){
+        const pa=a*4, pb=b*4;
+        const dr=data[pa]-data[pb], dg=data[pa+1]-data[pb+1], db=data[pa+2]-data[pb+2];
+        return Math.sqrt(dr*dr + dg*dg + db*db);
+      }
+      function median(arr){ arr.sort((a,b)=>a-b); return arr[Math.floor(arr.length/2)] || 0; }
+      function autoBgColor(){
+        if(window.alphaManualBgPicked){
+          const hex=document.getElementById('local-bg-color')?.value || '#ffffff';
+          return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+        }
+        const step = Math.max(1, Math.floor(Math.min(w,h) / 80));
+        const buckets = new Map();
+        const samples=[];
+        function add(x,y){
+          const p=(y*w+x)*4;
+          const r=data[p], g=data[p+1], b=data[p+2];
+          const key=(r>>4)+','+(g>>4)+','+(b>>4);
+          if(!buckets.has(key)) buckets.set(key, []);
+          buckets.get(key).push([r,g,b]); samples.push([r,g,b]);
+        }
+        for(let x=0;x<w;x+=step){ add(x,0); add(x,h-1); }
+        for(let y=0;y<h;y+=step){ add(0,y); add(w-1,y); }
+        let best=null;
+        for(const group of buckets.values()) if(!best || group.length>best.length) best=group;
+        const group = best && best.length >= Math.max(8, samples.length*0.08) ? best : samples;
+        return [median(group.map(v=>v[0])), median(group.map(v=>v[1])), median(group.map(v=>v[2]))];
+      }
+      const bg = autoBgColor();
+      const bgHex = '#'+bg.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+      const disp=document.getElementById('v-picker-hex'); if(disp && !window.alphaManualBgPicked) disp.textContent=bgHex;
+      const col=document.getElementById('local-bg-color'); if(col && !window.alphaManualBgPicked) col.value=bgHex;
+      const hex=document.getElementById('local-hex-disp'); if(hex && !window.alphaManualBgPicked) hex.textContent=bgHex;
+
+      // Flood-fill only from borders so similarly colored subject interiors are not automatically erased.
+      const bgMask = new Uint8Array(n);
+      const q = [];
+      function seed(x,y){
+        const idx=y*w+x;
+        if(!bgMask[idx] && distAt(idx,bg) <= tol){ bgMask[idx]=1; q.push(idx); }
+      }
+      for(let x=0;x<w;x++){ seed(x,0); seed(x,h-1); }
+      for(let y=0;y<h;y++){ seed(0,y); seed(w-1,y); }
+      let head=0;
+      while(head<q.length){
+        const idx=q[head++], x=idx%w, y=(idx/w)|0;
+        const neigh=[];
+        if(x>0) neigh.push(idx-1); if(x<w-1) neigh.push(idx+1); if(y>0) neigh.push(idx-w); if(y<h-1) neigh.push(idx+w);
+        for(const nb of neigh){
+          if(bgMask[nb]) continue;
+          // Allow mild gradients by accepting pixels close to the estimated bg OR close to the previous bg pixel.
+          if(distAt(nb,bg) <= tol || (distIdx(nb,idx) <= tol*0.20 && distAt(nb,bg) <= tol*1.05)){
+            bgMask[nb]=1; q.push(nb);
+          }
+        }
+      }
+
+      // Despeckle / close tiny holes: local majority filter on mask.
+      let keep = new Uint8Array(n);
+      for(let i=0;i<n;i++) keep[i] = bgMask[i] ? 0 : 255;
+      function majorityPass(src, mode){
+        const dst = new Uint8Array(src);
+        for(let y=1;y<h-1;y++){
+          for(let x=1;x<w-1;x++){
+            const idx=y*w+x;
+            let fg=0;
+            for(let yy=-1;yy<=1;yy++) for(let xx=-1;xx<=1;xx++) if(src[idx+yy*w+xx]>0) fg++;
+            if(mode==='removeSpecks' && fg<=2) dst[idx]=0;
+            if(mode==='fillHoles' && fg>=7) dst[idx]=255;
+          }
+        }
+        return dst;
+      }
+      keep = majorityPass(keep,'removeSpecks');
+      keep = majorityPass(keep,'fillHoles');
+
+      // Edge cleanup: conservative by default. High can shrink + feather to reduce light halos.
+      function blurAlpha(src, passes){
+        let a = src;
+        for(let pass=0; pass<passes; pass++){
+          const b = new Uint8Array(a);
+          for(let y=1;y<h-1;y++){
+            for(let x=1;x<w-1;x++){
+              const idx=y*w+x;
+              let sum=0;
+              for(let yy=-1;yy<=1;yy++) for(let xx=-1;xx<=1;xx++) sum += a[idx+yy*w+xx];
+              b[idx] = Math.round(sum/9);
+            }
+          }
+          a=b;
+        }
+        return a;
+      }
+      function erodeForeground(src, passes){
+        let a = src;
+        for(let pass=0; pass<passes; pass++){
+          const b = new Uint8Array(a);
+          for(let y=1;y<h-1;y++){
+            for(let x=1;x<w-1;x++){
+              const idx=y*w+x;
+              if(a[idx]===0) continue;
+              let touchesBg=false;
+              for(let yy=-1;yy<=1;yy++) for(let xx=-1;xx<=1;xx++) if(a[idx+yy*w+xx]===0) touchesBg=true;
+              if(touchesBg) b[idx]=0;
+            }
+          }
+          a=b;
+        }
+        return a;
+      }
+      const cleanup = getAlphaCleanup();
+      const cleanupMap = { low:{shrink:0,feather:0}, med:{shrink:0,feather:1}, high:{shrink:1,feather:2} };
+      const c = cleanupMap[cleanup] || cleanupMap.med;
+      let finalAlpha = keep;
+      if(c.shrink>0) finalAlpha = erodeForeground(finalAlpha, c.shrink);
+      if(refine === 'soft' && c.feather>0) finalAlpha = blurAlpha(finalAlpha, c.feather);
+      for(let i=0;i<n;i++) data[i*4+3] = finalAlpha[i];
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.src = url;
+  });
+}
+
+function alphaDirectDownload(blob, filename){
+  if(!blob) return;
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(blob);
+  a.href=url;
+  a.download=filename || 'image_alpha.png';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+async function alphaBuildExportBlob(includePending=true){
+  const sourceBlob = alphaBaseBlob || alphaResultBlob;
+  if(!sourceBlob) return null;
+  const pending = includePending && Array.isArray(alphaRefine.strokes) && alphaRefine.strokes.length > 0;
+  if(!pending || !alphaFile) return sourceBlob;
+
+  const baseBmp = await createImageBitmap(sourceBlob);
+  const origBmp = await createImageBitmap(alphaFile);
+  const c=document.createElement('canvas');
+  c.width=baseBmp.width; c.height=baseBmp.height;
+  const ctx=c.getContext('2d', {willReadFrequently:true});
+
+  ctx.drawImage(origBmp,0,0,c.width,c.height);
+  const orig=ctx.getImageData(0,0,c.width,c.height);
+
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.drawImage(baseBmp,0,0,c.width,c.height);
+  const out=ctx.getImageData(0,0,c.width,c.height);
+
+  for(const s of alphaRefine.strokes){
+    const r=s.size/2, r2=r*r;
+    const x0=Math.max(0,Math.floor(s.x-r)), x1=Math.min(c.width-1,Math.ceil(s.x+r));
+    const y0=Math.max(0,Math.floor(s.y-r)), y1=Math.min(c.height-1,Math.ceil(s.y+r));
+    for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){
+      const dx=x-s.x, dy=y-s.y;
+      if(dx*dx+dy*dy>r2) continue;
+      const i=(y*c.width+x)*4;
+      if(s.brush==='keep'){
+        out.data[i]=orig.data[i];
+        out.data[i+1]=orig.data[i+1];
+        out.data[i+2]=orig.data[i+2];
+        out.data[i+3]=255;
+      }else if(s.brush==='remove'){
+        if(alphaRemoveMatchesColor(orig.data,i,s.removeColor||null)) out.data[i+3]=0;
+      }
+    }
+  }
+
+  ctx.putImageData(out,0,0);
+  return await new Promise(res=>c.toBlob(res,'image/png'));
+}
+
+async function alphaDownload(){
+  const blob = await alphaBuildExportBlob(true);
+  if(!blob) return;
+  const base = alphaFile?.name.replace(/[.][^.]+$/, '') || 'image';
+  alphaDirectDownload(blob, base + '_alpha.png');
+}
+
+async function alphaMediaPipeRemove(file){
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Load MediaPipe via CDN
+      if(!window.SelfieSegmentation){
+        await new Promise((res,rej)=>{
+          const s=document.createElement('script');
+          s.src='https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js';
+          s.onload=res; s.onerror=()=>rej(new Error('MediaPipe load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = async () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const seg = new SelfieSegmentation({locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${f}`});
+        seg.setOptions({modelSelection: 1}); // 1 = landscape model
+
+        seg.onResults(results => {
+          const mask = results.segmentationMask;
+          const maskCanvas = document.createElement('canvas');
+          maskCanvas.width = canvas.width; maskCanvas.height = canvas.height;
+          const mCtx = maskCanvas.getContext('2d');
+          mCtx.drawImage(mask, 0, 0, canvas.width, canvas.height);
+          const maskData = mCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const refine = document.querySelector('[data-refine].on')?.getAttribute('data-refine') || 'soft';
+          for(let i=0; i<imgData.data.length; i+=4){
+            const alpha = maskData.data[i]; // red channel = mask
+            imgData.data[i+3] = refine === 'hard' ? (alpha > 128 ? 255 : 0) : alpha;
+          }
+          ctx.putImageData(imgData, 0, 0);
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), 'image/png');
+        });
+
+        await seg.send({image: img});
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = URL.createObjectURL(file);
+    } catch(e){ reject(e); }
+  });
+}
+
+// Modal functions
+const previewState = {
+  alpha:{scale:1,x:0,y:0,inspect:false,drag:false,pinch:false,lastX:0,lastY:0,startDist:0,startScale:1},
+  img:{scale:1,x:0,y:0,inspect:false,drag:false,pinch:false,lastX:0,lastY:0,startDist:0,startScale:1}
+};
+function pvIds(kind){
+  return kind==='alpha'
+    ? {modal:'alpha-modal', img:'alpha-modal-img', zoom:'alpha-modal-zoom', canvas:'alpha-modal-canvas', inspect:'alpha-inspect-btn', overlay:'alpha-refine-overlay'}
+    : {modal:'img-preview-modal', img:'img-preview-img', zoom:'img-preview-zoom', canvas:'img-preview-canvas', inspect:'img-preview-inspect-btn'};
+}
+function pvApply(kind){
+  const st=previewState[kind], ids=pvIds(kind);
+  const img=document.getElementById(ids.img), canvas=document.getElementById(ids.canvas), zoom=document.getElementById(ids.zoom), btn=document.getElementById(ids.inspect), overlay=ids.overlay?document.getElementById(ids.overlay):null;
+  if(!img) return;
+  img.style.transform=`translate(${st.x}px, ${st.y}px) scale(${st.scale})`;
+  if(overlay){ overlay.style.transform=`translate(calc(-50% + ${st.x}px), calc(-50% + ${st.y}px)) scale(${st.scale})`; alphaRefineSyncOverlay(); }
+  if(zoom) zoom.textContent=Math.round(st.scale*100)+'%';
+  if(canvas){ canvas.classList.toggle('is-zoomed', st.scale>1.01); canvas.classList.toggle('inspect-on', !!st.inspect); }
+  if(btn){ btn.style.borderColor=st.inspect?'#00aaff':'#1a2535'; btn.style.color=st.inspect?'#00aaff':'#e2eaf5'; }
+}
+function pvReset(kind){
+  const st=previewState[kind]; st.scale=1; st.x=0; st.y=0; st.inspect=false; st.drag=false; st.pinch=false; pvApply(kind);
+}
+function pvZoom(kind,delta){
+  const st=previewState[kind];
+  st.scale=Math.max(0.25,Math.min(6,st.scale+delta));
+  if(st.scale<=1.01){ st.x=0; st.y=0; }
+  pvApply(kind);
+}
+function pvToggleInspect(kind){
+  const st=previewState[kind]; st.inspect=!st.inspect;
+  if(st.inspect && st.scale<2) st.scale=2;
+  pvApply(kind);
+}
+function pvDownload(){ alphaDownload(); }
+function alphaModalOpen(){
+  if(!alphaResultBlob) return;
+  const modal=document.getElementById('alpha-modal'), mImg=document.getElementById('alpha-modal-img');
+  mImg.src=URL.createObjectURL(alphaResultBlob); modal.style.display='grid'; alphaRefine.undoStack=[]; pvReset('alpha'); alphaRefineSetMode('inspect'); setTimeout(alphaRefineSyncOverlay,80);
+}
+function alphaModalClose(){ document.getElementById('alpha-modal').style.display='none'; pvReset('alpha'); alphaRefineSetMode('inspect'); }
+function alphaZoom(delta){ pvZoom('alpha',delta); }
+function alphaToggleInspect(){ alphaRefineSetMode('inspect'); pvToggleInspect('alpha'); }
+function alphaResetView(){ pvReset('alpha'); setTimeout(alphaRefineSyncOverlay,50); }
+// Close modal on backdrop click
+document.addEventListener('click', e => {
+  if(e.target.id === 'alpha-modal' || e.target.classList.contains('alpha-modal-stage')) alphaModalClose();
+  if(!e.target.closest?.('.alpha-color-menu-wrap')) alphaCloseColorMenu();
+});
+
+function pvCanvasPointerDown(kind,e){
+  const wantsPan = e.shiftKey || e.metaKey || e.ctrlKey || e.altKey;
+  if(kind==='alpha' && !wantsPan && alphaRefinePointerDown(e)) return;
+  const st=previewState[kind];
+  if(e.pointerType==='mouse' && e.button!==0) return;
+  const canvas=document.getElementById(pvIds(kind).canvas);
+  if(!canvas) return;
+  if(st.scale<=1.01 && !st.inspect) return;
+  st.drag=true; st.lastX=e.clientX; st.lastY=e.clientY; canvas.classList.add('is-dragging'); canvas.setPointerCapture?.(e.pointerId); e.preventDefault();
+}
+function pvCanvasPointerMove(kind,e){
+  if(kind==='alpha'){
+    const canvas=document.getElementById('alpha-modal-canvas');
+    canvas?.classList.toggle('mod-pan', !!(e.shiftKey || e.metaKey || e.ctrlKey || e.altKey));
+  }
+  if(kind==='alpha' && !(e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) && alphaRefinePointerMove(e)) return;
+  const st=previewState[kind]; if(!st.drag) return;
+  st.x += e.clientX-st.lastX; st.y += e.clientY-st.lastY; st.lastX=e.clientX; st.lastY=e.clientY; pvApply(kind); e.preventDefault();
+}
+function pvCanvasPointerUp(kind,e){
+  if(kind==='alpha') alphaRefinePointerUp(e);
+  const st=previewState[kind]; st.drag=false; const canvas=document.getElementById(pvIds(kind).canvas); canvas?.classList.remove('is-dragging');
+}
+function pvWheel(kind,e){
+  if(!e.ctrlKey && !previewState[kind].inspect) return;
+  e.preventDefault(); pvZoom(kind, e.deltaY<0 ? 0.25 : -0.25);
+}
+function pvTouchStart(kind,e){
+  if(e.touches.length===2){
+    const st=previewState[kind], a=e.touches[0], b=e.touches[1];
+    st.pinch=true; st.startDist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); st.startScale=st.scale; e.preventDefault();
+  }
+}
+function pvTouchMove(kind,e){
+  const st=previewState[kind];
+  if(st.pinch && e.touches.length===2){
+    const a=e.touches[0], b=e.touches[1];
+    const dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    st.scale=Math.max(0.25,Math.min(6,st.startScale*(dist/st.startDist)));
+    if(st.scale<=1.01){ st.x=0; st.y=0; }
+    pvApply(kind); e.preventDefault();
+  }
+}
+function pvTouchEnd(kind,e){ if(e.touches.length<2) previewState[kind].pinch=false; }
+
+// ── i-ALPHA MASK REFINE WORKFLOW ──
+// v5.5 export stabilization: PNG export now renders committed base + pending Keep/Remove strokes directly to a transparent PNG.
+function alphaRefineCloneStrokes(){ return alphaRefine.strokes.map(s=>({...s, removeColor:s.removeColor?{...s.removeColor}:null})); }
+function alphaRefinePushUndo(label='edit'){
+  alphaRefine.undoStack = alphaRefine.undoStack || [];
+  alphaRefine.undoStack.push({label, strokes:alphaRefineCloneStrokes(), baseBlob:alphaBaseBlob, resultBlob:alphaResultBlob});
+  if(alphaRefine.undoStack.length>5) alphaRefine.undoStack.shift();
+}
+function alphaRefineUpdateImagesFromBlob(blob){
+  if(!blob) return;
+  const url=URL.createObjectURL(blob);
+  const small=document.getElementById('alpha-preview-result'); if(small) small.src=url;
+  const modalImg=document.getElementById('alpha-modal-img'); if(modalImg) modalImg.src=url;
+  setTimeout(alphaRefineSyncOverlay,60);
+}
+function alphaRefineScreenBrushSize(){
+  const img=document.getElementById('alpha-modal-img');
+  if(!img || !img.naturalWidth) return alphaRefine.size;
+  const r=img.getBoundingClientRect();
+  return Math.max(4, alphaRefine.size * (r.width / img.naturalWidth));
+}
+function alphaRefineSetMode(mode){
+  alphaRefine.mode = mode;
+  const canvas = document.getElementById('alpha-modal-canvas');
+  const overlay = document.getElementById('alpha-refine-overlay');
+  const cursor = document.getElementById('alpha-refine-cursor');
+  canvas?.classList.toggle('refine-on', mode === 'refine');
+  if(overlay) overlay.style.display = mode === 'refine' ? 'block' : 'none';
+  if(cursor) cursor.style.display = 'none';
+  document.getElementById('alpha-inspect-btn')?.classList.toggle('active', mode === 'inspect');
+  if(mode === 'inspect') alphaRefine.brush = null;
+  alphaRefineUpdateButtons();
+  alphaRefineSyncOverlay();
+}
+function alphaRefineToggleBrush(brush){
+  if(alphaRefine.mode === 'refine' && alphaRefine.brush === brush){
+    alphaRefine.brush = null;
+    alphaRefineSetMode('inspect');
+    return;
+  }
+  alphaRefine.brush = brush;
+  alphaRefineSetMode('refine');
+}
+function alphaRefineSetBrush(brush){ alphaRefineToggleBrush(brush); }
+function alphaRefineSetSize(v){
+  alphaRefine.size = Math.max(4, Math.min(120, parseInt(v||28,10)));
+  const cur=document.getElementById('alpha-refine-cursor');
+  if(cur){ const d=alphaRefineScreenBrushSize(); cur.style.width=d+'px'; cur.style.height=d+'px'; }
+  const slider=document.getElementById('alpha-brush-slider'); if(slider) slider.value=alphaRefine.size;
+  const ro=document.getElementById('alpha-brush-readout'); if(ro) ro.textContent=alphaRefine.size+'px';
+}
+function alphaRefineUpdateButtons(){
+  const keep=document.getElementById('alpha-keep-btn'), rem=document.getElementById('alpha-remove-btn');
+  keep?.classList.toggle('keep-active', alphaRefine.mode==='refine' && alphaRefine.brush==='keep');
+  rem?.classList.toggle('remove-active', alphaRefine.mode==='refine' && alphaRefine.brush==='remove');
+}
+function alphaSetRemoveColor(hex){
+  if(!hex) return alphaClearRemoveColor();
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if(!m) return;
+  alphaRefine.removeColor = {r:parseInt(m[1],16), g:parseInt(m[2],16), b:parseInt(m[3],16), hex:'#'+m[1]+m[2]+m[3]};
+  const chip=document.getElementById('alpha-remove-chip'); if(chip){ chip.style.background=alphaRefine.removeColor.hex; chip.classList.add('alpha-remove-color-on'); }
+  const input=document.getElementById('alpha-remove-color-input'); if(input) input.value=alphaRefine.removeColor.hex;
+}
+function alphaClearRemoveColor(){
+  alphaRefine.removeColor = null;
+  const chip=document.getElementById('alpha-remove-chip');
+  if(chip){ chip.style.background=''; chip.classList.remove('alpha-remove-color-on'); }
+}
+function alphaToggleColorMenu(){
+  document.getElementById('alpha-color-menu')?.classList.toggle('show');
+}
+function alphaCloseColorMenu(){
+  document.getElementById('alpha-color-menu')?.classList.remove('show');
+}
+async function alphaPickRemoveColorFromMenu(){
+  alphaCloseColorMenu();
+  await alphaPickRemoveColor();
+}
+function alphaClearRemoveColorFromMenu(){
+  alphaCloseColorMenu();
+  alphaClearRemoveColor();
+}
+async function alphaPickRemoveColor(){
+  if(window.EyeDropper){
+    try{ const res = await new EyeDropper().open(); alphaSetRemoveColor(res.sRGBHex); }
+    catch(e){}
+  }else{
+    document.getElementById('alpha-remove-color-input')?.click();
+  }
+}
+function alphaRemoveMatchesColor(data,i,strokeColor=null){
+  const c=strokeColor || alphaRefine.removeColor;
+  if(!c) return true;
+  const dr=data[i]-c.r, dg=data[i+1]-c.g, db=data[i+2]-c.b;
+  return Math.sqrt(dr*dr+dg*dg+db*db) <= alphaRefine.removeTolerance;
+}
+function alphaRefineSyncOverlay(){
+  const img=document.getElementById('alpha-modal-img'), ov=document.getElementById('alpha-refine-overlay');
+  if(!img || !ov || !img.naturalWidth) return;
+  const r = img.getBoundingClientRect();
+  ov.width = img.naturalWidth; ov.height = img.naturalHeight;
+  ov.style.width = (r.width / previewState.alpha.scale) + 'px';
+  ov.style.height = (r.height / previewState.alpha.scale) + 'px';
+  alphaRefineRedrawOverlay();
+}
+function alphaRefinePoint(e){
+  const img=document.getElementById('alpha-modal-img'); if(!img || !img.naturalWidth) return null;
+  const r=img.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*img.naturalWidth;
+  const y=(e.clientY-r.top)/r.height*img.naturalHeight;
+  if(x<0||y<0||x>img.naturalWidth||y>img.naturalHeight) return null;
+  return {x,y};
+}
+function alphaRefineAddStroke(e){
+  const p=alphaRefinePoint(e); if(!p) return;
+  const id = alphaRefine.currentStrokeId;
+  const size = alphaRefine.size;
+  const brush = alphaRefine.brush;
+  const last = alphaRefine.lastPoint;
+  if(last){
+    const dx=p.x-last.x, dy=p.y-last.y;
+    const dist=Math.hypot(dx,dy);
+    const step=Math.max(1, size*0.22);
+    const n=Math.max(1, Math.ceil(dist/step));
+    for(let k=1;k<=n;k++){
+      const t=k/n;
+      alphaRefine.strokes.push({x:last.x+dx*t,y:last.y+dy*t,size,brush,id,removeColor:brush==='remove'&&alphaRefine.removeColor?{...alphaRefine.removeColor}:null});
+    }
+  }else{
+    alphaRefine.strokes.push({x:p.x,y:p.y,size,brush,id,removeColor:brush==='remove'&&alphaRefine.removeColor?{...alphaRefine.removeColor}:null});
+  }
+  alphaRefine.lastPoint = p;
+  alphaRefineRedrawOverlay();
+}
+function alphaRefineRedrawOverlay(){
+  const ov=document.getElementById('alpha-refine-overlay'); if(!ov || !ov.width) return;
+  const ctx=ov.getContext('2d'); ctx.clearRect(0,0,ov.width,ov.height);
+  for(const s of alphaRefine.strokes){
+    const isKeep=s.brush==='keep';
+    ctx.save();
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.size/2,0,Math.PI*2);
+    ctx.fillStyle = isKeep ? 'rgba(34,197,94,0.42)' : 'rgba(239,68,68,0.58)';
+    ctx.fill();
+    // Double-ring for visibility on both light and dark pixels
+    ctx.lineWidth = Math.max(2, s.size*0.055);
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+    ctx.stroke();
+    ctx.lineWidth = Math.max(2, s.size*0.035);
+    ctx.strokeStyle = isKeep ? 'rgba(34,197,94,1)' : 'rgba(239,68,68,1)';
+    ctx.stroke();
+    // Remove hatch so red strokes remain visible over white backgrounds
+    if(!isKeep){
+      ctx.clip();
+      ctx.strokeStyle='rgba(80,0,0,0.75)';
+      ctx.lineWidth=Math.max(1, s.size*0.025);
+      const r=s.size/2, step=Math.max(6,s.size*0.22);
+      for(let x=s.x-r-step; x<s.x+r+step; x+=step){
+        ctx.beginPath(); ctx.moveTo(x,s.y-r); ctx.lineTo(x+step*1.6,s.y+r); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+}
+function alphaRefinePointerDown(e){
+  if(alphaRefine.mode !== 'refine') return false;
+  if(e.pointerType==='mouse' && e.button!==0) return false;
+  alphaRefinePushUndo(alphaRefine.brush || 'stroke');
+  alphaRefine.drawing = true;
+  alphaRefine.currentStrokeId++;
+  alphaRefine.lastPoint = null;
+  alphaRefineAddStroke(e);
+  e.preventDefault(); e.stopPropagation();
+  return true;
+}
+function alphaRefinePointerMove(e){
+  const cur=document.getElementById('alpha-refine-cursor');
+  if(alphaRefine.mode === 'refine' && cur){
+    const d=alphaRefineScreenBrushSize();
+    cur.style.width=d+'px'; cur.style.height=d+'px';
+    cur.style.display='block'; cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+    cur.classList.toggle('keep', alphaRefine.brush === 'keep');
+    cur.classList.toggle('remove', alphaRefine.brush === 'remove');
+  }
+  if(alphaRefine.mode !== 'refine' || !alphaRefine.drawing) return false;
+  alphaRefineAddStroke(e);
+  e.preventDefault(); e.stopPropagation();
+  return true;
+}
+function alphaRefinePointerUp(e){ alphaRefine.drawing=false; alphaRefine.lastPoint=null; }
+function alphaRefinePointerLeave(){ const cur=document.getElementById('alpha-refine-cursor'); if(cur) cur.style.display='none'; alphaRefine.drawing=false; alphaRefine.lastPoint=null; }
+function alphaRefineUndo(){
+  const snap = (alphaRefine.undoStack||[]).pop();
+  if(!snap) return;
+  alphaRefine.strokes = snap.strokes || [];
+  alphaBaseBlob = snap.baseBlob || alphaBaseBlob;
+  alphaResultBlob = snap.resultBlob || alphaResultBlob;
+  alphaRefineUpdateImagesFromBlob(alphaResultBlob || alphaBaseBlob);
+  alphaRefineRedrawOverlay();
+}
+function alphaRefineClear(){ alphaRefine.strokes=[]; alphaRefine.lastPoint=null; alphaRefineRedrawOverlay(); }
+async function alphaRefineApply(){
+  if(!alphaBaseBlob || !alphaFile) return;
+  alphaRefinePushUndo('apply');
+  const blob = await alphaBuildExportBlob(true);
+  if(!blob) return;
+  alphaResultBlob = blob;
+  alphaBaseBlob = blob; // make APPLY permanent; next edits build on corrected mask
+  const url=URL.createObjectURL(alphaResultBlob);
+  const small=document.getElementById('alpha-preview-result'); if(small) small.src=url;
+  const modalImg=document.getElementById('alpha-modal-img'); if(modalImg) modalImg.src=url;
+  alphaRefine.strokes=[];
+  alphaRefineRedrawOverlay();
+}
+
+function bindPreviewGestures(){
+  ['alpha','img'].forEach(kind=>{
+    const canvas=document.getElementById(pvIds(kind).canvas); if(!canvas || canvas.dataset.gesturesBound) return;
+    canvas.dataset.gesturesBound='1';
+    canvas.addEventListener('pointerdown',e=>pvCanvasPointerDown(kind,e));
+    canvas.addEventListener('pointermove',e=>pvCanvasPointerMove(kind,e));
+    canvas.addEventListener('pointerup',e=>pvCanvasPointerUp(kind,e));
+    canvas.addEventListener('pointercancel',e=>pvCanvasPointerUp(kind,e));
+    canvas.addEventListener('wheel',e=>pvWheel(kind,e),{passive:false});
+    canvas.addEventListener('touchstart',e=>pvTouchStart(kind,e),{passive:false});
+    canvas.addEventListener('touchmove',e=>pvTouchMove(kind,e),{passive:false});
+    canvas.addEventListener('touchend',e=>pvTouchEnd(kind,e));
+  });
+}
+document.addEventListener('DOMContentLoaded',bindPreviewGestures);
+document.addEventListener('keydown', e=>{
+  const modal=document.getElementById('alpha-modal');
+  if(modal?.style.display==='grid' && (e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){
+    e.preventDefault(); alphaRefineUndo();
+  }
+});
+
+function alphaReset(){
+  alphaFile = null; alphaResultBlob = null; alphaBaseBlob = null;
+  document.getElementById('alpha-preview-orig').style.display = 'none';
+  document.getElementById('alpha-preview-orig').src = '';
+  document.getElementById('alpha-preview-result').style.display = 'none';
+  document.getElementById('alpha-result-placeholder').style.display = 'flex';
+  document.getElementById('alpha-drop-icon').style.display = 'block';
+  document.getElementById('alpha-drop-label').style.display = 'block';
+  document.getElementById('alpha-btn-dl').style.display='none';
+  setBtnState('alpha-btn-run','alpha-btn-reprocess','initial');
+  alphaHasProcessed=false;
+}
+
+// ── i-ALPHA TOOLTIPS ──
+TIPS['tb-method'] = {es:'ML Local corre en tu browser sin internet — gratuito pero menos preciso. remove.bg usa IA profesional — requiere API key gratuita.', en:'ML Local runs in your browser offline — free but less precise. remove.bg uses professional AI — requires a free API key.'};
+TIPS['tb-threshold'] = {es:'Controla cuán diferente debe ser un píxel del fondo para conservarlo. Sube si quedan manchas de fondo; baja si se come partes del sujeto.', en:'Controls how different a pixel must be from the background to be kept. Increase if background remains; decrease if subject is being removed.'};
+TIPS['tb-refine'] = {es:'Suave: bordes con degradado — ideal para cabello, piel, pelaje. Duro: bordes cortados limpio — ideal para productos, logos, objetos.', en:'Soft: feathered edges — ideal for hair, skin, fur. Hard: clean-cut edges — ideal for products, logos, objects.'};
+
+// ── DRAG ──
+function dragStart(e, elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  // Remove transform so we can use left/top directly
+  el.dataset.dragged='1';
+  const rect = el.getBoundingClientRect();
+  el.style.left = rect.left + 'px';
+  el.style.top  = rect.top  + 'px';
+  el.style.bottom = 'auto';
+  el.style.right  = 'auto';
+  el.style.transform = 'none';
+  let startX = e.clientX - rect.left;
+  let startY = e.clientY - rect.top;
+  function onMove(e){
+    el.style.left = Math.max(0, Math.min(window.innerWidth  - el.offsetWidth,  e.clientX - startX)) + 'px';
+    el.style.top  = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, e.clientY - startY)) + 'px';
+  }
+  function onUp(){ document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  e.preventDefault();
+}
+
+// ── BUTTON STATES ──
+function setBtnState(runId,reproId,state){
+  const run=document.getElementById(runId),repro=document.getElementById(reproId);
+  if(state==='initial'){ if(run){run.style.opacity='1';run.disabled=false;} if(repro){repro.style.opacity='0.3';repro.disabled=true;} }
+  else if(state==='processing'){ if(run){run.style.opacity='0.3';run.disabled=true;} if(repro){repro.style.opacity='0.3';repro.disabled=true;} }
+  else if(state==='done'){ if(run){run.style.opacity='0.3';run.disabled=true;} if(repro){repro.style.opacity='1';repro.disabled=false;} }
+}
+
+// ── FLOATING LOG ──
+function floatLogShow(title){
+  const el=document.getElementById('float-log');
+  document.getElementById('float-log-title').textContent=title||(S.lang==='es'?'VENTANA DE PROCESO':'PROCESS WINDOW');
+  document.getElementById('float-log-box').innerHTML='';
+  document.getElementById('float-log-fill').style.width='0%';
+  document.getElementById('float-log-txt').textContent='';
+  document.getElementById('float-log-pct').textContent='';
+  // Always center on fresh show
+  el.style.top='50%'; el.style.left='50%';
+  el.style.bottom='auto'; el.style.right='auto';
+  el.style.transform='translate(-50%,-50%)';
+  el.dataset.dragged='';
+  el.style.display='flex';
+}
+function floatLogClose(){ document.getElementById('float-log').style.display='none'; }
+function floatLogAppend(msg,cls){
+  const b=document.getElementById('float-log-box');
+  const d=document.createElement('div'); if(cls)d.className=cls;
+  d.textContent=msg; b.appendChild(d); b.scrollTop=b.scrollHeight;
+}
+function floatLogProgress(done,total){
+  const pct=total>0?Math.round((done/total)*100):0;
+  document.getElementById('float-log-fill').style.width=pct+'%';
+  document.getElementById('float-log-txt').textContent=done+' / '+total;
+  document.getElementById('float-log-pct').textContent=pct+'%';
+}
+
+// ── DOWNLOAD CONFIRM ──
+let dlcState={blob:null,filename:''};
+function showDownload(opts){
+  dlcState={blob:opts.blob,filename:opts.filename};
+  document.getElementById('dlc-name').textContent=opts.filename||'—';
+  document.getElementById('dlc-size').textContent=opts.size||'—';
+  const pyEl=document.getElementById('dlc-py');
+  if(opts.isPy){
+    pyEl.style.display='block';
+    document.getElementById('dlc-py-text').innerHTML=
+      S.lang==='es'
+      ?'Requiere: Python 3.8+<br>Ejecución: <span style="color:#00aaff">python3 '+opts.filename+' /ruta/carpeta</span><br>Instalar Pillow: <span style="color:#00aaff">pip3 install Pillow</span>'
+      :'Requires: Python 3.8+<br>Run: <span style="color:#00aaff">python3 '+opts.filename+' /path/to/folder</span><br>Install Pillow: <span style="color:#00aaff">pip3 install Pillow</span>';
+  } else { pyEl.style.display='none'; }
+  // Update lang strings
+  const el=document.getElementById('dl-confirm');
+  el.querySelectorAll('[data-es]').forEach(e=>{const v=e.getAttribute('data-'+S.lang);if(v)e.textContent=v;});
+  el.style.top='50%'; el.style.left='50%';
+  el.style.bottom='auto'; el.style.right='auto';
+  el.style.transform='translate(-50%,-50%)';
+  el.dataset.dragged='';
+  el.style.display='flex';
+}
+function dlcConfirm(){
+  document.getElementById('dl-confirm').style.display='none';
+  if(!dlcState.blob) return;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(dlcState.blob);
+  a.download=dlcState.filename; a.click(); URL.revokeObjectURL(a.href);
+}
+function dlcCancel(){ document.getElementById('dl-confirm').style.display='none'; }
+
+// ── IMAGE PREVIEW MODAL ──
+function imgPreviewOpen(){
+  if(!alphaResultBlob) return;
+  const img=document.getElementById('img-preview-img');
+  img.src=URL.createObjectURL(alphaResultBlob);
+  document.getElementById('img-preview-modal').style.display='grid';
+  pvReset('img');
+}
+function imgPreviewClose(){ document.getElementById('img-preview-modal').style.display='none'; pvReset('img'); }
+function imgPreviewZoom(d){ pvZoom('img',d); }
+function imgPreviewToggleInspect(){ pvToggleInspect('img'); }
+function imgPreviewResetView(){ pvReset('img'); }
+
+// ── i-ALPHA HELPERS ──
+let alphaHasProcessed=false;
+function pickRefineMp(btn){
+  document.querySelectorAll('[data-refine-mp]').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  const lbl=btn.getAttribute('data-refine-mp')==='soft'?(S.lang==='es'?'SUAVE':'SOFT'):(S.lang==='es'?'DURO':'HARD');
+  const el=document.getElementById('v-refine-mp'); if(el)el.textContent=lbl;
+  updateAlphaLive();
+}
+function pickRefineRbg(btn){
+  document.querySelectorAll('[data-refine-rbg]').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  const lbl=btn.getAttribute('data-refine-rbg')==='soft'?(S.lang==='es'?'SUAVE':'SOFT'):(S.lang==='es'?'DURO':'HARD');
+  const el=document.getElementById('v-refine-rbg'); if(el)el.textContent=lbl;
+  updateAlphaLive();
+}
+async function activateEyedropper(){
+  if(!window.EyeDropper){ alert(S.lang==='es'?'Eyedropper no disponible en este browser.':'Eyedropper not available in this browser.'); return; }
+  try{
+    const r=await new EyeDropper().open();
+    document.getElementById('local-bg-color').value=r.sRGBHex;
+    document.getElementById('local-hex-disp').textContent=r.sRGBHex;
+    document.getElementById('v-picker-hex').textContent=r.sRGBHex;
+    window.alphaManualBgPicked = true;
+  } catch(e){}
+}
+
+// ── TOOLTIPS for new controls ──
+TIPS['tb-picker']={es:'Toca un píxel del fondo con Muestra para capturar su color exacto.',en:'Tap a background pixel with Sample to capture its exact color.'};
+TIPS['tb-confidence']={es:'Probabilidad mínima del modelo para clasificar un píxel como persona. Alto: más preciso pero puede recortar bordes finos.',en:'Minimum model probability to classify a pixel as person. High: more precise but may clip fine edges.'};
+TIPS['tb-refine-local']={es:'Suave: borde degradado — cabello, piel. Duro: borde limpio — productos, logos.',en:'Soft: feathered edge — hair, skin. Hard: clean edge — products, logos.'};
+TIPS['tb-refine-mp']={es:'Suave: bordes suavizados para retratos. Duro: silueta limpia tipo sticker.',en:'Soft: smooth edges for portraits. Hard: clean sticker-style silhouette.'};
+TIPS['tb-refine-rbg']={es:'Suave para bordes orgánicos. Duro para objetos con contornos definidos.',en:'Soft for organic edges. Hard for objects with defined contours.'};
+
+// ── OVERRIDE pickMethod to show/hide control panels ──
+const _origPickMethod=pickMethod;
+
+// ── dlScript ──
+function dlScript(){
+  const ms=document.getElementById('sl-max').value;
+  const q=document.getElementById('sl-qual').value;
+  const px=(document.getElementById('prefix-in').value.replace(/[^A-Za-z0-9_]/g,'')||'ICT').toUpperCase();
+  const fn=document.getElementById('folder-in').value||'_ICT_REDUCED_JPG_FOR_REVIEW';
+  const algo=document.getElementById('lv-algo').textContent;
+  const bg=document.getElementById('v-bgcol').textContent.replace('#','');
+  const rv=parseInt(bg.slice(0,2),16),gv=parseInt(bg.slice(2,4),16),bv=parseInt(bg.slice(4,6),16);
+  const rec=document.getElementById('sw-rec').classList.contains('on');
+  const exif=document.getElementById('sw-exif').classList.contains('on');
+  const amap={LANCZOS:'Image.LANCZOS',BICUBIC:'Image.BICUBIC',BILINEAR:'Image.BILINEAR',BOX:'Image.BOX',NEAREST:'Image.NEAREST'};
+  const lines=[
+    '#!/usr/bin/env python3','# ICT i-Compress v3.7',
+    'import sys','from pathlib import Path','from PIL import Image, ImageOps',
+    'MAX_SIDE='+ms+';QUALITY='+q+';PREFIX="'+px+'"',
+    'OUTPUT_FOLDER="'+fn+'";RECURSIVE='+(rec?'True':'False'),
+    'EXIF='+(exif?'True':'False')+';BG=('+rv+','+gv+','+bv+')',
+    'ALGO='+(amap[algo]||'Image.LANCZOS'),
+    'def run(folder):',
+    '    out=folder/OUTPUT_FOLDER;out.mkdir(exist_ok=True)',
+    '    files=sorted(folder.rglob("*.jpg") if RECURSIVE else folder.glob("*.jpg"))',
+    '    n=1',
+    '    for src in files:',
+    '        try:',
+    '            with Image.open(src) as img:',
+    '                if EXIF: img=ImageOps.exif_transpose(img)',
+    '                img=img.convert("RGB");w,h=img.size;mx=max(w,h)',
+    '                if mx>MAX_SIDE: sc=MAX_SIDE/mx;img=img.resize((round(w*sc),round(h*sc)),ALGO)',
+    '                p=out/f"{PREFIX}_{n:04d}.jpg";img.save(p,"JPEG",quality=QUALITY,optimize=True)',
+    '                print(f"{p.name}<-{src.name}");n+=1',
+    '        except Exception as e: print(f"SKIP {src.name}:{e}")',
+    'if __name__=="__main__":',
+    '    if len(sys.argv)<2: sys.exit("Usage: python3 script.py /path")',
+    '    run(Path(sys.argv[1]).expanduser().resolve())'
+  ];
+  const pyTxt=lines.join('\n');
+  showDownload({blob:new Blob([pyTxt],{type:'text/plain'}),filename:'ict_reducer.py',size:Math.round(pyTxt.length/1024)+' KB',isPy:true});
+}
+
 // ── INIT ──
 document.querySelectorAll('input[type=range]').forEach(updTrack);
 updEst();
@@ -1043,6 +2390,11 @@ updFullPath();
 applyAllTips();
 buildCopyUI();
 buildCopyTT();
+const initDesc=document.getElementById('method-desc-content');
+if(initDesc&&typeof METHOD_DESC!=='undefined') initDesc.innerHTML=METHOD_DESC['local'][S.lang];
+// Set initial method description
+const initMethodDesc = document.getElementById('method-desc-content');
+if(initMethodDesc) initMethodDesc.innerHTML = METHOD_DESC['local'][S.lang];
 
 if(!window.showDirectoryPicker){
   document.getElementById('btn-pick').title='File System Access API not supported. Use Chrome or Edge.';
@@ -1050,5 +2402,140 @@ if(!window.showDirectoryPicker){
   setStatus('\u26a0 Usa Chrome o Edge para acceso directo al sistema de archivos');
 }
 </script>
+<!-- i-Alpha Preview Modal -->
+<div id="alpha-modal" class="alpha-modal" onclick="if(event.target===this || event.target.classList.contains('alpha-modal-stage'))alphaModalClose()">
+  <div class="alpha-modal-stage">
+    <div class="alpha-modal-canvas" id="alpha-modal-canvas" onclick="event.stopPropagation()">
+      <img id="alpha-modal-img">
+      <canvas id="alpha-refine-overlay" class="alpha-refine-overlay"></canvas>
+    </div>
+  </div>
+  <div class="alpha-modal-controls" onclick="event.stopPropagation()">
+    <button class="alpha-tool-btn" onclick="alphaZoom(-0.25)" title="Zoom out / Alejar">−</button>
+    <span id="alpha-modal-zoom" style="font-family:var(--mono);font-size:11px;color:var(--text2);min-width:42px;text-align:center">100%</span>
+    <button class="alpha-tool-btn" onclick="alphaZoom(0.25)" title="Zoom in / Acercar">+</button>
+    <button class="alpha-tool-btn" id="alpha-inspect-btn" onclick="alphaToggleInspect()" title="Inspect / Pan">
+      <svg viewBox="0 0 24 24"><path d="M8 11V6a2 2 0 0 1 4 0v5"/><path d="M12 10V5a2 2 0 0 1 4 0v8"/><path d="M16 11V7a2 2 0 0 1 4 0v7c0 4-3 7-7 7h-1c-3 0-5-2-6-5l-1-4a2 2 0 0 1 4-1l1 3"/></svg>
+    </button>
+    <button class="alpha-tool-btn keep-tool" id="alpha-keep-btn" onclick="alphaRefineToggleBrush('keep')" title="Keep / Restore">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </button>
+    <button class="alpha-tool-btn remove-tool" id="alpha-remove-btn" onclick="alphaRefineToggleBrush('remove')" title="Remove / Erase">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+    </button>
+    <button class="alpha-tool-btn" onclick="alphaRefineApply()" title="Apply edits / Aplicar">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 21h14"/></svg>
+    </button>
+    <div class="alpha-brush-wrap" title="Brush size / Tamaño de pincel">
+      <input id="alpha-brush-slider" class="alpha-brush-slider" type="range" min="4" max="120" value="28" oninput="alphaRefineSetSize(this.value)">
+      <span id="alpha-brush-readout" class="alpha-brush-readout">28px</span>
+    </div>
+    <div class="alpha-color-menu-wrap">
+      <button class="alpha-tool-btn" onclick="alphaToggleColorMenu()" title="Remove color options / Opciones de color">
+        <svg viewBox="0 0 24 24"><path d="M14 5l5 5"/><path d="M19 5l-9 9"/><path d="M6 18l4-4 4 4-4 4H6z"/></svg>
+        <span id="alpha-remove-chip" class="alpha-color-chip"></span><span class="alpha-color-drop">▼</span>
+      </button>
+      <div class="alpha-color-menu" id="alpha-color-menu">
+        <button onclick="alphaPickRemoveColorFromMenu()">Pick color</button>
+        <button onclick="alphaClearRemoveColorFromMenu()">Clear color</button>
+      </div>
+    </div>
+    <input type="color" id="alpha-remove-color-input" onchange="alphaSetRemoveColor(this.value)">
+    <button class="alpha-tool-btn" onclick="alphaRefineUndo()" title="Undo / Deshacer">
+      <svg viewBox="0 0 24 24"><path d="M9 14l-4-4 4-4"/><path d="M5 10h9a5 5 0 1 1 0 10h-2"/></svg>
+    </button>
+    <button class="alpha-tool-btn" onclick="alphaResetView()" title="Fit / Ajustar">FIT</button>
+    <button class="btn-dl-png" onclick="alphaDownload()" title="Download PNG / Descargar PNG">↓ PNG</button>
+    <button class="btn-close" onclick="alphaModalClose()" title="Close / Cerrar">CERRAR</button>
+  </div>
+</div>
+<div id="alpha-refine-cursor" class="alpha-refine-cursor"></div>
+<!-- FLOATING LOG PANEL -->
+<div class="float-log" id="float-log">
+  <div class="float-log-head" onmousedown="dragStart(event,'float-log')">
+    <span class="float-log-title" id="float-log-title">PROCESS WINDOW</span>
+    <button class="float-log-close" onclick="floatLogClose()" data-es="CERRAR ✕" data-en="CLOSE ✕">CERRAR ✕</button>
+  </div>
+  <div class="float-log-prog">
+    <div class="float-log-track"><div class="float-log-fill" id="float-log-fill"></div></div>
+    <div class="float-log-meta">
+      <span style="color:#7a9ab8" id="float-log-txt"></span>
+      <span style="color:#00aaff;font-weight:700" id="float-log-pct"></span>
+    </div>
+  </div>
+  <div class="float-log-box" id="float-log-box"></div>
+</div>
+
+<!-- DOWNLOAD CONFIRM (floating, non-blocking) -->
+<div class="dl-confirm" id="dl-confirm">
+  <div class="dl-confirm-drag" onmousedown="dragStart(event,'dl-confirm')">
+    <span class="dl-confirm-title" data-es="CONFIRMACIÓN DE DESCARGA" data-en="DOWNLOAD CONFIRMATION">CONFIRMACIÓN DE DESCARGA</span>
+    <button onclick="dlcCancel()" style="background:none;border:none;color:#00aaff;cursor:pointer;font-family:var(--mono);font-size:14px;padding:0;line-height:1">✕</button>
+  </div>
+  <div class="dl-confirm-body">
+    <div class="dl-confirm-row"><span class="dl-confirm-label" data-es="NOMBRE" data-en="NAME">NOMBRE</span><span class="dl-confirm-val accent" id="dlc-name">—</span></div>
+    <div class="dl-confirm-row"><span class="dl-confirm-label" data-es="TAMAÑO" data-en="SIZE">TAMAÑO</span><span class="dl-confirm-val" id="dlc-size">—</span></div>
+    <div class="dl-py" id="dlc-py">
+      <div style="color:#3d5a78;font-size:9px;letter-spacing:0.14em;margin-bottom:6px;text-transform:uppercase" data-es="INSTRUCCIONES" data-en="INSTRUCTIONS">INSTRUCCIONES</div>
+      <div id="dlc-py-text"></div>
+    </div>
+    <div class="dl-confirm-btns">
+      <button onclick="dlcCancel()" style="background:#111820;border:1px solid #1a2535;border-radius:7px;padding:9px 18px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:#7a9ab8;cursor:pointer" data-es="CANCELAR" data-en="CANCEL">CANCELAR</button>
+      <button onclick="dlcConfirm()" style="background:#0066cc;border:none;border-radius:7px;padding:9px 22px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:#fff;cursor:pointer" data-es="DESCARGAR" data-en="DOWNLOAD">DESCARGAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div class="img-preview-modal" id="img-preview-modal" onclick="if(event.target===this || event.target.classList.contains('img-preview-stage'))imgPreviewClose()">
+  <div class="img-preview-stage">
+    <div class="img-preview-canvas" id="img-preview-canvas" onclick="event.stopPropagation()">
+      <img id="img-preview-img" src="">
+    </div>
+  </div>
+  <div class="img-preview-controls" onclick="event.stopPropagation()">
+    <button onclick="imgPreviewZoom(-0.25)">−</button>
+    <span style="font-family:var(--mono);font-size:10px;color:#7a9ab8;min-width:40px;text-align:center" id="img-preview-zoom">100%</span>
+    <button onclick="imgPreviewZoom(0.25)">+</button>
+    <button id="img-preview-inspect-btn" onclick="imgPreviewToggleInspect()" data-es="INSPECT" data-en="INSPECT">INSPECT</button>
+    <button onclick="imgPreviewResetView()" data-es="FIT" data-en="FIT">FIT</button>
+    <div class="img-preview-sep"></div>
+    <button class="btn-dl-png" onclick="alphaDownload()" data-es="↓ PNG" data-en="↓ PNG">↓ PNG</button>
+    <button class="btn-close" onclick="imgPreviewClose()" data-es="CERRAR" data-en="CLOSE">CERRAR</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  function bindPv(){
+    const a=document.getElementById('alpha-modal-canvas'), i=document.getElementById('img-preview-canvas');
+    if(a && !a.dataset.pvbound){
+      a.dataset.pvbound='1';
+      a.addEventListener('pointerdown',e=>pvCanvasPointerDown('alpha',e));
+      a.addEventListener('pointermove',e=>pvCanvasPointerMove('alpha',e));
+      a.addEventListener('pointerup',e=>pvCanvasPointerUp('alpha',e));
+      a.addEventListener('pointerleave',e=>{alphaRefinePointerLeave(); pvCanvasPointerUp('alpha',e);});
+      a.addEventListener('wheel',e=>pvWheel('alpha',e),{passive:false});
+      a.addEventListener('touchstart',e=>pvTouchStart('alpha',e),{passive:false});
+      a.addEventListener('touchmove',e=>pvTouchMove('alpha',e),{passive:false});
+      a.addEventListener('touchend',e=>pvTouchEnd('alpha',e));
+    }
+    if(i && !i.dataset.pvbound){
+      i.dataset.pvbound='1';
+      i.addEventListener('pointerdown',e=>pvCanvasPointerDown('img',e));
+      i.addEventListener('pointermove',e=>pvCanvasPointerMove('img',e));
+      i.addEventListener('pointerup',e=>pvCanvasPointerUp('img',e));
+      i.addEventListener('pointerleave',e=>pvCanvasPointerUp('img',e));
+      i.addEventListener('wheel',e=>pvWheel('img',e),{passive:false});
+      i.addEventListener('touchstart',e=>pvTouchStart('img',e),{passive:false});
+      i.addEventListener('touchmove',e=>pvTouchMove('img',e),{passive:false});
+      i.addEventListener('touchend',e=>pvTouchEnd('img',e));
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindPv); else bindPv();
+})();
+</script>
+
 </body>
 </html>
