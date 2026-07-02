@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOL Webhook Schema Proposal v0.1</title>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --paper: #ffffff;
+      --ink: #1f2933;
+      --muted: #5f6f7b;
+      --line: #d8e1e8;
+      --soft: #edf3f7;
+      --accent: #0d6b73;
+      --accent-dark: #084f55;
+      --warn: #b55b13;
+      --danger: #a33a45;
+      --ok: #236b3f;
+      --shadow: 0 16px 40px rgba(31, 41, 51, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    a { color: var(--accent-dark); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .toc {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 24px;
+      background: #142630;
+      color: #f8fbfc;
+    }
+
+    .toc h1 {
+      margin: 0 0 4px;
+      font-size: 1.12rem;
+      line-height: 1.2;
+    }
+
+    .toc .version {
+      margin: 0 0 22px;
+      color: #b8cbd4;
+      font-size: 0.86rem;
+    }
+
+    .toc nav {
+      display: grid;
+      gap: 5px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #deedf1;
+      font-size: 0.92rem;
+    }
+
+    .toc a:hover {
+      background: rgba(255,255,255,0.08);
+      text-decoration: none;
+    }
+
+    .toc .tools {
+      display: grid;
+      gap: 8px;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.16);
+    }
+
+    .content {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .hero {
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 880px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .meta-grid,
+    .kpi-grid,
+    .domain-grid,
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .meta-card,
+    .card,
+    .section,
+    .table-card,
+    .definition,
+    .decision-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .meta-card,
+    .card,
+    .definition,
+    .decision-card {
+      padding: 16px;
+    }
+
+    .meta-card strong,
+    .card strong {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+      font-size: 1.02rem;
+    }
+
+    .section {
+      margin-top: 22px;
+      padding: 24px;
+      scroll-margin-top: 16px;
+    }
+
+    .section-header,
+    .sub-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h3, h4, p { margin-top: 0; }
+
+    h3 {
+      margin-bottom: 4px;
+      font-size: 1.45rem;
+      letter-spacing: 0;
+    }
+
+    h4 {
+      margin-bottom: 8px;
+      font-size: 1.04rem;
+    }
+
+    .section > p,
+    .card p,
+    .definition p,
+    .decision-card p {
+      color: var(--muted);
+    }
+
+    .note-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--accent-dark);
+      cursor: pointer;
+      font-weight: 800;
+      position: relative;
+    }
+
+    .note-button:hover { border-color: var(--accent); }
+
+    .note-badge {
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      line-height: 18px;
+    }
+
+    .button {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .button.primary:hover { background: var(--accent-dark); }
+    .button:hover { border-color: #aebbc6; }
+
+    .summary-list,
+    .scope-list,
+    .definition-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 12px;
+    }
+
+    .arch-node {
+      display: grid;
+      place-items: center;
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .arch-arrow {
+      display: none;
+    }
+
+    .domain-card {
+      padding: 16px;
+    }
+
+    .domain-card .tag,
+    .table-card .tag,
+    .hardcode-table .tag,
+    .field-table .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.high { background: #ffe8e8; color: var(--danger); }
+    .tag.medium { background: #fff0dc; color: var(--warn); }
+    .tag.mvp { background: #e5f5eb; color: var(--ok); }
+
+    .table-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .table-tools input,
+    .table-tools select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 0 10px;
+    }
+
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .table-card {
+      padding: 16px;
+    }
+
+    .table-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .table-card ul {
+      margin-bottom: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .scroll-table {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #eef4f7;
+      color: #33444f;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .erd {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .erd-box {
+      min-height: 110px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .erd-box strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .erd-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .feedback-panel {
+      position: fixed;
+      inset: 0 0 0 auto;
+      width: min(520px, 100vw);
+      padding: 22px;
+      background: var(--paper);
+      border-left: 1px solid var(--line);
+      box-shadow: -20px 0 50px rgba(31,41,51,0.18);
+      transform: translateX(105%);
+      transition: transform 0.2s ease;
+      z-index: 20;
+      overflow: auto;
+    }
+
+    .feedback-panel.is-open { transform: translateX(0); }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 20, 28, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 19;
+    }
+
+    .overlay.is-open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .field textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .comment-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .comment {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .comment-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 750;
+    }
+
+    .feedback-export {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .file-input {
+      max-width: 260px;
+    }
+
+    .review-target-id {
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+    }
+
+    .print-note {
+      display: none;
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc {
+        position: static;
+        height: auto;
+      }
+      .toc nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .meta-grid,
+      .kpi-grid,
+      .domain-grid,
+      .decision-grid,
+      .architecture,
+      .erd,
+      .table-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .content,
+      .toc,
+      .hero,
+      .section { padding: 18px; }
+      .toc nav,
+      .meta-grid,
+      .kpi-grid,
+      .domain-grid,
+      .decision-grid,
+      .architecture,
+      .erd,
+      .table-grid {
+        grid-template-columns: 1fr;
+      }
+      .section-header,
+      .sub-header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      .toc, .note-button, .feedback-panel, .overlay, .feedback-export, .table-tools { display: none !important; }
+      .layout { display: block; }
+      .content { padding: 0; }
+      body { background: #fff; }
+      .section, .hero, .card, .table-card { box-shadow: none; break-inside: avoid; }
+      .print-note { display: block; color: var(--muted); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="toc" aria-label="Table of contents">
+      <h1>SOL Schema Proposal</h1>
+      <p class="version">v0.1 review portal</p>
+      <nav>
+        <a href="#executive-summary">Executive Summary</a>
+        <a href="#objectives">Objectives</a>
+        <a href="#definitions">Definitions</a>
+        <a href="#architecture">Architecture Overview</a>
+        <a href="#schema-domains">Schema Domains</a>
+        <a href="#table-catalog">Table Catalog</a>
+        <a href="#field-matrix">Field Matrix</a>
+        <a href="#hardcode-map">Hard-Code Map</a>
+        <a href="#relationship-map">Relationship Map</a>
+        <a href="#review-feedback">Review Feedback</a>
+        <a href="#mvp-scope">MVP Scope</a>
+        <a href="#open-decisions">Open Decisions</a>
+        <a href="#appendix">Appendix</a>
+      </nav>
+      <div class="tools">
+        <button class="button primary" id="exportAllComments">Export feedback JSON</button>
+        <label class="button" for="importComments">Import feedback JSON</label>
+        <input id="importComments" class="file-input" type="file" accept="application/json" hidden>
+        <button class="button" onclick="window.print()">Print / Save PDF</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="hero" id="cover">
+        <p class="eyebrow">Review Draft</p>
+        <h2>SOL Webhook Schema Proposal</h2>
+        <p>
+          A single review surface for aligning Supabase schema design, tenant/property configuration,
+          webhook runtime variables, Fast Path menus, and LOGS operational events before any production code changes.
+        </p>
+        <div class="meta-grid">
+          <div class="meta-card"><span class="eyebrow">Version</span><strong>v0.1</strong></div>
+          <div class="meta-card"><span class="eyebrow">Date</span><strong>2026-07-02</strong></div>
+          <div class="meta-card"><span class="eyebrow">Status</span><strong>Proposal for review</strong></div>
+          <div class="meta-card"><span class="eyebrow">Rule</span><strong>No coding without approval</strong></div>
+        </div>
+      </section>
+
+      <section class="section" id="executive-summary" data-review-id="section.executive_summary">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 1</p>
+            <h3>Executive Summary</h3>
+          </div>
+          <button class="note-button" data-note-target="section.executive_summary" data-note-label="Executive Summary">N</button>
+        </div>
+        <p>
+          SOL Webhook currently mixes tenant/property facts across JSON packages and hard-coded runtime logic.
+          Supabase should become the database of record for tenant identity, property data, venue catalogs,
+          routing teams, templates, and operational events. The webhook should consume a stable runtime config
+          derived from that data, while LOGS should read operational event tables and views.
+        </p>
+        <div class="kpi-grid">
+          <div class="card"><span class="eyebrow">Goal</span><strong>One source of truth</strong><p>Reduce duplicated config and hard-coded tenant details.</p></div>
+          <div class="card"><span class="eyebrow">Method</span><strong>Supabase schema contract</strong><p>Define ownership before implementation.</p></div>
+          <div class="card"><span class="eyebrow">Runtime</span><strong>Compiled config view</strong><p>Webhook reads stable config, not scattered raw tables.</p></div>
+          <div class="card"><span class="eyebrow">Review</span><strong>Commentable artifact</strong><p>Every major target can receive feedback.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="objectives" data-review-id="section.objectives">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 2</p>
+            <h3>Objectives</h3>
+          </div>
+          <button class="note-button" data-note-target="section.objectives" data-note-label="Objectives">N</button>
+        </div>
+        <ul class="summary-list">
+          <li>Create a shared Supabase schema that both Property Admin and LOGS can trust.</li>
+          <li>Move tenant/property-specific facts out of runtime code and into managed configuration.</li>
+          <li>Preserve existing webhook behavior until schema, migration, and runtime consumption are approved.</li>
+          <li>Separate deployment secrets from tenant-editable settings and operational event data.</li>
+          <li>Give reviewers a commentable, exportable, single-page artifact for schema feedback.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="definitions" data-review-id="section.definitions">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 3</p>
+            <h3>Definitions</h3>
+          </div>
+          <button class="note-button" data-note-target="section.definitions" data-note-label="Definitions">N</button>
+        </div>
+        <div class="domain-grid">
+          <div class="definition"><h4>Tenant</h4><p>The client account or organization using SOL.</p></div>
+          <div class="definition"><h4>Property</h4><p>A hotel, casino, venue, or site owned by a tenant.</p></div>
+          <div class="definition"><h4>Venue</h4><p>A restaurant, bar, room service, entertainment location, or guest-facing service point.</p></div>
+          <div class="definition"><h4>Runtime Config</h4><p>The stable data shape consumed by webhook and Fast Path logic.</p></div>
+          <div class="definition"><h4>Template</h4><p>Localized guest-facing response text with variables.</p></div>
+          <div class="definition"><h4>Operational Event</h4><p>A logged inbound, outbound, status, reservation, complaint, or middleware event.</p></div>
+          <div class="definition"><h4>Hard-Code Replacement</h4><p>A current literal value that should move into env, tenant config, or runtime config.</p></div>
+          <div class="definition"><h4>Review Target</h4><p>A stable ID that comments attach to, such as <code>table.venues</code>.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="architecture" data-review-id="section.architecture">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 4</p>
+            <h3>Architecture Overview</h3>
+          </div>
+          <button class="note-button" data-note-target="section.architecture" data-note-label="Architecture Overview">N</button>
+        </div>
+        <p>
+          Supabase is the source of truth. Admin UI writes managed configuration. The webhook reads a compiled
+          runtime config by property. LOGS reads operational event tables and reporting views.
+        </p>
+        <div class="architecture">
+          <div class="arch-node">Property Admin UI</div>
+          <div class="arch-node">Supabase Tables</div>
+          <div class="arch-node">Runtime Config View</div>
+          <div class="arch-node">Webhook / Fast Path</div>
+          <div class="arch-node">LOGS UI / Reports</div>
+        </div>
+      </section>
+
+      <section class="section" id="schema-domains" data-review-id="section.schema_domains">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 5</p>
+            <h3>Schema Domains</h3>
+          </div>
+          <button class="note-button" data-note-target="section.schema_domains" data-note-label="Schema Domains">N</button>
+        </div>
+        <div class="domain-grid" id="domainGrid"></div>
+      </section>
+
+      <section class="section" id="table-catalog" data-review-id="section.table_catalog">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 6</p>
+            <h3>Table Catalog</h3>
+          </div>
+          <button class="note-button" data-note-target="section.table_catalog" data-note-label="Table Catalog">N</button>
+        </div>
+        <div class="table-tools">
+          <input id="tableSearch" type="search" placeholder="Search tables, owners, uses">
+          <select id="domainFilter">
+            <option value="">All domains</option>
+          </select>
+          <select id="mvpFilter">
+            <option value="">All scope</option>
+            <option value="MVP">MVP</option>
+            <option value="Later">Later</option>
+          </select>
+        </div>
+        <div class="table-grid" id="tableCatalog"></div>
+      </section>
+
+      <section class="section" id="field-matrix" data-review-id="section.field_matrix">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 7</p>
+            <h3>Field Matrix</h3>
+          </div>
+          <button class="note-button" data-note-target="section.field_matrix" data-note-label="Field Matrix">N</button>
+        </div>
+        <div class="scroll-table">
+          <table class="field-table">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Tenant Editable</th>
+                <th>Webhook</th>
+                <th>LOGS</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="fieldRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="hardcode-map" data-review-id="section.hardcode_map">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 8</p>
+            <h3>Hard-Code Replacement Map</h3>
+          </div>
+          <button class="note-button" data-note-target="section.hardcode_map" data-note-label="Hard-Code Replacement Map">N</button>
+        </div>
+        <div class="scroll-table">
+          <table class="hardcode-table">
+            <thead>
+              <tr>
+                <th>Current Value</th>
+                <th>Current Location</th>
+                <th>Future Source</th>
+                <th>Priority</th>
+                <th>Owner</th>
+                <th>Review</th>
+              </tr>
+            </thead>
+            <tbody id="hardcodeRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="relationship-map" data-review-id="section.relationship_map">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 9</p>
+            <h3>Relationship Map / ERD</h3>
+          </div>
+          <button class="note-button" data-note-target="section.relationship_map" data-note-label="Relationship Map">N</button>
+        </div>
+        <div class="erd">
+          <div class="erd-box"><strong>tenants</strong><span>1:N properties</span><span>1:N tenant_users</span></div>
+          <div class="erd-box"><strong>properties</strong><span>1:N venues</span><span>1:N teams</span><span>1:N templates</span></div>
+          <div class="erd-box"><strong>venues</strong><span>1:N aliases</span><span>1:N descriptions</span><span>1:N hours</span></div>
+          <div class="erd-box"><strong>menu_branches</strong><span>1:N menu_options</span><span>N:1 response_templates</span></div>
+          <div class="erd-box"><strong>guest_threads</strong><span>1:N inbound_messages</span><span>1:N outbound_messages</span></div>
+          <div class="erd-box"><strong>reservation_requests</strong><span>N:1 property</span><span>N:1 venue</span><span>N:1 guest_thread</span></div>
+          <div class="erd-box"><strong>complaint_incidents</strong><span>N:1 team</span><span>N:1 guest_thread</span></div>
+          <div class="erd-box"><strong>operational_events</strong><span>Feeds LOGS views</span><span>Audit/reporting foundation</span></div>
+        </div>
+      </section>
+
+      <section class="section" id="review-feedback" data-review-id="section.review_feedback">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 10</p>
+            <h3>Review Feedback</h3>
+          </div>
+          <button class="note-button" data-note-target="section.review_feedback" data-note-label="Review Feedback">N</button>
+        </div>
+        <p>
+          Use the note buttons throughout this document to attach comments to stable review targets.
+          Comments are stored locally in this browser until exported. Export JSON and send it back for review consolidation.
+        </p>
+        <div class="feedback-export">
+          <button class="button primary" id="exportAllCommentsInline">Export feedback JSON</button>
+          <button class="button" id="clearAllComments">Clear local comments</button>
+        </div>
+        <div id="allComments" class="comment-list"></div>
+      </section>
+
+      <section class="section" id="mvp-scope" data-review-id="section.mvp_scope">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 11</p>
+            <h3>MVP Scope</h3>
+          </div>
+          <button class="note-button" data-note-target="section.mvp_scope" data-note-label="MVP Scope">N</button>
+        </div>
+        <ul class="scope-list">
+          <li>MVP includes tenant, property, settings, teams, venues, aliases, templates, runtime flags, messages, reservations, and operational events.</li>
+          <li>MVP does not require a live property admin UI connected to Supabase.</li>
+          <li>MVP does not require the webhook to read raw tables directly.</li>
+          <li>MVP should seed current demo data into the schema for validation.</li>
+          <li>MVP must preserve current webhook behavior until runtime config migration is approved.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="open-decisions" data-review-id="section.open_decisions">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 12</p>
+            <h3>Open Decisions</h3>
+          </div>
+          <button class="note-button" data-note-target="section.open_decisions" data-note-label="Open Decisions">N</button>
+        </div>
+        <div class="decision-grid" id="decisionGrid"></div>
+      </section>
+
+      <section class="section" id="appendix" data-review-id="section.appendix">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Section 13</p>
+            <h3>Appendix</h3>
+          </div>
+          <button class="note-button" data-note-target="section.appendix" data-note-label="Appendix">N</button>
+        </div>
+        <p><strong>Source observations used:</strong> current demo property package, webhook constants, Fast Path responder/classifier, LOGS mapper/workbook, and Voiceflow bridge configuration.</p>
+        <p><strong>Approved artifact boundary:</strong> this file is a review proposal. It is not runtime code and should not be wired to production without review.</p>
+        <p class="print-note">Feedback is browser-local unless exported as JSON.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="feedback-panel" id="feedbackPanel" aria-label="Feedback panel">
+    <div class="feedback-header">
+      <div>
+        <p class="eyebrow">Review Comment</p>
+        <h3 id="feedbackTitle">Comment</h3>
+        <p id="feedbackTarget" class="review-target-id"></p>
+      </div>
+      <button class="button" id="closeFeedback">Close</button>
+    </div>
+    <label class="field">
+      <span>Your name</span>
+      <input id="commentAuthor" type="text" placeholder="Reviewer name">
+    </label>
+    <label class="field">
+      <span>Priority</span>
+      <select id="commentPriority">
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="low">Low</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>Status</span>
+      <select id="commentStatus">
+        <option value="open">Open</option>
+        <option value="accepted">Accepted</option>
+        <option value="rejected">Rejected</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>Comment</span>
+      <textarea id="commentText" placeholder="Write feedback for this section or item."></textarea>
+    </label>
+    <button class="button primary" id="saveComment">Save Comment</button>
+    <div class="comment-list" id="targetComments"></div>
+  </aside>
+
+  <script>
+    const STORAGE_KEY = "sol_schema_proposal_v01_comments";
+
+    const domains = [
+      ["Tenant & Property", "Identity, account, property-level defaults, timezone, default language.", "MVP"],
+      ["Venues & Services", "Restaurants, bars, room service, amenities, aliases, hours, reservation behavior.", "MVP"],
+      ["Menus & Templates", "Branches, options, lookup aliases, language-specific response templates.", "MVP"],
+      ["Routing & Teams", "Departments, handoff targets, escalation rules, routing categories.", "MVP"],
+      ["Runtime Flags", "Feature switches by tenant/property, including Fast Path behavior.", "MVP"],
+      ["Messages & Threads", "Guest conversation state, inbound/outbound messages, Meta status updates.", "MVP"],
+      ["Reservations", "Reservation request lifecycle, party size, date/time, venue, contact fields.", "MVP"],
+      ["Complaints / Incidents", "Guest complaints, security concerns, billing issues, lost and found.", "MVP"],
+      ["Audit / LOGS", "Operational events and reporting views for dashboard work.", "MVP"]
+    ];
+
+    const tables = [
+      { name: "tenants", domain: "Tenant & Property", owner: "Admin", scope: "MVP", purpose: "Client organization account.", usedBy: "Admin UI, auth, reporting", fields: ["id", "tenant_key", "display_name", "status"] },
+      { name: "properties", domain: "Tenant & Property", owner: "Admin", scope: "MVP", purpose: "Physical property/site under a tenant.", usedBy: "Webhook, Admin UI, LOGS", fields: ["id", "tenant_id", "property_key", "display_name", "timezone"] },
+      { name: "property_settings", domain: "Tenant & Property", owner: "Property Admin", scope: "MVP", purpose: "Concierge name, default language, runtime profile.", usedBy: "Webhook, templates, Admin UI", fields: ["property_id", "concierge_name", "default_language", "phone_region"] },
+      { name: "teams", domain: "Routing & Teams", owner: "Property Admin", scope: "MVP", purpose: "Guest Services, Reservations, Security, and other routing teams.", usedBy: "Webhook, LOGS, escalation", fields: ["id", "property_id", "team_key", "display_name", "scope"] },
+      { name: "venues", domain: "Venues & Services", owner: "Property Admin", scope: "MVP", purpose: "Restaurants, bars, room service, amenities.", usedBy: "Fast Path, reservations, templates", fields: ["id", "property_id", "venue_key", "display_name", "venue_type", "reservation_enabled"] },
+      { name: "venue_aliases", domain: "Venues & Services", owner: "Property Admin", scope: "MVP", purpose: "Search and natural-language aliases for venues.", usedBy: "Webhook venue detection", fields: ["id", "venue_id", "alias", "language"] },
+      { name: "venue_descriptions", domain: "Venues & Services", owner: "Property Admin", scope: "MVP", purpose: "Localized venue descriptions.", usedBy: "Fast Path restaurant list", fields: ["venue_id", "language", "short_description", "long_description"] },
+      { name: "venue_hours", domain: "Venues & Services", owner: "Property Admin", scope: "Later", purpose: "Configured operating hours and exceptions.", usedBy: "Guest answers, escalation guardrails", fields: ["venue_id", "day_of_week", "open_time", "close_time", "is_24_hours"] },
+      { name: "reservation_rules", domain: "Reservations", owner: "Property Admin", scope: "MVP", purpose: "Thresholds, required fields, timing, group policy.", usedBy: "Webhook reservation routing", fields: ["property_id", "large_party_threshold", "arrival_buffer_minutes", "required_fields"] },
+      { name: "menu_branches", domain: "Menus & Templates", owner: "Admin", scope: "MVP", purpose: "Top-level and nested guest menu branches.", usedBy: "Fast Path classifier", fields: ["id", "property_id", "branch_key", "parent_branch_key", "display_order"] },
+      { name: "menu_options", domain: "Menus & Templates", owner: "Admin", scope: "MVP", purpose: "Menu options and next-context routing.", usedBy: "Fast Path classifier/responder", fields: ["id", "branch_id", "option_key", "label_en", "label_es", "next_branch_key"] },
+      { name: "response_templates", domain: "Menus & Templates", owner: "Admin", scope: "MVP", purpose: "Localized response text with placeholders.", usedBy: "Webhook outbound replies", fields: ["id", "property_id", "template_key", "language", "body"] },
+      { name: "runtime_feature_flags", domain: "Runtime Flags", owner: "Admin", scope: "MVP", purpose: "Per-property toggles for runtime behavior.", usedBy: "Webhook startup/runtime", fields: ["property_id", "flag_key", "enabled", "value_json"] },
+      { name: "guest_threads", domain: "Messages & Threads", owner: "Runtime", scope: "MVP", purpose: "Conversation session identity and state references.", usedBy: "Webhook, LOGS", fields: ["id", "property_id", "wa_user_id", "current_language", "status"] },
+      { name: "inbound_messages", domain: "Messages & Threads", owner: "Runtime", scope: "MVP", purpose: "Guest inbound WhatsApp messages.", usedBy: "LOGS, audit, analytics", fields: ["id", "thread_id", "message_id", "body", "received_at"] },
+      { name: "outbound_messages", domain: "Messages & Threads", owner: "Runtime", scope: "MVP", purpose: "Messages sent by SOL to guests.", usedBy: "LOGS, Meta status", fields: ["id", "thread_id", "message_id", "body", "sent_at", "status"] },
+      { name: "reservation_requests", domain: "Reservations", owner: "Runtime", scope: "MVP", purpose: "Structured reservation request records.", usedBy: "LOGS, staff follow-up", fields: ["id", "property_id", "thread_id", "venue_id", "guest_name", "party_size", "requested_time"] },
+      { name: "complaint_incidents", domain: "Complaints / Incidents", owner: "Runtime", scope: "MVP", purpose: "Complaint, billing, safety, and incident records.", usedBy: "LOGS, escalation", fields: ["id", "property_id", "thread_id", "team_id", "category", "severity", "status"] },
+      { name: "operational_events", domain: "Audit / LOGS", owner: "Runtime", scope: "MVP", purpose: "Append-only event ledger for dashboards and audits.", usedBy: "LOGS UI, reports", fields: ["id", "property_id", "event_type", "thread_id", "payload", "created_at"] },
+      { name: "schema_review_comments", domain: "Audit / LOGS", owner: "Review", scope: "Later", purpose: "Optional hosted comments for this schema review flow.", usedBy: "Review portal", fields: ["id", "review_version", "target_id", "author_name", "comment_text", "status"] }
+    ];
+
+    const fieldRows = [
+      ["properties", "display_name", "text", "yes", "yes", "yes", "yes", "Replaces 'Your Casino'."],
+      ["properties", "timezone", "text", "yes", "yes", "yes", "yes", "Replaces America/Panama constant where property-specific."],
+      ["property_settings", "concierge_name", "text", "yes", "yes", "yes", "no", "Supports client-selected concierge identity."],
+      ["property_settings", "default_language", "text", "yes", "yes", "yes", "yes", "Controls language gate default."],
+      ["teams", "display_name", "text", "yes", "yes", "yes", "yes", "Replaces Guest Services / Reservations / Security literals."],
+      ["venues", "venue_key", "text", "yes", "yes", "yes", "yes", "Stable natural key for menus and runtime config."],
+      ["venues", "display_name", "text", "yes", "yes", "yes", "yes", "Replaces hard-coded restaurant names."],
+      ["venues", "reservation_enabled", "boolean", "yes", "yes", "yes", "yes", "Determines reservation-led flow."],
+      ["venue_aliases", "alias", "text", "yes", "yes", "yes", "no", "Replaces KNOWN_RESERVATION_VENUES aliases."],
+      ["venue_descriptions", "short_description", "text", "yes", "yes", "yes", "no", "Replaces Fast Path venue copy map."],
+      ["reservation_rules", "large_party_threshold", "integer", "yes", "yes", "yes", "yes", "Replaces STANDARD_RESTAURANT_PARTY_SIZE_MAX = 8."],
+      ["response_templates", "body", "text", "yes", "admin", "yes", "no", "Replaces hard-coded guest-facing prompts."],
+      ["runtime_feature_flags", "enabled", "boolean", "yes", "admin", "yes", "no", "Maps FAST_PATH_ENABLED-style behavior per property."],
+      ["operational_events", "payload", "jsonb", "yes", "no", "yes", "yes", "Base feed for LOGS dashboards."],
+      ["schema_review_comments", "target_id", "text", "yes", "reviewer", "no", "no", "Stable comment anchor for proposal review."]
+    ];
+
+    const hardcodes = [
+      ["sol_verify_123", "webhook.js:253", "deployment env: VERIFY_TOKEN", "High", "Deployment"],
+      ["America/Panama", "webhook.js:258", "properties.timezone", "High", "Property Admin"],
+      ["STANDARD_RESTAURANT_PARTY_SIZE_MAX = 8", "webhook.js:264", "reservation_rules.large_party_threshold", "High", "Property Admin"],
+      ["KNOWN_RESERVATION_VENUES", "webhook.js:1392", "venues + venue_aliases", "High", "Property Admin"],
+      ["Your Casino Club Card loyalty facts", "webhook.js:1548", "response_templates / loyalty config", "High", "Admin"],
+      ["Welcome to Your Casino", "webhook.js:1849", "response_templates + properties.display_name", "High", "Admin"],
+      ["Voiceflow project ID", "vf_bridge/vf_client.js:28", "deployment env: VF_PROJECT_ID", "High", "Deployment"],
+      ["Venue presentation copy", "src/fast_path/fast_path_responder.js:24", "venue_descriptions", "Medium", "Property Admin"],
+      ["Room Service exclusion", "src/fast_path/fast_path_responder.js:20", "venues.venue_type / visibility flag", "Medium", "Property Admin"],
+      ["Guest Services / Security", "logs_mapper.js:100", "teams + routing rules", "Medium", "LOGS/Admin"]
+    ];
+
+    const decisions = [
+      ["Runtime config view", "Should webhook read a compiled view/export instead of raw tables?", "Recommended: yes"],
+      ["Tenant editable fields", "Which fields can client users edit directly?", "Needs approval"],
+      ["LOGS boundaries", "Should LOGS own only operational data, not property truth?", "Recommended: yes"],
+      ["Template governance", "Who approves guest-facing templates?", "Needs owner"],
+      ["Migration order", "Do we seed demo data first, then wire runtime?", "Recommended: yes"],
+      ["Comment hosting", "Keep feedback export-only or add schema_review_comments table?", "Later"]
+    ];
+
+    let comments = loadComments();
+    let activeTarget = null;
+
+    function noteButton(target, label) {
+      const count = (comments[target] || []).length;
+      return `<button class="note-button" data-note-target="${target}" data-note-label="${escapeHtml(label)}">N${count ? `<span class="note-badge">${count}</span>` : ""}</button>`;
+    }
+
+    function renderDomains() {
+      const grid = document.getElementById("domainGrid");
+      grid.innerHTML = domains.map(([name, desc, scope]) => `
+        <div class="domain-card card">
+          <div class="sub-header">
+            <div>
+              <h4>${name}</h4>
+              <span class="tag mvp">${scope}</span>
+            </div>
+            ${noteButton("domain." + slug(name), name)}
+          </div>
+          <p>${desc}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderFilters() {
+      const select = document.getElementById("domainFilter");
+      const unique = [...new Set(tables.map(t => t.domain))];
+      select.innerHTML += unique.map(d => `<option value="${d}">${d}</option>`).join("");
+    }
+
+    function renderTables() {
+      const query = document.getElementById("tableSearch").value.toLowerCase();
+      const domain = document.getElementById("domainFilter").value;
+      const scope = document.getElementById("mvpFilter").value;
+      const container = document.getElementById("tableCatalog");
+      const rows = tables.filter(t => {
+        const hay = `${t.name} ${t.domain} ${t.owner} ${t.purpose} ${t.usedBy}`.toLowerCase();
+        return (!query || hay.includes(query)) && (!domain || t.domain === domain) && (!scope || t.scope === scope);
+      });
+
+      container.innerHTML = rows.map(t => `
+        <article class="table-card">
+          <header>
+            <div>
+              <h4>${t.name}</h4>
+              <span class="tag ${t.scope === "MVP" ? "mvp" : ""}">${t.scope}</span>
+              <span class="tag">${t.domain}</span>
+            </div>
+            ${noteButton("table." + t.name, "Table: " + t.name)}
+          </header>
+          <p><strong>Purpose:</strong> ${t.purpose}</p>
+          <p><strong>Owner:</strong> ${t.owner}<br><strong>Used by:</strong> ${t.usedBy}</p>
+          <ul>${t.fields.map(f => `<li>${f} ${noteButton("field." + t.name + "." + f, t.name + "." + f)}</li>`).join("")}</ul>
+        </article>
+      `).join("");
+      bindNoteButtons();
+    }
+
+    function renderFields() {
+      document.getElementById("fieldRows").innerHTML = fieldRows.map(r => `
+        <tr>
+          <td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td>
+          <td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td>
+          <td>${r[7]} ${noteButton("field." + r[0] + "." + r[1], r[0] + "." + r[1])}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderHardcodes() {
+      document.getElementById("hardcodeRows").innerHTML = hardcodes.map(h => {
+        const id = "hardcode." + slug(h[1]);
+        return `
+          <tr>
+            <td>${h[0]}</td>
+            <td><code>${h[1]}</code></td>
+            <td>${h[2]}</td>
+            <td><span class="tag ${h[3] === "High" ? "high" : "medium"}">${h[3]}</span></td>
+            <td>${h[4]}</td>
+            <td>${noteButton(id, "Hard-code: " + h[0])}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderDecisions() {
+      document.getElementById("decisionGrid").innerHTML = decisions.map(d => `
+        <div class="decision-card">
+          <div class="sub-header">
+            <div>
+              <h4>${d[0]}</h4>
+              <span class="tag">${d[2]}</span>
+            </div>
+            ${noteButton("decision." + slug(d[0]), "Decision: " + d[0])}
+          </div>
+          <p>${d[1]}</p>
+        </div>
+      `).join("");
+    }
+
+    function bindNoteButtons() {
+      document.querySelectorAll("[data-note-target]").forEach(button => {
+        button.onclick = () => openFeedback(button.dataset.noteTarget, button.dataset.noteLabel);
+      });
+    }
+
+    function openFeedback(target, label) {
+      activeTarget = { target, label };
+      document.getElementById("feedbackTitle").textContent = label;
+      document.getElementById("feedbackTarget").textContent = target;
+      document.getElementById("commentText").value = "";
+      document.getElementById("feedbackPanel").classList.add("is-open");
+      document.getElementById("overlay").classList.add("is-open");
+      renderTargetComments();
+    }
+
+    function closeFeedback() {
+      document.getElementById("feedbackPanel").classList.remove("is-open");
+      document.getElementById("overlay").classList.remove("is-open");
+    }
+
+    function saveComment() {
+      if (!activeTarget) return;
+      const text = document.getElementById("commentText").value.trim();
+      if (!text) return;
+      const author = document.getElementById("commentAuthor").value.trim() || "Reviewer";
+      const priority = document.getElementById("commentPriority").value;
+      const status = document.getElementById("commentStatus").value;
+      comments[activeTarget.target] = comments[activeTarget.target] || [];
+      comments[activeTarget.target].push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        target_id: activeTarget.target,
+        target_label: activeTarget.label,
+        author_name: author,
+        priority,
+        status,
+        comment_text: text,
+        created_at: new Date().toISOString()
+      });
+      saveComments();
+      document.getElementById("commentText").value = "";
+      renderAll();
+      openFeedback(activeTarget.target, activeTarget.label);
+    }
+
+    function renderTargetComments() {
+      const list = document.getElementById("targetComments");
+      const rows = comments[activeTarget?.target] || [];
+      list.innerHTML = rows.length ? rows.map(renderComment).join("") : "<p>No comments for this target yet.</p>";
+    }
+
+    function renderAllComments() {
+      const list = document.getElementById("allComments");
+      const rows = Object.values(comments).flat().sort((a, b) => a.created_at.localeCompare(b.created_at));
+      list.innerHTML = rows.length ? rows.map(renderComment).join("") : "<p>No review comments stored in this browser yet.</p>";
+    }
+
+    function renderComment(c) {
+      return `
+        <div class="comment">
+          <div class="comment-meta">
+            <span>${escapeHtml(c.author_name)}</span>
+            <span>${escapeHtml(c.priority)}</span>
+            <span>${escapeHtml(c.status)}</span>
+            <span>${new Date(c.created_at).toLocaleString()}</span>
+          </div>
+          <div class="review-target-id">${escapeHtml(c.target_id)} — ${escapeHtml(c.target_label)}</div>
+          <p>${escapeHtml(c.comment_text)}</p>
+        </div>
+      `;
+    }
+
+    function loadComments() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+      catch { return {}; }
+    }
+
+    function saveComments() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(comments, null, 2));
+    }
+
+    function exportComments() {
+      const payload = {
+        review_title: "SOL Webhook Schema Proposal",
+        review_version: "v0.1",
+        exported_at: new Date().toISOString(),
+        comments: Object.values(comments).flat()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "SOL_Schema_Proposal_v0.1_feedback.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importComments(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          const imported = Array.isArray(payload.comments) ? payload.comments : [];
+          imported.forEach(c => {
+            comments[c.target_id] = comments[c.target_id] || [];
+            comments[c.target_id].push(c);
+          });
+          saveComments();
+          renderAll();
+        } catch (err) {
+          alert("Could not import feedback JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllComments() {
+      if (!confirm("Clear all comments stored locally in this browser?")) return;
+      comments = {};
+      saveComments();
+      renderAll();
+    }
+
+    function slug(value) {
+      return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderAll() {
+      renderDomains();
+      renderTables();
+      renderFields();
+      renderHardcodes();
+      renderDecisions();
+      renderAllComments();
+      bindNoteButtons();
+    }
+
+    document.getElementById("tableSearch").addEventListener("input", renderTables);
+    document.getElementById("domainFilter").addEventListener("change", renderTables);
+    document.getElementById("mvpFilter").addEventListener("change", renderTables);
+    document.getElementById("closeFeedback").addEventListener("click", closeFeedback);
+    document.getElementById("overlay").addEventListener("click", closeFeedback);
+    document.getElementById("saveComment").addEventListener("click", saveComment);
+    document.getElementById("exportAllComments").addEventListener("click", exportComments);
+    document.getElementById("exportAllCommentsInline").addEventListener("click", exportComments);
+    document.getElementById("clearAllComments").addEventListener("click", clearAllComments);
+    document.getElementById("importComments").addEventListener("change", event => {
+      if (event.target.files?.[0]) importComments(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    renderFilters();
+    renderAll();
+  </script>
+</body>
+</html>
